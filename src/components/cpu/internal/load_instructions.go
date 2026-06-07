@@ -21,48 +21,19 @@ func (c *cpu) LoadValueFromMemoryIntoRegisterZeroPage(address uint8, register st
 }
 
 func (c *cpu) LoadValueFromMemoryIntoAccumulatorWithIndexAbsolute(address uint16, register string) {
-	var registerValue uint8
-
-	switch register {
-	case REGISTER_X:
-		registerValue = c.x
-	case REGISTER_Y:
-		registerValue = c.y
-	}
-
-	finalAddress := address + uint16(registerValue)
-	value := c.memory.Read(finalAddress)
+	value := c.memory.Read(c.getAddressByIndexedAbsoluteMode(address, register))
 	c.acc = value
 }
 
 func (c *cpu) LoadValueFromMemoryIntoAccumulatorWithIndexZeroPage(address uint8, register string) {
-	var registerValue uint8
-
-	switch register {
-	case REGISTER_X:
-		registerValue = c.x
-	case REGISTER_Y:
-		registerValue = c.y
-	}
-
-	finalAddress := address + registerValue
-	value := c.memory.Read(uint16(finalAddress))
+	value := c.memory.Read(c.getAddressByIndexedZeroPageMode(address, register))
 	c.acc = value
 }
 
 func (c *cpu) LoadValueFromMemoryIntoRegisterWithIndexedXIndirectAddress(initialAddress uint8, register string) {
-	pivotAddress := uint16(initialAddress) + uint16(c.x)
-	lastByte := c.memory.Read(pivotAddress)
-	firstByte := c.memory.Read(pivotAddress + 1)
-	finalAddress := uint16(firstByte)<<8 | uint16(lastByte)
-
-	c.LoadValueIntoRegister(c.memory.Read(finalAddress), register)
+	c.LoadValueIntoRegister(c.memory.Read(c.getAddressByIndexedIndirectXMode(initialAddress)), register)
 }
 
 func (c *cpu) LoadValueFromMemoryIntoRegisterWithIndirectIndexedYAddress(initialAddress uint8, register string) {
-	lastByte := c.memory.Read(uint16(initialAddress))
-	firstByte := c.memory.Read(uint16(initialAddress) + 1)
-	finalAddress := uint16(firstByte)<<8 | uint16(lastByte) + uint16(c.y)
-
-	c.LoadValueIntoRegister(c.memory.Read(finalAddress), register)
+	c.LoadValueIntoRegister(c.memory.Read(c.getAddressByIndirectIndexedYMode(initialAddress)), register)
 }
