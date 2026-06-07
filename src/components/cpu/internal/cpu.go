@@ -57,3 +57,12 @@ func (c *cpu) GetOverflowFlag() bool {
 func (c *cpu) GetIRQFlag() bool {
 	return c.irq
 }
+
+func (c *cpu) GetZeroFlag() bool {
+	return c.zero
+}
+
+func (c *cpu) GetNegativeFlag() bool {
+	return c.negative
+}
+
