@@ -1,0 +1,39 @@
+package internal
+
+import "nes-emu/src/components/memory"
+
+type cpu struct {
+	programCounter                  uint16
+	acc, x, y                       uint8
+	carry, zero, overflow, negative bool
+	stackPointer                    uint8
+	memory                          memory.Memory
+}
+
+func NewCpu(memory memory.Memory) *cpu {
+	c := &cpu{
+		memory: memory,
+	}
+	c.Reset()
+	return c
+}
+
+func (c *cpu) Reset() {
+	c.programCounter = 0
+	c.acc = 0
+	c.x = 0
+	c.y = 0
+	c.carry = false
+	c.zero = false
+	c.overflow = false
+	c.negative = false
+	c.stackPointer = 0xFF
+}
+
+func (c *cpu) GetDebugData() map[string]uint8 {
+	return map[string]uint8{
+		"acc": c.acc,
+		"x":   c.x,
+		"y":   c.y,
+	}
+}
