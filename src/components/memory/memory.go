@@ -1,4 +1,4 @@
-package internal
+package memory
 
 type memory struct {
 	storage map[uint16]uint8

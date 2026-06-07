@@ -1,12 +1,12 @@
 package tests
 
 import (
-	"nes-emu/src/components/memory/internal"
+	"nes-emu/src/components/memory"
 	"testing"
 )
 
 func TestReadEmptyValueFromMemory(t *testing.T) {
-	sut := internal.NewMemory()
+	sut := memory.NewMemory()
 	result := sut.Read(0x1234)
 
 	if result != 0x00 {
@@ -15,7 +15,7 @@ func TestReadEmptyValueFromMemory(t *testing.T) {
 }
 
 func TestWriteToMemory(t *testing.T) {
-	sut := internal.NewMemory()
+	sut := memory.NewMemory()
 	sut.Write(0x1234, 0x42)
 	result := sut.Read(0x1234)
 
