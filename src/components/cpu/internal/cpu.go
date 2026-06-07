@@ -2,6 +2,10 @@ package internal
 
 import "nes-emu/src/components/memory"
 
+const REGISTER_X = "X"
+const REGISTER_Y = "Y"
+const ACCUMULATOR = "ACC"
+
 type cpu struct {
 	programCounter                  uint16
 	acc, x, y                       uint8

@@ -1,9 +1,5 @@
 package internal
 
-const REGISTER_X = "X"
-const REGISTER_Y = "Y"
-const ACCUMULATOR = "ACC"
-
 func (c *cpu) LoadValueIntoRegister(value uint8, register string) {
 	switch register {
 	case REGISTER_X:
