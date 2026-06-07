@@ -49,3 +49,20 @@ func (c *cpu) LoadValueFromMemoryIntoAccumulatorWithIndexZeroPage(address uint8,
 	value := c.memory.Read(uint16(finalAddress))
 	c.acc = value
 }
+
+func (c *cpu) LoadValueFromMemoryIntoRegisterWithIndexedXIndirectAddress(initialAddress uint8, register string) {
+	pivotAddress := uint16(initialAddress) + uint16(c.x)
+	lastByte := c.memory.Read(pivotAddress)
+	firstByte := c.memory.Read(pivotAddress + 1)
+	finalAddress := uint16(firstByte)<<8 | uint16(lastByte)
+
+	c.LoadValueIntoRegister(c.memory.Read(finalAddress), register)
+}
+
+func (c *cpu) LoadValueFromMemoryIntoRegisterWithIndirectIndexedYAddress(initialAddress uint8, register string) {
+	lastByte := c.memory.Read(uint16(initialAddress))
+	firstByte := c.memory.Read(uint16(initialAddress) + 1)
+	finalAddress := uint16(firstByte)<<8 | uint16(lastByte) + uint16(c.y)
+
+	c.LoadValueIntoRegister(c.memory.Read(finalAddress), register)
+}

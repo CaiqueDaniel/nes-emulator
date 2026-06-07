@@ -244,3 +244,126 @@ func TestShouldLoadValueFromMemoryIntoAccumulatorAbsoluteYWhenYNotZero(t *testin
 		t.Errorf("Expected acc to be 0x42, got %d", cpu.GetDebugData()["acc"])
 	}
 }
+
+// Indexed Indirect (Indirect,X) addressing mode
+func TestShouldLoadRegisterFromMemoryWithIndexedXIndirectAddress(t *testing.T) {
+	tests := []struct {
+		name     string
+		register string
+		value    uint8
+	}{
+		{
+			name:     "Load ACC with Indexed X Indirect Addressing",
+			register: internal.ACCUMULATOR,
+			value:    0x42,
+		},
+		{
+			name:     "Load X with Indexed X Indirect Addressing",
+			register: internal.REGISTER_X,
+			value:    0x33,
+		},
+		{
+			name:     "Load Y with Indexed X Indirect Addressing",
+			register: internal.REGISTER_Y,
+			value:    0x55,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			mem := memory.NewMemory()
+			cpu := internal.NewCpu(mem)
+
+			// Setup X register
+			var xVal uint8 = 0x04
+			cpu.LoadValueIntoRegister(xVal, internal.REGISTER_X)
+
+			// Pivot address is 0x20 + 0x04 = 0x24
+			var targetAddr uint16 = 0x5678
+			mem.Write(0x24, uint8(targetAddr&0xFF))
+			mem.Write(0x25, uint8(targetAddr>>8))
+
+			// Setup memory value to be loaded
+			mem.Write(targetAddr, tt.value)
+
+			cpu.LoadValueFromMemoryIntoRegisterWithIndexedXIndirectAddress(0x20, tt.register)
+
+			regKey := ""
+			switch tt.register {
+			case internal.ACCUMULATOR:
+				regKey = "acc"
+			case internal.REGISTER_X:
+				regKey = "x"
+			case internal.REGISTER_Y:
+				regKey = "y"
+			}
+
+			if cpu.GetDebugData()[regKey] != tt.value {
+				t.Errorf("Expected %s to be 0x%02X, got 0x%02X", regKey, tt.value, cpu.GetDebugData()[regKey])
+			}
+		})
+	}
+}
+
+// Indirect Indexed (Indirect),Y addressing mode
+func TestShouldLoadRegisterFromMemoryWithIndirectIndexedYAddress(t *testing.T) {
+	tests := []struct {
+		name     string
+		register string
+		value    uint8
+	}{
+		{
+			name:     "Load ACC with Indirect Indexed Y Addressing",
+			register: internal.ACCUMULATOR,
+			value:    0x42,
+		},
+		{
+			name:     "Load X with Indirect Indexed Y Addressing",
+			register: internal.REGISTER_X,
+			value:    0x33,
+		},
+		{
+			name:     "Load Y with Indirect Indexed Y Addressing",
+			register: internal.REGISTER_Y,
+			value:    0x55,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			mem := memory.NewMemory()
+			cpu := internal.NewCpu(mem)
+
+			// Setup Y register
+			var yVal uint8 = 0x05
+			cpu.LoadValueIntoRegister(yVal, internal.REGISTER_Y)
+
+			// Base address at 0x20 -> 0x5670
+			var baseAddr uint16 = 0x5670
+			mem.Write(0x20, uint8(baseAddr&0xFF))
+			mem.Write(0x21, uint8(baseAddr>>8))
+
+			// Final address is 0x5670 + 0x05 = 0x5675
+			finalAddress := baseAddr + uint16(yVal)
+
+			// Setup memory value to be loaded
+			mem.Write(finalAddress, tt.value)
+
+			cpu.LoadValueFromMemoryIntoRegisterWithIndirectIndexedYAddress(0x20, tt.register)
+
+			regKey := ""
+			switch tt.register {
+			case internal.ACCUMULATOR:
+				regKey = "acc"
+			case internal.REGISTER_X:
+				regKey = "x"
+			case internal.REGISTER_Y:
+				regKey = "y"
+			}
+
+			if cpu.GetDebugData()[regKey] != tt.value {
+				t.Errorf("Expected %s to be 0x%02X, got 0x%02X", regKey, tt.value, cpu.GetDebugData()[regKey])
+			}
+		})
+	}
+}
