@@ -118,3 +118,51 @@ func TestBreakInstruction(t *testing.T) {
 		t.Error("Expected IRQ flag to be true after Break")
 	}
 }
+
+func TestGetZeroFlag(t *testing.T) {
+	mem := memory.NewMemory()
+	cpu := internal.NewCpu(mem)
+
+	// Default should be false
+	if cpu.GetZeroFlag() {
+		t.Error("Expected zero flag to be false initially")
+	}
+
+	// Load zero into accumulator and perform AND to trigger zero flag
+	cpu.LoadValueIntoRegister(0x00, internal.ACCUMULATOR)
+	cpu.And(0x00)
+	if !cpu.GetZeroFlag() {
+		t.Error("Expected zero flag to be true after AND resulting in zero")
+	}
+
+	// Load non-zero value and trigger clear of zero flag
+	cpu.LoadValueIntoRegister(0x01, internal.ACCUMULATOR)
+	cpu.And(0xFF)
+	if cpu.GetZeroFlag() {
+		t.Error("Expected zero flag to be false after AND resulting in non-zero")
+	}
+}
+
+func TestGetNegativeFlag(t *testing.T) {
+	mem := memory.NewMemory()
+	cpu := internal.NewCpu(mem)
+
+	// Default should be false
+	if cpu.GetNegativeFlag() {
+		t.Error("Expected negative flag to be false initially")
+	}
+
+	// Load a value with bit 7 set to trigger negative flag
+	cpu.LoadValueIntoRegister(0xFF, internal.ACCUMULATOR)
+	cpu.And(0b10000000)
+	if !cpu.GetNegativeFlag() {
+		t.Error("Expected negative flag to be true when bit 7 of result is set")
+	}
+
+	// Load a value with bit 7 clear to clear negative flag
+	cpu.LoadValueIntoRegister(0xFF, internal.ACCUMULATOR)
+	cpu.And(0b01111111)
+	if cpu.GetNegativeFlag() {
+		t.Error("Expected negative flag to be false when bit 7 of result is clear")
+	}
+}
