@@ -50,10 +50,21 @@ func (c *cpu) Bit(value uint8) {
 	c.overflow = result&0b01000000 != 0
 }
 
-func (c *cpu) CompareWithRegister(value uint8) {
-	c.zero = c.acc == value
-	c.carry = c.acc >= value
-	c.negative = c.isValueNegative(c.acc & value)
+func (c *cpu) CompareWithRegister(value uint8, register string) {
+	var registerValue uint8
+
+	switch register {
+	case ACCUMULATOR:
+		registerValue = c.acc
+	case REGISTER_X:
+		registerValue = c.x
+	case REGISTER_Y:
+		registerValue = c.y
+	}
+
+	c.zero = registerValue == value
+	c.carry = registerValue >= value
+	c.negative = c.isValueNegative(registerValue & value)
 }
 
 func (c *cpu) isValueNegative(value uint8) bool {

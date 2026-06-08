@@ -610,68 +610,133 @@ func TestBit(t *testing.T) {
 
 func TestCompareWithRegister(t *testing.T) {
 	tests := []struct {
-		name       string
-		initialAcc uint8
-		value      uint8
-		expectedZ  bool
-		expectedC  bool
-		expectedN  bool
+		name            string
+		register        string
+		initialRegister uint8
+		value           uint8
+		expectedZ       bool
+		expectedC       bool
+		expectedN       bool
 	}{
+		// Accumulator (CMP)
 		{
-			name:       "Equal values: zero and carry set, no negative",
-			initialAcc: 0x10,
-			value:      0x10,
-			expectedZ:  true,
-			expectedC:  true,
-			expectedN:  false,
+			name:            "ACC equal: zero and carry set, no negative",
+			register:        internal.ACCUMULATOR,
+			initialRegister: 0x10,
+			value:           0x10,
+			expectedZ:       true,
+			expectedC:       true,
+			expectedN:       false,
 		},
 		{
-			name:       "ACC greater than value: carry set, no zero or negative",
-			initialAcc: 0x20,
-			value:      0x10,
-			expectedZ:  false,
-			expectedC:  true,
-			expectedN:  false,
+			name:            "ACC greater than value: carry set only",
+			register:        internal.ACCUMULATOR,
+			initialRegister: 0x20,
+			value:           0x10,
+			expectedZ:       false,
+			expectedC:       true,
+			expectedN:       false,
 		},
 		{
-			name:       "ACC less than value: no zero or carry",
-			initialAcc: 0x10,
-			value:      0x20,
-			expectedZ:  false,
-			expectedC:  false,
-			expectedN:  false,
+			name:            "ACC less than value: no flags set",
+			register:        internal.ACCUMULATOR,
+			initialRegister: 0x10,
+			value:           0x20,
+			expectedZ:       false,
+			expectedC:       false,
+			expectedN:       false,
 		},
 		{
-			name:       "Both zero: zero and carry set",
-			initialAcc: 0x00,
-			value:      0x00,
-			expectedZ:  true,
-			expectedC:  true,
-			expectedN:  false,
+			name:            "ACC both zero: zero and carry set",
+			register:        internal.ACCUMULATOR,
+			initialRegister: 0x00,
+			value:           0x00,
+			expectedZ:       true,
+			expectedC:       true,
+			expectedN:       false,
 		},
 		{
-			name:       "Negative flag set when bit 7 of (acc AND value) is 1",
-			initialAcc: 0b10000001,
-			value:      0b10000010,
-			expectedZ:  false,
-			expectedC:  false,
-			expectedN:  true,
+			name:            "ACC: negative flag set when bit 7 of (reg AND value) is 1",
+			register:        internal.ACCUMULATOR,
+			initialRegister: 0b10000001,
+			value:           0b10000010,
+			expectedZ:       false,
+			expectedC:       false,
+			expectedN:       true,
 		},
 		{
-			name:       "Negative flag clear when bit 7 of (acc AND value) is 0",
-			initialAcc: 0b11000000,
-			value:      0b01000000,
-			expectedZ:  false,
-			expectedC:  true,
-			expectedN:  false,
+			name:            "ACC: negative flag clear when bit 7 of (reg AND value) is 0",
+			register:        internal.ACCUMULATOR,
+			initialRegister: 0b11000000,
+			value:           0b01000000,
+			expectedZ:       false,
+			expectedC:       true,
+			expectedN:       false,
 		},
 		{
-			name:       "ACC equals 0xFF, value equals 0xFF",
-			initialAcc: 0xFF,
-			value:      0xFF,
-			expectedZ:  true,
-			expectedC:  true,
-			expectedN:  true,
+			name:            "ACC equals 0xFF, value equals 0xFF",
+			register:        internal.ACCUMULATOR,
+			initialRegister: 0xFF,
+			value:           0xFF,
+			expectedZ:       true,
+			expectedC:       true,
+			expectedN:       true,
+		},
+		// Register X (CPX)
+		{
+			name:            "X equal: zero and carry set",
+			register:        internal.REGISTER_X,
+			initialRegister: 0x42,
+			value:           0x42,
+			expectedZ:       true,
+			expectedC:       true,
+			expectedN:       false,
+		},
+		{
+			name:            "X greater than value: carry set only",
+			register:        internal.REGISTER_X,
+			initialRegister: 0x50,
+			value:           0x30,
+			expectedZ:       false,
+			expectedC:       true,
+			expectedN:       false,
+		},
+		{
+			name:            "X less than value: no flags set",
+			register:        internal.REGISTER_X,
+			initialRegister: 0x10,
+			value:           0x40,
+			expectedZ:       false,
+			expectedC:       false,
+			expectedN:       false,
+		},
+		// Register Y (CPY)
+		{
+			name:            "Y equal: zero and carry set",
+			register:        internal.REGISTER_Y,
+			initialRegister: 0x77,
+			value:           0x77,
+			expectedZ:       true,
+			expectedC:       true,
+			expectedN:       false,
+		},
+		{
+			name:            "Y greater than value: carry set only",
+			register:        internal.REGISTER_Y,
+			initialRegister: 0x80,
+			value:           0x01,
+			expectedZ:       false,
+			expectedC:       true,
+			expectedN:       false,
+		},
+		{
+			name:            "Y less than value: no flags set",
+			register:        internal.REGISTER_Y,
+			initialRegister: 0x01,
+			value:           0x80,
+			expectedZ:       false,
+			expectedC:       false,
+			expectedN:       false,
 		},
 	}
 
@@ -680,13 +745,22 @@ func TestCompareWithRegister(t *testing.T) {
 			mem := memory.NewMemory()
 			cpu := internal.NewCpu(mem)
 
-			cpu.LoadValueIntoRegister(tt.initialAcc, internal.ACCUMULATOR)
-			cpu.CompareWithRegister(tt.value)
+			cpu.LoadValueIntoRegister(tt.initialRegister, tt.register)
+			cpu.CompareWithRegister(tt.value, tt.register)
 
-			// CompareWithRegister must NOT modify the accumulator
+			// CompareWithRegister must NOT modify the register
 			debugData := cpu.GetDebugData()
-			if debugData["acc"] != tt.initialAcc {
-				t.Errorf("CompareWithRegister should not modify accumulator: expected %d, got %d", tt.initialAcc, debugData["acc"])
+			var registerKey string
+			switch tt.register {
+			case internal.ACCUMULATOR:
+				registerKey = "acc"
+			case internal.REGISTER_X:
+				registerKey = "x"
+			case internal.REGISTER_Y:
+				registerKey = "y"
+			}
+			if debugData[registerKey] != tt.initialRegister {
+				t.Errorf("CompareWithRegister should not modify register %s: expected %d, got %d", tt.register, tt.initialRegister, debugData[registerKey])
 			}
 			if cpu.GetZeroFlag() != tt.expectedZ {
 				t.Errorf("Expected Zero flag %t, got %t", tt.expectedZ, cpu.GetZeroFlag())
