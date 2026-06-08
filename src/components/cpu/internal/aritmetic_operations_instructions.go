@@ -67,6 +67,57 @@ func (c *cpu) CompareWithRegister(value uint8, register string) {
 	c.negative = c.isValueNegative(registerValue & value)
 }
 
+// TODO: adicionar tests unitários para essas operações
+func (c *cpu) IncrementMemory(address uint16) {
+	value := c.memory.Read(address) + 1
+
+	c.memory.Write(address, value)
+
+	c.zero = c.isValueZero(value)
+	c.negative = c.isValueNegative(value)
+}
+
+func (c *cpu) IncrementRegister(register string) {
+	var registerValue uint8
+
+	switch register {
+	case REGISTER_X:
+		c.x++
+		registerValue = c.x
+	case REGISTER_Y:
+		c.y++
+		registerValue = c.y
+	}
+
+	c.zero = c.isValueZero(registerValue)
+	c.negative = c.isValueNegative(registerValue)
+}
+
+func (c *cpu) DecrementMemory(address uint16) {
+	value := c.memory.Read(address) - 1
+
+	c.memory.Write(address, value)
+
+	c.zero = c.isValueZero(value)
+	c.negative = c.isValueNegative(value)
+}
+
+func (c *cpu) DecrementRegister(register string) {
+	var registerValue uint8
+
+	switch register {
+	case REGISTER_X:
+		c.x--
+		registerValue = c.x
+	case REGISTER_Y:
+		c.y--
+		registerValue = c.y
+	}
+
+	c.zero = c.isValueZero(registerValue)
+	c.negative = c.isValueNegative(registerValue)
+}
+
 func (c *cpu) isValueNegative(value uint8) bool {
 	return value&signalBitMask != 0
 }
