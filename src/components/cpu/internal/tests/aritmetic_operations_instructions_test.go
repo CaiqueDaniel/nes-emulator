@@ -607,3 +607,96 @@ func TestBit(t *testing.T) {
 		})
 	}
 }
+
+func TestCompareWithRegister(t *testing.T) {
+	tests := []struct {
+		name       string
+		initialAcc uint8
+		value      uint8
+		expectedZ  bool
+		expectedC  bool
+		expectedN  bool
+	}{
+		{
+			name:       "Equal values: zero and carry set, no negative",
+			initialAcc: 0x10,
+			value:      0x10,
+			expectedZ:  true,
+			expectedC:  true,
+			expectedN:  false,
+		},
+		{
+			name:       "ACC greater than value: carry set, no zero or negative",
+			initialAcc: 0x20,
+			value:      0x10,
+			expectedZ:  false,
+			expectedC:  true,
+			expectedN:  false,
+		},
+		{
+			name:       "ACC less than value: no zero or carry",
+			initialAcc: 0x10,
+			value:      0x20,
+			expectedZ:  false,
+			expectedC:  false,
+			expectedN:  false,
+		},
+		{
+			name:       "Both zero: zero and carry set",
+			initialAcc: 0x00,
+			value:      0x00,
+			expectedZ:  true,
+			expectedC:  true,
+			expectedN:  false,
+		},
+		{
+			name:       "Negative flag set when bit 7 of (acc AND value) is 1",
+			initialAcc: 0b10000001,
+			value:      0b10000010,
+			expectedZ:  false,
+			expectedC:  false,
+			expectedN:  true,
+		},
+		{
+			name:       "Negative flag clear when bit 7 of (acc AND value) is 0",
+			initialAcc: 0b11000000,
+			value:      0b01000000,
+			expectedZ:  false,
+			expectedC:  true,
+			expectedN:  false,
+		},
+		{
+			name:       "ACC equals 0xFF, value equals 0xFF",
+			initialAcc: 0xFF,
+			value:      0xFF,
+			expectedZ:  true,
+			expectedC:  true,
+			expectedN:  true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			mem := memory.NewMemory()
+			cpu := internal.NewCpu(mem)
+
+			cpu.LoadValueIntoRegister(tt.initialAcc, internal.ACCUMULATOR)
+			cpu.CompareWithRegister(tt.value)
+
+			// CompareWithRegister must NOT modify the accumulator
+			debugData := cpu.GetDebugData()
+			if debugData["acc"] != tt.initialAcc {
+				t.Errorf("CompareWithRegister should not modify accumulator: expected %d, got %d", tt.initialAcc, debugData["acc"])
+			}
+			if cpu.GetZeroFlag() != tt.expectedZ {
+				t.Errorf("Expected Zero flag %t, got %t", tt.expectedZ, cpu.GetZeroFlag())
+			}
+			if cpu.GetCarryFlag() != tt.expectedC {
+				t.Errorf("Expected Carry flag %t, got %t", tt.expectedC, cpu.GetCarryFlag())
+			}
+			if cpu.GetNegativeFlag() != tt.expectedN {
+				t.Errorf("Expected Negative flag %t, got %t", tt.expectedN, cpu.GetNegativeFlag())
+			}
+		})
+	}
+}

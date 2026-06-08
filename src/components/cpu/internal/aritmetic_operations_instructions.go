@@ -50,9 +50,10 @@ func (c *cpu) Bit(value uint8) {
 	c.overflow = result&0b01000000 != 0
 }
 
-
 func (c *cpu) CompareWithRegister(value uint8) {
-
+	c.zero = c.acc == value
+	c.carry = c.acc >= value
+	c.negative = c.isValueNegative(c.acc & value)
 }
 
 func (c *cpu) isValueNegative(value uint8) bool {
