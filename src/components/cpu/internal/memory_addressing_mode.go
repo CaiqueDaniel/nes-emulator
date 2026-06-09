@@ -4,6 +4,19 @@ func (c *cpu) GetValueByAbsoluteMode(address uint16) uint8 {
 	return c.memory.Read(address)
 }
 
+func (c *cpu) GetValueByZeroPageMode(address uint8) uint8 {
+	return c.memory.Read(uint16(address))
+}
+
+func (c *cpu) GetValueByIndexedAbsoluteMode(address uint16, index uint8) uint8 {
+	return c.memory.Read(address + uint16(index))
+}
+
+func (c *cpu) GetValueByZeroPageIndexedMode(address uint8, index uint8) uint8 {
+	return c.memory.Read(uint16(address) + uint16(index))
+}
+
+// Remover
 func (c *cpu) GetAddressByIndexedAbsoluteMode(address uint16, register string) uint16 {
 	var registerValue uint8
 
@@ -17,6 +30,7 @@ func (c *cpu) GetAddressByIndexedAbsoluteMode(address uint16, register string) u
 	return address + uint16(registerValue)
 }
 
+// Remover
 func (c *cpu) GetAddressByIndexedZeroPageMode(address uint8, register string) uint16 {
 	var registerValue uint8
 
