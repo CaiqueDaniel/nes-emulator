@@ -22,6 +22,14 @@ func NewCpu(memory memory.Memory) *cpu {
 	return c
 }
 
+func NewCpuWithProgramCounter(memory memory.Memory, programCounter uint16) *cpu {
+	c := &cpu{
+		memory:         memory,
+		programCounter: programCounter,
+	}
+	return c
+}
+
 func (c *cpu) Reset() {
 	c.programCounter = 0
 	c.acc = 0
@@ -66,3 +74,6 @@ func (c *cpu) GetNegativeFlag() bool {
 	return c.negative
 }
 
+func (c *cpu) GetProgramCounter() uint16 {
+	return c.programCounter
+}
