@@ -77,18 +77,38 @@ func TestBranchIfCarryIsSet_CarryIsClear(t *testing.T) {
 	}
 }
 
-func TestBranchIfNegative(t *testing.T) {
+func TestBranchIfEqualWithValuePositive(t *testing.T) {
+	memory := memory.NewMemory()
+	cpu := internal.NewCpu(memory)
 
+	cpu.AddWithCarry(0)
+	cpu.BranchIfEqual(0x10)
+
+	if cpu.GetProgramCounter() != 0x12 {
+		t.Errorf("Expected pc to be 0x%04X, got 0x%04X", 0x12, cpu.GetProgramCounter())
+	}
 }
 
-func TestBranchIfZero(t *testing.T) {
+func TestBranchIfEqualWithValueNegative(t *testing.T) {
+	memory := memory.NewMemory()
+	cpu := internal.NewCpuWithProgramCounter(memory, 0xA)
 
+	cpu.AddWithCarry(0)
+	cpu.BranchIfEqual(128)
+
+	if cpu.GetProgramCounter() != 0xB {
+		t.Errorf("Expected pc to be 0x%04X, got 0x%04X", 0xB, cpu.GetProgramCounter())
+	}
 }
 
-func TestBranchIfNotZero(t *testing.T) {
+func TestBranchIfEqual_ZeroIsClear(t *testing.T) {
+	memory := memory.NewMemory()
+	cpu := internal.NewCpuWithProgramCounter(memory, 0xA)
 
-}
+	cpu.AddWithCarry(1)
+	cpu.BranchIfEqual(10)
 
-func TestBranchIfOverflow(t *testing.T) {
-
+	if cpu.GetProgramCounter() != 0xA {
+		t.Errorf("Expected pc to be 0x%04X, got 0x%04X", 0xA, cpu.GetProgramCounter())
+	}
 }
