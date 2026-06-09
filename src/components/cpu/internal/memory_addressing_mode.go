@@ -1,5 +1,9 @@
 package internal
 
+func (c *cpu) GetValueByAbsoluteMode(address uint16) uint8 {
+	return c.memory.Read(address)
+}
+
 func (c *cpu) GetAddressByIndexedAbsoluteMode(address uint16, register string) uint16 {
 	var registerValue uint8
 
