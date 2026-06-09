@@ -21,19 +21,19 @@ func (c *cpu) LoadValueFromMemoryIntoRegisterZeroPage(address uint8, register st
 }
 
 func (c *cpu) LoadValueFromMemoryIntoAccumulatorWithIndexAbsolute(address uint16, register string) {
-	value := c.memory.Read(c.getAddressByIndexedAbsoluteMode(address, register))
+	value := c.memory.Read(c.GetAddressByIndexedAbsoluteMode(address, register))
 	c.acc = value
 }
 
 func (c *cpu) LoadValueFromMemoryIntoAccumulatorWithIndexZeroPage(address uint8, register string) {
-	value := c.memory.Read(c.getAddressByIndexedZeroPageMode(address, register))
+	value := c.memory.Read(c.GetAddressByIndexedZeroPageMode(address, register))
 	c.acc = value
 }
 
 func (c *cpu) LoadValueFromMemoryIntoRegisterWithIndexedXIndirectAddress(initialAddress uint8, register string) {
-	c.LoadValueIntoRegister(c.memory.Read(c.getAddressByIndexedIndirectXMode(initialAddress)), register)
+	c.LoadValueIntoRegister(c.memory.Read(c.GetAddressByIndexedIndirectXMode(initialAddress)), register)
 }
 
 func (c *cpu) LoadValueFromMemoryIntoRegisterWithIndirectIndexedYAddress(initialAddress uint8, register string) {
-	c.LoadValueIntoRegister(c.memory.Read(c.getAddressByIndirectIndexedYMode(initialAddress)), register)
+	c.LoadValueIntoRegister(c.memory.Read(c.GetAddressByIndirectIndexedYMode(initialAddress)), register)
 }
