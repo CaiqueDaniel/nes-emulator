@@ -48,6 +48,22 @@ func (c *cpu) BranchIfPositive(value uint8) {
 	c.branchByValue(value)
 }
 
+func (c *cpu) BranchIfOverflowClear(value uint8) {
+	if c.overflow {
+		return
+	}
+
+	c.branchByValue(value)
+}
+
+func (c *cpu) BranchIfOverflowSet(value uint8) {
+	if !c.overflow {
+		return
+	}
+
+	c.branchByValue(value)
+}
+
 func (c *cpu) branchByValue(value uint8) {
 	if c.isValueNegative(value) {
 		c.programCounter = c.programCounter - (uint16(value^0b10000000) + 1) + 2
