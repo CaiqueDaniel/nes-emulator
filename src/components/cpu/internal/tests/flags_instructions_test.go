@@ -32,25 +32,14 @@ func TestInterruptFlagInstructions(t *testing.T) {
 	mem := memory.NewMemory()
 	cpu := internal.NewCpu(mem)
 
-	// Default should be false
-	if cpu.GetInterruptFlag() {
-		t.Error("Expected interrupt flag to be false initially")
-	}
-
 	// Set Interrupt Flag
 	cpu.SetInterruptFlag()
-	if !cpu.GetInterruptFlag() {
-		t.Error("Expected interrupt flag to be true after SetInterruptFlag")
-	}
 	if cpu.GetIRQFlag() {
 		t.Error("Expected IRQ flag to be false after SetInterruptFlag")
 	}
 
 	// Clear Interrupt Flag
 	cpu.ClearInterruptFlag()
-	if cpu.GetInterruptFlag() {
-		t.Error("Expected interrupt flag to be false after ClearInterruptFlag")
-	}
 	if !cpu.GetIRQFlag() {
 		t.Error("Expected IRQ flag to be true after ClearInterruptFlag")
 	}
@@ -85,7 +74,6 @@ func TestNoOpInstruction(t *testing.T) {
 	// Save initial CPU state
 	initialDebug := cpu.GetDebugData()
 	initialCarry := cpu.GetCarryFlag()
-	initialInterrupt := cpu.GetInterruptFlag()
 	initialOverflow := cpu.GetOverflowFlag()
 	initialIRQ := cpu.GetIRQFlag()
 
@@ -97,7 +85,7 @@ func TestNoOpInstruction(t *testing.T) {
 	if currentDebug["acc"] != initialDebug["acc"] || currentDebug["x"] != initialDebug["x"] || currentDebug["y"] != initialDebug["y"] {
 		t.Error("Expected CPU registers to remain unchanged after NoOp")
 	}
-	if cpu.GetCarryFlag() != initialCarry || cpu.GetInterruptFlag() != initialInterrupt ||
+	if cpu.GetCarryFlag() != initialCarry ||
 		cpu.GetOverflowFlag() != initialOverflow || cpu.GetIRQFlag() != initialIRQ {
 		t.Error("Expected CPU flags to remain unchanged after NoOp")
 	}

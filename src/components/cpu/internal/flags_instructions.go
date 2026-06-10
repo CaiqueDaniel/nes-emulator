@@ -9,12 +9,10 @@ func (c *cpu) SetCarryFlag() {
 }
 
 func (c *cpu) ClearInterruptFlag() {
-	c.interrupt = false
 	c.irq = true
 }
 
 func (c *cpu) SetInterruptFlag() {
-	c.interrupt = true
 	c.irq = false
 }
 

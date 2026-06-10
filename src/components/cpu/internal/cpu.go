@@ -7,11 +7,11 @@ const REGISTER_Y = "Y"
 const ACCUMULATOR = "ACC"
 
 type cpu struct {
-	programCounter                                  uint16
-	acc, x, y                                       uint8
-	carry, zero, overflow, negative, interrupt, irq bool
-	stackPointer                                    uint8
-	memory                                          memory.Memory
+	programCounter                       uint16
+	acc, x, y                            uint8
+	carry, zero, overflow, negative, irq bool
+	stackPointer                         uint8
+	memory                               memory.Memory
 }
 
 func NewCpu(memory memory.Memory) *cpu {
@@ -52,10 +52,6 @@ func (c *cpu) GetDebugData() map[string]uint8 {
 
 func (c *cpu) GetCarryFlag() bool {
 	return c.carry
-}
-
-func (c *cpu) GetInterruptFlag() bool {
-	return c.interrupt
 }
 
 func (c *cpu) GetOverflowFlag() bool {
