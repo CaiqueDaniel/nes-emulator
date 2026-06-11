@@ -148,3 +148,88 @@ func TestArithmeticShiftLeftOnAbsoluteAddressWithPositiveValueAndXIndexedMode(t 
 		t.Error("Expected carry flag to be false")
 	}
 }
+
+func TestLogicalShiftRightOnAccWithPositiveValue(t *testing.T) {
+	mem := memory.NewMemory()
+	cpu := internal.NewCpu(mem)
+
+	cpu.LoadValueIntoRegister(0, internal.ACCUMULATOR)
+	cpu.AddWithCarry(1)
+	cpu.LogicalShiftRight()
+
+	if cpu.GetDebugData()["acc"] != 0 {
+		t.Errorf("Expected accumulator to be 0, got %d", cpu.GetDebugData()["acc"])
+	}
+
+	if !cpu.GetZeroFlag() {
+		t.Error("Expected zero flag to be true")
+	}
+
+	if cpu.GetNegativeFlag() {
+		t.Error("Expected negative flag to be false")
+	}
+
+	if cpu.GetOverflowFlag() {
+		t.Error("Expected overflow flag to be false")
+	}
+
+	if !cpu.GetCarryFlag() {
+		t.Error("Expected carry flag to be true")
+	}
+}
+
+func TestLogicalShiftRightOnAccWithNegativeValue(t *testing.T) {
+	mem := memory.NewMemory()
+	cpu := internal.NewCpu(mem)
+
+	cpu.LoadValueIntoRegister(254, internal.ACCUMULATOR)
+	cpu.LogicalShiftRight()
+
+	if cpu.GetDebugData()["acc"] != 127 {
+		t.Errorf("Expected accumulator to be 127, got %d", cpu.GetDebugData()["acc"])
+	}
+
+	if cpu.GetZeroFlag() {
+		t.Error("Expected zero flag to be false")
+	}
+
+	if cpu.GetNegativeFlag() {
+		t.Error("Expected negative flag to be false")
+	}
+
+	if cpu.GetOverflowFlag() {
+		t.Error("Expected overflow flag to be false")
+	}
+
+	if cpu.GetCarryFlag() {
+		t.Error("Expected carry flag to be false")
+	}
+}
+
+func TestLogicalShiftRightOnAbsoluteAddressWithPositiveValue(t *testing.T) {
+	mem := memory.NewMemory()
+	cpu := internal.NewCpu(mem)
+
+	mem.Write(0, 1)
+	cpu.LogicalShiftRightAbsolute(0x0000, false)
+
+	if mem.Read(0) != 0 {
+		t.Errorf("Expected accumulator to be 0, got %d", mem.Read(0))
+	}
+
+	if !cpu.GetZeroFlag() {
+		t.Error("Expected zero flag to be true")
+	}
+
+	if cpu.GetNegativeFlag() {
+		t.Error("Expected negative flag to be false")
+	}
+
+	if cpu.GetOverflowFlag() {
+		t.Error("Expected overflow flag to be false")
+	}
+
+	if !cpu.GetCarryFlag() {
+		t.Error("Expected carry flag to be true")
+	}
+}
