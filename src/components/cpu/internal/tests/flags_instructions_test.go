@@ -154,3 +154,25 @@ func TestGetNegativeFlag(t *testing.T) {
 		t.Error("Expected negative flag to be false when bit 7 of result is clear")
 	}
 }
+
+func TestDecimalFlagInstructions(t *testing.T) {
+	mem := memory.NewMemory()
+	cpu := internal.NewCpu(mem)
+
+	// Default should be false
+	if cpu.GetDecimalFlag() {
+		t.Error("Expected decimal flag to be false initially")
+	}
+
+	// Set Decimal Flag
+	cpu.SetDecimalFlag()
+	if !cpu.GetDecimalFlag() {
+		t.Error("Expected decimal flag to be true after SetDecimalFlag")
+	}
+
+	// Clear Decimal Flag
+	cpu.ClearDecimalFlag()
+	if cpu.GetDecimalFlag() {
+		t.Error("Expected decimal flag to be false after ClearDecimalFlag")
+	}
+}

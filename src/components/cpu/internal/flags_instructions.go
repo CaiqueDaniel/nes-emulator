@@ -29,3 +29,11 @@ func (c *cpu) NoOp() {}
 func (c *cpu) Break() {
 	c.irq = true
 }
+
+func (c *cpu) ClearDecimalFlag() {
+	c.decimal = false
+}
+
+func (c *cpu) SetDecimalFlag() {
+	c.decimal = true
+}

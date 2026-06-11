@@ -73,3 +73,7 @@ func (c *cpu) GetNegativeFlag() bool {
 func (c *cpu) GetProgramCounter() uint16 {
 	return c.programCounter
 }
+
+func (c *cpu) GetDecimalFlag() bool {
+	return c.decimal
+}
