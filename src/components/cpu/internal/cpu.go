@@ -77,3 +77,17 @@ func (c *cpu) GetProgramCounter() uint16 {
 func (c *cpu) GetDecimalFlag() bool {
 	return c.decimal
 }
+
+func (c *cpu) transformFlagIntoUint8(flag bool) uint8 {
+	if flag {
+		return 1
+	}
+	return 0
+}
+
+//Transfer	TAX	TXA	TAY	TYA
+
+//Shift	ROL	ROR
+
+//Jump	JMP	JSR	RTS	RTI
+//Stack	PHA	PLA	PHP	PLP	TXS	TSX
