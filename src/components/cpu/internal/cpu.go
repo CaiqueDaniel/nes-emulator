@@ -78,7 +78,7 @@ func (c *cpu) GetDecimalFlag() bool {
 	return c.decimal
 }
 
-func (c *cpu) transformFlagIntoUint8(flag bool) uint8 {
+func transformFlagIntoUint8(flag bool) uint8 {
 	if flag {
 		return 1
 	}
@@ -86,8 +86,6 @@ func (c *cpu) transformFlagIntoUint8(flag bool) uint8 {
 }
 
 //Transfer	TAX	TXA	TAY	TYA
-
-//Shift	ROL	ROR
 
 //Jump	JMP	JSR	RTS	RTI
 //Stack	PHA	PLA	PHP	PLP	TXS	TSX

@@ -3,24 +3,17 @@ package internal
 func (c *cpu) ArithmeticShiftLeft() {
 	prevValue := c.acc
 	c.acc = c.acc << 1
-	c.negative = c.isValueNegative(c.acc)
-	c.zero = c.isValueZero(c.acc)
+	c.updateFlagsOnShift(c.acc)
 	c.carry = c.acc < prevValue
 }
 
 func (c *cpu) ArithmeticShiftLeftAbsolute(address uint16, xIndexedMode bool) {
-	if xIndexedMode {
-		address = c.getAddressByIndexedAbsoluteMode(address, c.x)
-	}
-
-	prevValue := c.GetValueByAbsoluteMode(address)
+	prevValue, address := c.getValueByAddress(address, xIndexedMode)
 	value := prevValue << 1
 
-	c.memory.Write(address, prevValue)
-	c.memory.Write(address, value)
+	c.doubleWriteToMemory(address, prevValue, value)
+	c.updateFlagsOnShift(value)
 
-	c.negative = c.isValueNegative(value)
-	c.zero = c.isValueZero(value)
 	c.carry = value < prevValue
 }
 
@@ -31,24 +24,17 @@ func (c *cpu) ArithmeticShiftLeftZeroPage(address uint8, xIndexedMode bool) {
 func (c *cpu) LogicalShiftRight() {
 	prevValue := c.acc
 	c.acc = c.acc >> 1
-	c.negative = false
-	c.zero = c.isValueZero(c.acc)
+	c.updateFlagsOnShift(c.acc)
 	c.carry = prevValue&0x1 == 1
 }
 
 func (c *cpu) LogicalShiftRightAbsolute(address uint16, xIndexedMode bool) {
-	if xIndexedMode {
-		address = c.getAddressByIndexedAbsoluteMode(address, c.x)
-	}
-
-	prevValue := c.GetValueByAbsoluteMode(address)
+	prevValue, address := c.getValueByAddress(address, xIndexedMode)
 	value := prevValue >> 1
 
-	c.memory.Write(address, prevValue)
-	c.memory.Write(address, value)
+	c.doubleWriteToMemory(address, prevValue, value)
+	c.updateFlagsOnShift(value)
 
-	c.negative = false
-	c.zero = c.isValueZero(value)
 	c.carry = prevValue&0x1 == 1
 }
 
@@ -57,31 +43,24 @@ func (c *cpu) LogicalShiftRightZeroPage(address uint8, xIndexedMode bool) {
 }
 
 func (c *cpu) RotateLeft() {
-	swapCarry := c.transformFlagIntoUint8(c.carry)
-	c.carry = c.acc&0b10000000 != 0
-	c.acc <<= 1
-	c.acc |= swapCarry
+	prevCarry := c.carry
 
-	c.negative = c.isValueNegative(c.acc)
-	c.zero = c.isValueZero(c.acc)
+	c.carry = c.acc&0b10000000 != 0
+	c.acc = bitShiftLeftWithCarry(c.acc, prevCarry)
+
+	c.updateFlagsOnShift(c.acc)
 }
 
 func (c *cpu) RotateLeftAbsolute(address uint16, xIndexedMode bool) {
-	if xIndexedMode {
-		address = c.getAddressByIndexedAbsoluteMode(address, c.x)
-	}
+	prevValue, address := c.getValueByAddress(address, xIndexedMode)
+	prevCarry := c.carry
 
-	prevValue := c.GetValueByAbsoluteMode(address)
-	swapCarry := c.transformFlagIntoUint8(c.carry)
 	c.carry = prevValue&0b10000000 != 0
-	value := prevValue << 1
-	value |= swapCarry
 
-	c.memory.Write(address, prevValue)
-	c.memory.Write(address, value)
+	value := bitShiftLeftWithCarry(prevValue, prevCarry)
 
-	c.negative = c.isValueNegative(value)
-	c.zero = c.isValueZero(value)
+	c.doubleWriteToMemory(address, prevValue, value)
+	c.updateFlagsOnShift(value)
 }
 
 func (c *cpu) RotateLeftZeroPage(address uint8, xIndexedMode bool) {
@@ -89,33 +68,63 @@ func (c *cpu) RotateLeftZeroPage(address uint8, xIndexedMode bool) {
 }
 
 func (c *cpu) RotateRight() {
-	swapCarry := c.transformFlagIntoUint8(c.carry) << 7
-	c.carry = c.acc&0b00000001 != 0
-	c.acc = c.acc >> 1
-	c.acc |= swapCarry
+	prevCarry := c.carry
 
-	c.negative = c.isValueNegative(c.acc)
-	c.zero = c.isValueZero(c.acc)
+	c.carry = c.acc&0b00000001 != 0
+	c.acc = bitShiftRightWithCarry(c.acc, prevCarry)
+
+	c.updateFlagsOnShift(c.acc)
 }
 
 func (c *cpu) RotateRightAbsolute(address uint16, xIndexedMode bool) {
-	if xIndexedMode {
-		address = c.getAddressByIndexedAbsoluteMode(address, c.x)
-	}
+	prevValue, address := c.getValueByAddress(address, xIndexedMode)
+	prevCarry := c.carry
 
-	prevValue := c.GetValueByAbsoluteMode(address)
-	swapCarry := c.transformFlagIntoUint8(c.carry) << 7
 	c.carry = prevValue&0b00000001 != 0
-	value := prevValue >> 1
-	value |= swapCarry
 
-	c.memory.Write(address, prevValue)
-	c.memory.Write(address, value)
+	value := bitShiftRightWithCarry(prevValue, prevCarry)
 
-	c.negative = c.isValueNegative(value)
-	c.zero = c.isValueZero(value)
+	c.doubleWriteToMemory(address, prevValue, value)
+	c.updateFlagsOnShift(value)
 }
 
 func (c *cpu) RotateRightZeroPage(address uint8, xIndexedMode bool) {
 	c.RotateRightAbsolute(uint16(address), xIndexedMode)
+}
+
+func (c *cpu) doubleWriteToMemory(address uint16, prevValue, currentValue uint8) {
+	c.memory.Write(address, prevValue)
+	c.memory.Write(address, currentValue)
+}
+
+func (c *cpu) updateFlagsOnShift(value uint8) {
+	c.negative = c.isValueNegative(value)
+	c.zero = c.isValueZero(value)
+}
+
+func (c *cpu) getValueByAddress(address uint16, xIndexedMode bool) (uint8, uint16) {
+	if xIndexedMode {
+		address = c.getAddressByIndexedAbsoluteMode(address, c.x)
+	}
+
+	return c.GetValueByAbsoluteMode(address), address
+}
+
+func bitShiftLeftWithCarry(value uint8, carry bool) uint8 {
+	return bitShiftWithCarry(value, carry, false)
+}
+
+func bitShiftRightWithCarry(value uint8, carry bool) uint8 {
+	return bitShiftWithCarry(value, carry, true)
+}
+
+func bitShiftWithCarry(value uint8, carry bool, isRight bool) uint8 {
+	carryAsInt := transformFlagIntoUint8(carry)
+
+	if isRight {
+		carryAsInt <<= 7
+		return value>>1 | carryAsInt
+	}
+
+	return value<<1 | carryAsInt
 }
