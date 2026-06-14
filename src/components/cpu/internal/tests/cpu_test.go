@@ -138,3 +138,66 @@ func TestGetDebugDataIsIndependent(t *testing.T) {
 		t.Errorf("Expected acc to still be 0, got %d", debugData2["acc"])
 	}
 }
+
+func TestPushValueToStackDecrementsStackPointer(t *testing.T) {
+	memory := memory.NewMemory()
+	cpu := internal.NewCpu(memory)
+
+	cpu.PushValueToStack(0x42)
+
+	if cpu.GetStackPointer() != 0xFE {
+		t.Errorf("Expected stack pointer to be 0xFE, got %d", cpu.GetStackPointer())
+	}
+
+	if memory.Read(0x1FF) != 0x42 {
+		t.Errorf("Expected value 0x42 to be pushed to stack, got %d", memory.Read(0x1FF))
+	}
+}
+
+func TestPushValueToStackMultipleTimesDecrementsStackPointerCorrectly(t *testing.T) {
+	memory := memory.NewMemory()
+	cpu := internal.NewCpu(memory)
+
+	cpu.PushValueToStack(0x42)
+	cpu.PushValueToStack(0x43)
+	cpu.PushValueToStack(0x44)
+
+	if cpu.GetStackPointer() != 0xFC {
+		t.Errorf("Expected stack pointer to be 0xFC, got %d", cpu.GetStackPointer())
+	}
+
+	if memory.Read(0x1FF) != 0x42 {
+		t.Errorf("Expected value 0x42 to be pushed to stack, got %d", memory.Read(0x1FF))
+	}
+
+	if memory.Read(0x1FE) != 0x43 {
+		t.Errorf("Expected value 0x43 to be pushed to stack, got %d", memory.Read(0x1FE))
+	}
+
+	if memory.Read(0x1FD) != 0x44 {
+		t.Errorf("Expected value 0x44 to be pushed to stack, got %d", memory.Read(0x1FD))
+	}
+}
+
+func TestPullValueFromStackIncrementsStackPointer(t *testing.T) {
+	memory := memory.NewMemory()
+	cpu := internal.NewCpu(memory)
+
+	cpu.PushValueToStack(0x42)
+	cpu.PushValueToStack(0x43)
+	cpu.PushValueToStack(0x44)
+
+	value := cpu.PullValueFromStack()
+
+	if value != 0x44 {
+		t.Errorf("Expected value 0x44 to be pulled from stack, got %d", value)
+	}
+
+	if cpu.GetStackPointer() != 0xFD {
+		t.Errorf("Expected stack pointer to be 0xFD, got %d", cpu.GetStackPointer())
+	}
+
+	if memory.Read(0x1FD) != 0x0 {
+		t.Errorf("Expected value 0x0 to be pulled from stack, got %d", memory.Read(0x1FD))
+	}
+}

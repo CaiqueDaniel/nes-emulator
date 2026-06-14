@@ -5,6 +5,8 @@ import "nes-emu/src/components/memory"
 const REGISTER_X = "X"
 const REGISTER_Y = "Y"
 const ACCUMULATOR = "ACC"
+const STACK_START = 0x01FF
+const STACK_END = 0x0100
 
 type cpu struct {
 	programCounter                                       uint16
@@ -40,6 +42,20 @@ func (c *cpu) Reset() {
 	c.overflow = false
 	c.negative = false
 	c.stackPointer = 0xFF
+}
+
+func (c *cpu) PushValueToStack(value uint8) {
+	c.memory.Write(STACK_END+uint16(c.stackPointer), value)
+	c.stackPointer--
+}
+
+func (c *cpu) PullValueFromStack() uint8 {
+	c.stackPointer++
+	value := c.memory.Read(STACK_END + uint16(c.stackPointer))
+
+	c.memory.Write(STACK_END+uint16(c.stackPointer), 0)
+
+	return value
 }
 
 func (c *cpu) GetDebugData() map[string]uint8 {
@@ -83,6 +99,10 @@ func transformFlagIntoUint8(flag bool) uint8 {
 		return 1
 	}
 	return 0
+}
+
+func (c *cpu) GetStackPointer() uint8 {
+	return c.stackPointer
 }
 
 //Jump	JSR	RTS	RTI
