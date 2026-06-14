@@ -11,3 +11,13 @@ func (c *cpu) JumpProgramCounterByIndirectValue(address uint16) {
 
 	c.JumpProgramCounterToValue(highAddress + uint16(lowAddress))
 }
+
+func (c *cpu) JumpProgramCounterToSubRoutine(value uint16) {
+	lowAddress := uint8(c.programCounter)
+	highAddress := uint8(c.programCounter & 0xFF00 >> 8)
+
+	c.PushValueToStack(highAddress)
+	c.PushValueToStack(lowAddress)
+
+	c.programCounter = value
+}
