@@ -85,7 +85,5 @@ func transformFlagIntoUint8(flag bool) uint8 {
 	return 0
 }
 
-//Transfer	TAX	TXA	TAY	TYA
-
-//Jump	JMP	JSR	RTS	RTI
+//Jump	JSR	RTS	RTI
 //Stack	PHA	PLA	PHP	PLP	TXS	TSX
