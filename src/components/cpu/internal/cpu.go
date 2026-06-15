@@ -28,6 +28,7 @@ func NewCpuWithProgramCounter(memory memory.Memory, programCounter uint16) *cpu 
 	c := &cpu{
 		memory:         memory,
 		programCounter: programCounter,
+		stackPointer:   0xFF,
 	}
 	return c
 }
