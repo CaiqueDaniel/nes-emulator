@@ -107,4 +107,4 @@ func (c *cpu) GetStackPointer() uint8 {
 }
 
 //Jump	RTI
-//Stack	PHA	PLA	PHP	PLP	TXS	TSX
+//Stack	PHP	PLP
