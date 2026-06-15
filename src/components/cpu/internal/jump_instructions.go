@@ -29,3 +29,17 @@ func (c *cpu) ReturnFromSubRoutine() {
 	c.programCounter = uint16(lowAddress) + uint16(highAddress)<<8
 	c.programCounter++
 }
+
+func (c *cpu) ReturnFromInterrupt() {
+	flags := c.PullValueFromStack()
+	lowAddress := c.PullValueFromStack()
+	highAddress := c.PullValueFromStack()
+
+	c.carry = flags&0b00000001 != 0
+	c.zero = flags&0b00000010 != 0
+	c.irq = flags&0b00000100 != 0
+	c.decimal = flags&0b00001000 != 0
+	c.overflow = flags&0b01000000 != 0
+	c.negative = flags&0b10000000 != 0
+	c.programCounter = uint16(lowAddress) + uint16(highAddress)<<8
+}
