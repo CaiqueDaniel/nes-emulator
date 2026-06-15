@@ -107,4 +107,3 @@ func (c *cpu) GetStackPointer() uint8 {
 }
 
 //Jump	RTI
-//Stack	PHP	PLP
