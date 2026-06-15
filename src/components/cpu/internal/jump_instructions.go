@@ -21,3 +21,11 @@ func (c *cpu) JumpProgramCounterToSubRoutine(value uint16) {
 
 	c.programCounter = value
 }
+
+func (c *cpu) ReturnFromSubRoutine() {
+	lowAddress := c.PullValueFromStack()
+	highAddress := c.PullValueFromStack()
+
+	c.programCounter = uint16(lowAddress) + uint16(highAddress)<<8
+	c.programCounter++
+}

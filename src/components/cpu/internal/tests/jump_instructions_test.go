@@ -49,3 +49,15 @@ func TestJumpProgramCounterToSubRoutine(t *testing.T) {
 		t.Errorf("Expected low address to be 0x34, got %d", cpu.PullValueFromStack())
 	}
 }
+
+func TestReturnFromSubRoutine(t *testing.T) {
+	mem := memory.NewMemory()
+	cpu := internal.NewCpuWithProgramCounter(mem, 0x1234)
+
+	cpu.JumpProgramCounterToSubRoutine(0x5678)
+	cpu.ReturnFromSubRoutine()
+
+	if cpu.GetProgramCounter() != 0x1235 {
+		t.Errorf("Expected program counter to be 0x1235, got %d", cpu.GetProgramCounter())
+	}
+}

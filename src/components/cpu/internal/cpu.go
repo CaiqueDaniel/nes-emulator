@@ -106,5 +106,5 @@ func (c *cpu) GetStackPointer() uint8 {
 	return c.stackPointer
 }
 
-//Jump	JSR	RTS	RTI
+//Jump	RTI
 //Stack	PHA	PLA	PHP	PLP	TXS	TSX
