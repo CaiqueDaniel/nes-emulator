@@ -9,4 +9,7 @@ func (c *cpu) LoadValueIntoRegister(value uint8, register string) {
 	case ACCUMULATOR:
 		c.acc = value
 	}
+
+	c.zero = c.isValueZero(value)
+	c.negative = c.isValueNegative(value)
 }
