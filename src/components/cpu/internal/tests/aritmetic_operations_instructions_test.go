@@ -470,3 +470,311 @@ func TestCompareWithRegister(t *testing.T) {
 		})
 	}
 }
+
+func TestIncrementMemory(t *testing.T) {
+	tests := []struct {
+		name          string
+		address       uint16
+		initialValue  uint8
+		expectedValue uint8
+		expectedZ     bool
+		expectedN     bool
+	}{
+		{
+			name:          "Increment normal value",
+			address:       0x0010,
+			initialValue:  0x05,
+			expectedValue: 0x06,
+			expectedZ:     false,
+			expectedN:     false,
+		},
+		{
+			name:          "Increment wraps from 0xFF to 0x00 and sets zero flag",
+			address:       0x0020,
+			initialValue:  0xFF,
+			expectedValue: 0x00,
+			expectedZ:     true,
+			expectedN:     false,
+		},
+		{
+			name:          "Increment sets negative flag when result bit 7 is set",
+			address:       0x0030,
+			initialValue:  0x7F,
+			expectedValue: 0x80,
+			expectedZ:     false,
+			expectedN:     true,
+		},
+		{
+			name:          "Increment value already in negative range stays negative",
+			address:       0x0040,
+			initialValue:  0x80,
+			expectedValue: 0x81,
+			expectedZ:     false,
+			expectedN:     true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			mem := memory.NewMemory()
+			cpu := internal.NewCpu(mem)
+
+			mem.Write(tt.address, tt.initialValue)
+			cpu.IncrementMemory(tt.address)
+
+			actualValue := mem.Read(tt.address)
+			if actualValue != tt.expectedValue {
+				t.Errorf("Expected memory value %d, got %d", tt.expectedValue, actualValue)
+			}
+			if cpu.GetZeroFlag() != tt.expectedZ {
+				t.Errorf("Expected Zero flag %t, got %t", tt.expectedZ, cpu.GetZeroFlag())
+			}
+			if cpu.GetNegativeFlag() != tt.expectedN {
+				t.Errorf("Expected Negative flag %t, got %t", tt.expectedN, cpu.GetNegativeFlag())
+			}
+		})
+	}
+}
+
+func TestIncrementRegister(t *testing.T) {
+	tests := []struct {
+		name          string
+		register      string
+		initialValue  uint8
+		expectedValue uint8
+		expectedZ     bool
+		expectedN     bool
+	}{
+		{
+			name:          "Increment X normal value",
+			register:      internal.REGISTER_X,
+			initialValue:  0x05,
+			expectedValue: 0x06,
+			expectedZ:     false,
+			expectedN:     false,
+		},
+		{
+			name:          "Increment X wraps from 0xFF to 0x00 and sets zero flag",
+			register:      internal.REGISTER_X,
+			initialValue:  0xFF,
+			expectedValue: 0x00,
+			expectedZ:     true,
+			expectedN:     false,
+		},
+		{
+			name:          "Increment X sets negative flag",
+			register:      internal.REGISTER_X,
+			initialValue:  0x7F,
+			expectedValue: 0x80,
+			expectedZ:     false,
+			expectedN:     true,
+		},
+		{
+			name:          "Increment Y normal value",
+			register:      internal.REGISTER_Y,
+			initialValue:  0x10,
+			expectedValue: 0x11,
+			expectedZ:     false,
+			expectedN:     false,
+		},
+		{
+			name:          "Increment Y wraps from 0xFF to 0x00 and sets zero flag",
+			register:      internal.REGISTER_Y,
+			initialValue:  0xFF,
+			expectedValue: 0x00,
+			expectedZ:     true,
+			expectedN:     false,
+		},
+		{
+			name:          "Increment Y sets negative flag",
+			register:      internal.REGISTER_Y,
+			initialValue:  0x7F,
+			expectedValue: 0x80,
+			expectedZ:     false,
+			expectedN:     true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			mem := memory.NewMemory()
+			cpu := internal.NewCpu(mem)
+
+			cpu.LoadValueIntoRegister(tt.initialValue, tt.register)
+			cpu.IncrementRegister(tt.register)
+
+			debugData := cpu.GetDebugData()
+			var registerKey string
+			switch tt.register {
+			case internal.REGISTER_X:
+				registerKey = "x"
+			case internal.REGISTER_Y:
+				registerKey = "y"
+			}
+
+			if debugData[registerKey] != tt.expectedValue {
+				t.Errorf("Expected register %s value %d, got %d", tt.register, tt.expectedValue, debugData[registerKey])
+			}
+			if cpu.GetZeroFlag() != tt.expectedZ {
+				t.Errorf("Expected Zero flag %t, got %t", tt.expectedZ, cpu.GetZeroFlag())
+			}
+			if cpu.GetNegativeFlag() != tt.expectedN {
+				t.Errorf("Expected Negative flag %t, got %t", tt.expectedN, cpu.GetNegativeFlag())
+			}
+		})
+	}
+}
+
+func TestDecrementMemory(t *testing.T) {
+	tests := []struct {
+		name          string
+		address       uint16
+		initialValue  uint8
+		expectedValue uint8
+		expectedZ     bool
+		expectedN     bool
+	}{
+		{
+			name:          "Decrement normal value",
+			address:       0x0010,
+			initialValue:  0x05,
+			expectedValue: 0x04,
+			expectedZ:     false,
+			expectedN:     false,
+		},
+		{
+			name:          "Decrement sets zero flag when result is 0x00",
+			address:       0x0020,
+			initialValue:  0x01,
+			expectedValue: 0x00,
+			expectedZ:     true,
+			expectedN:     false,
+		},
+		{
+			name:          "Decrement wraps from 0x00 to 0xFF and sets negative flag",
+			address:       0x0030,
+			initialValue:  0x00,
+			expectedValue: 0xFF,
+			expectedZ:     false,
+			expectedN:     true,
+		},
+		{
+			name:          "Decrement sets negative flag when result bit 7 is set",
+			address:       0x0040,
+			initialValue:  0x81,
+			expectedValue: 0x80,
+			expectedZ:     false,
+			expectedN:     true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			mem := memory.NewMemory()
+			cpu := internal.NewCpu(mem)
+
+			mem.Write(tt.address, tt.initialValue)
+			cpu.DecrementMemory(tt.address)
+
+			actualValue := mem.Read(tt.address)
+			if actualValue != tt.expectedValue {
+				t.Errorf("Expected memory value %d, got %d", tt.expectedValue, actualValue)
+			}
+			if cpu.GetZeroFlag() != tt.expectedZ {
+				t.Errorf("Expected Zero flag %t, got %t", tt.expectedZ, cpu.GetZeroFlag())
+			}
+			if cpu.GetNegativeFlag() != tt.expectedN {
+				t.Errorf("Expected Negative flag %t, got %t", tt.expectedN, cpu.GetNegativeFlag())
+			}
+		})
+	}
+}
+
+func TestDecrementRegister(t *testing.T) {
+	tests := []struct {
+		name          string
+		register      string
+		initialValue  uint8
+		expectedValue uint8
+		expectedZ     bool
+		expectedN     bool
+	}{
+		{
+			name:          "Decrement X normal value",
+			register:      internal.REGISTER_X,
+			initialValue:  0x05,
+			expectedValue: 0x04,
+			expectedZ:     false,
+			expectedN:     false,
+		},
+		{
+			name:          "Decrement X sets zero flag",
+			register:      internal.REGISTER_X,
+			initialValue:  0x01,
+			expectedValue: 0x00,
+			expectedZ:     true,
+			expectedN:     false,
+		},
+		{
+			name:          "Decrement X wraps from 0x00 to 0xFF and sets negative flag",
+			register:      internal.REGISTER_X,
+			initialValue:  0x00,
+			expectedValue: 0xFF,
+			expectedZ:     false,
+			expectedN:     true,
+		},
+		{
+			name:          "Decrement Y normal value",
+			register:      internal.REGISTER_Y,
+			initialValue:  0x10,
+			expectedValue: 0x0F,
+			expectedZ:     false,
+			expectedN:     false,
+		},
+		{
+			name:          "Decrement Y sets zero flag",
+			register:      internal.REGISTER_Y,
+			initialValue:  0x01,
+			expectedValue: 0x00,
+			expectedZ:     true,
+			expectedN:     false,
+		},
+		{
+			name:          "Decrement Y wraps from 0x00 to 0xFF and sets negative flag",
+			register:      internal.REGISTER_Y,
+			initialValue:  0x00,
+			expectedValue: 0xFF,
+			expectedZ:     false,
+			expectedN:     true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			mem := memory.NewMemory()
+			cpu := internal.NewCpu(mem)
+
+			cpu.LoadValueIntoRegister(tt.initialValue, tt.register)
+			cpu.DecrementRegister(tt.register)
+
+			debugData := cpu.GetDebugData()
+			var registerKey string
+			switch tt.register {
+			case internal.REGISTER_X:
+				registerKey = "x"
+			case internal.REGISTER_Y:
+				registerKey = "y"
+			}
+
+			if debugData[registerKey] != tt.expectedValue {
+				t.Errorf("Expected register %s value %d, got %d", tt.register, tt.expectedValue, debugData[registerKey])
+			}
+			if cpu.GetZeroFlag() != tt.expectedZ {
+				t.Errorf("Expected Zero flag %t, got %t", tt.expectedZ, cpu.GetZeroFlag())
+			}
+			if cpu.GetNegativeFlag() != tt.expectedN {
+				t.Errorf("Expected Negative flag %t, got %t", tt.expectedN, cpu.GetNegativeFlag())
+			}
+		})
+	}
+}
