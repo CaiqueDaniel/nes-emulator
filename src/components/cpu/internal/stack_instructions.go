@@ -21,15 +21,8 @@ func (c *cpu) TransferStackToX() {
 }
 
 func (c *cpu) PushStatusIntoStack() {
-	carry := transformFlagIntoUint8(c.carry)
-	zero := transformFlagIntoUint8(c.zero) << 1
-	irq := transformFlagIntoUint8(c.irq) << 2
-	decimal := transformFlagIntoUint8(c.decimal) << 3
-	overflow := transformFlagIntoUint8(c.overflow) << 6
-	negative := transformFlagIntoUint8(c.negative) << 7
-
-	valueToPush := 0b00110000 | carry | zero | irq | decimal | overflow | negative
-	c.PushValueToStack(valueToPush)
+	c.bFlag = true
+	c.PushFlagsIntoStack()
 }
 
 func (c *cpu) PullStatusFromStack() {

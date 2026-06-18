@@ -59,6 +59,19 @@ func (c *cpu) PullValueFromStack() uint8 {
 	return value
 }
 
+func (c *cpu) PushFlagsIntoStack() {
+	carry := transformFlagIntoUint8(c.carry)
+	zero := transformFlagIntoUint8(c.zero) << 1
+	irq := transformFlagIntoUint8(c.irq) << 2
+	decimal := transformFlagIntoUint8(c.decimal) << 3
+	breakFlag := transformFlagIntoUint8(c.bFlag) << 4
+	overflow := transformFlagIntoUint8(c.overflow) << 6
+	negative := transformFlagIntoUint8(c.negative) << 7
+
+	valueToPush := 0b00100000 | carry | zero | irq | decimal | breakFlag | overflow | negative
+	c.PushValueToStack(valueToPush)
+}
+
 func (c *cpu) GetDebugData() map[string]uint8 {
 	return map[string]uint8{
 		"acc": c.acc,
@@ -106,4 +119,4 @@ func (c *cpu) GetStackPointer() uint8 {
 	return c.stackPointer
 }
 
-//Jump	RTI
+//Arithmetic		SBC

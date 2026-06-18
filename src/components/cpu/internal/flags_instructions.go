@@ -27,7 +27,16 @@ func (c *cpu) SetOverflowFlag() {
 func (c *cpu) NoOp() {}
 
 func (c *cpu) Break() {
+	highAddress := uint8(c.programCounter >> 8)
+	lowAddress := uint8(c.programCounter)
+
 	c.irq = true
+	c.bFlag = true
+	c.PushValueToStack(highAddress)
+	c.PushValueToStack(lowAddress)
+	c.PushStatusIntoStack()
+
+	c.programCounter = uint16(c.memory.Read(0xFFFE))
 }
 
 func (c *cpu) ClearDecimalFlag() {

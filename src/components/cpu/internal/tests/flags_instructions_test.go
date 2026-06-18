@@ -93,7 +93,8 @@ func TestNoOpInstruction(t *testing.T) {
 
 func TestBreakInstruction(t *testing.T) {
 	mem := memory.NewMemory()
-	cpu := internal.NewCpu(mem)
+	mem.Write(0xFFFE, 0x12)
+	cpu := internal.NewCpuWithProgramCounter(mem, 0x1234)
 
 	// Default irq should be false
 	if cpu.GetIRQFlag() {
@@ -102,8 +103,31 @@ func TestBreakInstruction(t *testing.T) {
 
 	// Call Break
 	cpu.Break()
+
 	if !cpu.GetIRQFlag() {
 		t.Error("Expected IRQ flag to be true after Break")
+	}
+
+	// Verify PC is read from 0xFFFE
+	if cpu.GetProgramCounter() != 0x0012 {
+		t.Errorf("Expected Program Counter to be 0x0012, got 0x%04X", cpu.GetProgramCounter())
+	}
+
+	// Verify stack values (pulled in reverse order: Status, Low Address, High Address)
+	status := cpu.PullValueFromStack()
+	expectedStatusFlags := uint8(0b00110100) // Bit 5 (always 1), Bit 4 (B-flag), Bit 2 (IRQ)
+	if status&expectedStatusFlags != expectedStatusFlags {
+		t.Errorf("Expected Status with B-flag, unused and IRQ flag set, got %08b", status)
+	}
+
+	lowAddr := cpu.PullValueFromStack()
+	if lowAddr != 0x34 {
+		t.Errorf("Expected Low Address 0x34, got 0x%02X", lowAddr)
+	}
+
+	highAddr := cpu.PullValueFromStack()
+	if highAddr != 0x12 {
+		t.Errorf("Expected High Address 0x12, got 0x%02X", highAddr)
 	}
 }
 
