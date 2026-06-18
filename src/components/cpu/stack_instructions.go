@@ -1,4 +1,4 @@
-package internal
+package cpu
 
 func (c *cpu) PushAccToStack() {
 	c.PushValueToStack(c.acc)

@@ -1,4 +1,4 @@
-package internal
+package cpu
 
 import "nes-emu/src/components/memory"
 

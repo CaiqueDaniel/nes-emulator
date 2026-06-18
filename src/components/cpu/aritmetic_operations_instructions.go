@@ -1,4 +1,4 @@
-package internal
+package cpu
 
 const signalBitMask = 0b10000000
 

@@ -1,4 +1,4 @@
-package internal
+package cpu
 
 func (c *cpu) StoreRegisterIntoAbsoluteMemory(value uint16, register string) {
 	switch register {

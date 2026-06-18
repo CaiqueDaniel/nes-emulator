@@ -1,4 +1,4 @@
-package internal
+package cpu
 
 func (c *cpu) GetValueByAbsoluteMode(address uint16) uint8 {
 	return c.memory.Read(address)

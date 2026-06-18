@@ -1,4 +1,4 @@
-package internal
+package cpu
 
 func (c *cpu) And(value uint8) {
 	c.acc = c.acc & value

@@ -1,4 +1,4 @@
-package internal
+package cpu
 
 func (c *cpu) TransferFromAccumulatorToRegister(register string) {
 	switch register {
