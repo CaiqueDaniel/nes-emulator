@@ -77,4 +77,5 @@ type CPU interface {
 	TransferStackToX()
 	TransferXToStack()
 	Xor(value uint8)
+	GetTotalCycles() uint64
 }

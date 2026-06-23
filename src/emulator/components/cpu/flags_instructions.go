@@ -24,7 +24,9 @@ func (c *cpu) SetOverflowFlag() {
 	c.overflow = true
 }
 
-func (c *cpu) NoOp() {}
+func (c *cpu) NoOp() {
+	c.tick(1)
+}
 
 func (c *cpu) Break() {
 	highAddress := uint8(c.programCounter >> 8)
