@@ -1,15 +1,14 @@
 package memory
 
-type Memory interface {
-	Read(address uint16) uint8
-	Write(address uint16, value uint8)
-}
+import (
+	"nes-emu/src/emulator/application"
+)
 
 type memory struct {
 	storage map[uint16]uint8
 }
 
-func NewMemory() Memory {
+func NewMemory() application.Memory {
 	return &memory{
 		storage: make(map[uint16]uint8),
 	}

@@ -3,8 +3,8 @@ package tests
 import (
 	"testing"
 
-	internal "nes-emu/src/components/cpu"
-	"nes-emu/src/components/memory"
+	internal "nes-emu/src/emulator/components/cpu"
+	"nes-emu/src/emulator/components/memory"
 )
 
 func TestGetValueByAbsoluteMode(t *testing.T) {

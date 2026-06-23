@@ -1,8 +1,8 @@
 package tests
 
 import (
-	internal "nes-emu/src/components/cpu"
-	"nes-emu/src/components/memory"
+	internal "nes-emu/src/emulator/components/cpu"
+	"nes-emu/src/emulator/components/memory"
 	"testing"
 )
 
