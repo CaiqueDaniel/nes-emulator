@@ -1,6 +1,7 @@
 package tests
 
 import (
+	"nes-emu/src/emulator/components/bus"
 	internal "nes-emu/src/emulator/components/cpu"
 	"nes-emu/src/emulator/components/memory"
 	"strings"
@@ -27,8 +28,9 @@ func TestTransferFromAccumulatorToRegisters(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			mem := memory.NewMemory()
-			cpu := internal.NewCpu(mem)
+			b := bus.NewBus()
+			mem := memory.NewMemory(b)
+			cpu := internal.NewCpu(mem, b)
 
 			cpu.LoadValueIntoRegister(0x42, internal.ACCUMULATOR)
 			cpu.TransferFromAccumulatorToRegister(tt.constant)
@@ -73,8 +75,9 @@ func TestTransferFromAccumulatorToRegistersWithFlaggableValues(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			mem := memory.NewMemory()
-			cpu := internal.NewCpu(mem)
+			b := bus.NewBus()
+			mem := memory.NewMemory(b)
+			cpu := internal.NewCpu(mem, b)
 
 			cpu.LoadValueIntoRegister(0, internal.ACCUMULATOR)
 			cpu.TransferFromAccumulatorToRegister(tt.constant)
@@ -121,8 +124,9 @@ func TestTransferFromRegisterToAccumulator(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			mem := memory.NewMemory()
-			cpu := internal.NewCpu(mem)
+			b := bus.NewBus()
+			mem := memory.NewMemory(b)
+			cpu := internal.NewCpu(mem, b)
 
 			cpu.LoadValueIntoRegister(0x42, tt.constant)
 			cpu.TransferFromRegisterToAccumulator(tt.constant)

@@ -1,6 +1,7 @@
 package tests
 
 import (
+	"nes-emu/src/emulator/components/bus"
 	internal "nes-emu/src/emulator/components/cpu"
 	"nes-emu/src/emulator/components/memory"
 	"testing"
@@ -59,8 +60,9 @@ func TestAnd(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			mem := memory.NewMemory()
-			cpu := internal.NewCpu(mem)
+			b := bus.NewBus()
+			mem := memory.NewMemory(b)
+			cpu := internal.NewCpu(mem, b)
 
 			cpu.LoadValueIntoRegister(tt.initialAcc, internal.ACCUMULATOR)
 			cpu.And(tt.value)
@@ -132,8 +134,9 @@ func TestOr(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			mem := memory.NewMemory()
-			cpu := internal.NewCpu(mem)
+			b := bus.NewBus()
+			mem := memory.NewMemory(b)
+			cpu := internal.NewCpu(mem, b)
 
 			cpu.LoadValueIntoRegister(tt.initialAcc, internal.ACCUMULATOR)
 			cpu.Or(tt.value)
@@ -205,8 +208,9 @@ func TestXor(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			mem := memory.NewMemory()
-			cpu := internal.NewCpu(mem)
+			b := bus.NewBus()
+			mem := memory.NewMemory(b)
+			cpu := internal.NewCpu(mem, b)
 
 			cpu.LoadValueIntoRegister(tt.initialAcc, internal.ACCUMULATOR)
 			cpu.Xor(tt.value)
@@ -286,8 +290,9 @@ func TestBit(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			mem := memory.NewMemory()
-			cpu := internal.NewCpu(mem)
+			b := bus.NewBus()
+			mem := memory.NewMemory(b)
+			cpu := internal.NewCpu(mem, b)
 
 			cpu.LoadValueIntoRegister(tt.initialAcc, internal.ACCUMULATOR)
 			cpu.Bit(tt.value)

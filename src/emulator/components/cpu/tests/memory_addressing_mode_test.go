@@ -3,13 +3,15 @@ package tests
 import (
 	"testing"
 
+	"nes-emu/src/emulator/components/bus"
 	internal "nes-emu/src/emulator/components/cpu"
 	"nes-emu/src/emulator/components/memory"
 )
 
 func TestGetValueByAbsoluteMode(t *testing.T) {
-	memory := memory.NewMemory()
-	cpu := internal.NewCpu(memory)
+	b := bus.NewBus()
+	memory := memory.NewMemory(b)
+	cpu := internal.NewCpu(memory, b)
 
 	memory.Write(0x1000, 0xFF)
 
@@ -21,8 +23,9 @@ func TestGetValueByAbsoluteMode(t *testing.T) {
 }
 
 func TestGetValueByZeroPageMode(t *testing.T) {
-	memory := memory.NewMemory()
-	cpu := internal.NewCpu(memory)
+	b := bus.NewBus()
+	memory := memory.NewMemory(b)
+	cpu := internal.NewCpu(memory, b)
 
 	memory.Write(0x0010, 0xFF)
 
@@ -34,8 +37,9 @@ func TestGetValueByZeroPageMode(t *testing.T) {
 }
 
 func TestGetValueByIndexedAbsoluteMode(t *testing.T) {
-	memory := memory.NewMemory()
-	cpu := internal.NewCpu(memory)
+	b := bus.NewBus()
+	memory := memory.NewMemory(b)
+	cpu := internal.NewCpu(memory, b)
 
 	memory.Write(0x1010, 0xFF)
 
@@ -47,8 +51,9 @@ func TestGetValueByIndexedAbsoluteMode(t *testing.T) {
 }
 
 func TestGetValueByZeroPageIndexedMode(t *testing.T) {
-	memory := memory.NewMemory()
-	cpu := internal.NewCpu(memory)
+	b := bus.NewBus()
+	memory := memory.NewMemory(b)
+	cpu := internal.NewCpu(memory, b)
 
 	memory.Write(0x000F, 0xFF)
 
@@ -60,8 +65,9 @@ func TestGetValueByZeroPageIndexedMode(t *testing.T) {
 }
 
 func TestGetValueByIndirectAbsoluteMode(t *testing.T) {
-	memory := memory.NewMemory()
-	cpu := internal.NewCpu(memory)
+	b := bus.NewBus()
+	memory := memory.NewMemory(b)
+	cpu := internal.NewCpu(memory, b)
 
 	memory.Write(0xFAFF, 0x80)
 	memory.Write(0x1000, 0xFF)
@@ -75,8 +81,9 @@ func TestGetValueByIndirectAbsoluteMode(t *testing.T) {
 }
 
 func TestGetValueByIndexedIndirectXMode(t *testing.T) {
-	memory := memory.NewMemory()
-	cpu := internal.NewCpu(memory)
+	b := bus.NewBus()
+	memory := memory.NewMemory(b)
+	cpu := internal.NewCpu(memory, b)
 
 	memory.Write(0xFAFF, 0x80)
 	memory.Write(0x01, 0xFF)
@@ -91,8 +98,9 @@ func TestGetValueByIndexedIndirectXMode(t *testing.T) {
 }
 
 func TestGetValueByIndirectIndexedYMode(t *testing.T) {
-	memory := memory.NewMemory()
-	cpu := internal.NewCpu(memory)
+	b := bus.NewBus()
+	memory := memory.NewMemory(b)
+	cpu := internal.NewCpu(memory, b)
 
 	memory.Write(0xFAFF, 0x80)
 	memory.Write(0x01, 0xFF)

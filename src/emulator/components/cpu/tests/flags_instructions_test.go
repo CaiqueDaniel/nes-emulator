@@ -1,14 +1,16 @@
 package tests
 
 import (
+	"nes-emu/src/emulator/components/bus"
 	internal "nes-emu/src/emulator/components/cpu"
 	"nes-emu/src/emulator/components/memory"
 	"testing"
 )
 
 func TestCarryFlagInstructions(t *testing.T) {
-	mem := memory.NewMemory()
-	cpu := internal.NewCpu(mem)
+	b := bus.NewBus()
+	mem := memory.NewMemory(b)
+	cpu := internal.NewCpu(mem, b)
 
 	// Default should be false
 	if cpu.GetCarryFlag() {
@@ -29,8 +31,9 @@ func TestCarryFlagInstructions(t *testing.T) {
 }
 
 func TestInterruptFlagInstructions(t *testing.T) {
-	mem := memory.NewMemory()
-	cpu := internal.NewCpu(mem)
+	b := bus.NewBus()
+	mem := memory.NewMemory(b)
+	cpu := internal.NewCpu(mem, b)
 
 	// Set Interrupt Flag
 	cpu.SetInterruptFlag()
@@ -46,8 +49,9 @@ func TestInterruptFlagInstructions(t *testing.T) {
 }
 
 func TestOverflowFlagInstructions(t *testing.T) {
-	mem := memory.NewMemory()
-	cpu := internal.NewCpu(mem)
+	b := bus.NewBus()
+	mem := memory.NewMemory(b)
+	cpu := internal.NewCpu(mem, b)
 
 	// Default should be false
 	if cpu.GetOverflowFlag() {
@@ -68,8 +72,9 @@ func TestOverflowFlagInstructions(t *testing.T) {
 }
 
 func TestNoOpInstruction(t *testing.T) {
-	mem := memory.NewMemory()
-	cpu := internal.NewCpu(mem)
+	b := bus.NewBus()
+	mem := memory.NewMemory(b)
+	cpu := internal.NewCpu(mem, b)
 
 	// Save initial CPU state
 	initialDebug := cpu.GetDebugData()
@@ -92,7 +97,7 @@ func TestNoOpInstruction(t *testing.T) {
 }
 
 func TestBreakInstruction(t *testing.T) {
-	mem := memory.NewMemory()
+	mem := memory.NewMemory(bus.NewBus())
 	mem.Write(0xFFFE, 0x12)
 	cpu := internal.NewCpuWithProgramCounter(mem, 0x1234)
 
@@ -132,8 +137,9 @@ func TestBreakInstruction(t *testing.T) {
 }
 
 func TestGetZeroFlag(t *testing.T) {
-	mem := memory.NewMemory()
-	cpu := internal.NewCpu(mem)
+	b := bus.NewBus()
+	mem := memory.NewMemory(b)
+	cpu := internal.NewCpu(mem, b)
 
 	// Default should be false
 	if cpu.GetZeroFlag() {
@@ -156,8 +162,9 @@ func TestGetZeroFlag(t *testing.T) {
 }
 
 func TestGetNegativeFlag(t *testing.T) {
-	mem := memory.NewMemory()
-	cpu := internal.NewCpu(mem)
+	b := bus.NewBus()
+	mem := memory.NewMemory(b)
+	cpu := internal.NewCpu(mem, b)
 
 	// Default should be false
 	if cpu.GetNegativeFlag() {
@@ -180,8 +187,9 @@ func TestGetNegativeFlag(t *testing.T) {
 }
 
 func TestDecimalFlagInstructions(t *testing.T) {
-	mem := memory.NewMemory()
-	cpu := internal.NewCpu(mem)
+	b := bus.NewBus()
+	mem := memory.NewMemory(b)
+	cpu := internal.NewCpu(mem, b)
 
 	// Default should be false
 	if cpu.GetDecimalFlag() {

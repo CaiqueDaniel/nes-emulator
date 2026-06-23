@@ -1,6 +1,7 @@
 package tests
 
 import (
+	"nes-emu/src/emulator/components/bus"
 	internal "nes-emu/src/emulator/components/cpu"
 	"nes-emu/src/emulator/components/memory"
 	"testing"
@@ -31,8 +32,9 @@ func TestShouldStoreRegisterIntoAbsoluteMemory(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			mem := memory.NewMemory()
-			cpu := internal.NewCpu(mem)
+			b := bus.NewBus()
+			mem := memory.NewMemory(b)
+			cpu := internal.NewCpu(mem, b)
 
 			cpu.LoadValueIntoRegister(tt.value, tt.register)
 			cpu.StoreRegisterIntoAbsoluteMemory(0x1234, tt.register)

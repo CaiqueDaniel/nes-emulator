@@ -1,14 +1,16 @@
 package tests
 
 import (
+	"nes-emu/src/emulator/components/bus"
 	internal "nes-emu/src/emulator/components/cpu"
 	"nes-emu/src/emulator/components/memory"
 	"testing"
 )
 
 func TestJump(t *testing.T) {
-	mem := memory.NewMemory()
-	cpu := internal.NewCpu(mem)
+	b := bus.NewBus()
+	mem := memory.NewMemory(b)
+	cpu := internal.NewCpu(mem, b)
 
 	cpu.JumpProgramCounterToValue(0x1234)
 
@@ -18,8 +20,9 @@ func TestJump(t *testing.T) {
 }
 
 func TestJumpProgramCounterByIndirectValue(t *testing.T) {
-	mem := memory.NewMemory()
-	cpu := internal.NewCpu(mem)
+	b := bus.NewBus()
+	mem := memory.NewMemory(b)
+	cpu := internal.NewCpu(mem, b)
 
 	mem.Write(0x03FF, 1)
 	mem.Write(0x4000, 123)
@@ -32,7 +35,7 @@ func TestJumpProgramCounterByIndirectValue(t *testing.T) {
 }
 
 func TestJumpProgramCounterToSubRoutine(t *testing.T) {
-	mem := memory.NewMemory()
+	mem := memory.NewMemory(bus.NewBus())
 	cpu := internal.NewCpuWithProgramCounter(mem, 0x1234)
 
 	cpu.JumpProgramCounterToSubRoutine(0x5678)
@@ -51,7 +54,7 @@ func TestJumpProgramCounterToSubRoutine(t *testing.T) {
 }
 
 func TestReturnFromSubRoutine(t *testing.T) {
-	mem := memory.NewMemory()
+	mem := memory.NewMemory(bus.NewBus())
 	cpu := internal.NewCpuWithProgramCounter(mem, 0x1234)
 
 	cpu.JumpProgramCounterToSubRoutine(0x5678)
@@ -76,8 +79,9 @@ func pushInterruptState(cpu interface {
 }
 
 func TestReturnFromInterrupt_RestoresProgramCounter(t *testing.T) {
-	mem := memory.NewMemory()
-	cpu := internal.NewCpu(mem)
+	b := bus.NewBus()
+	mem := memory.NewMemory(b)
+	cpu := internal.NewCpu(mem, b)
 
 	pushInterruptState(cpu, 0x00, 0x34, 0x12)
 	cpu.ReturnFromInterrupt()
@@ -88,8 +92,9 @@ func TestReturnFromInterrupt_RestoresProgramCounter(t *testing.T) {
 }
 
 func TestReturnFromInterrupt_RestoresProgramCounter_HighByteOnly(t *testing.T) {
-	mem := memory.NewMemory()
-	cpu := internal.NewCpu(mem)
+	b := bus.NewBus()
+	mem := memory.NewMemory(b)
+	cpu := internal.NewCpu(mem, b)
 
 	pushInterruptState(cpu, 0x00, 0x00, 0xAB)
 	cpu.ReturnFromInterrupt()
@@ -100,8 +105,9 @@ func TestReturnFromInterrupt_RestoresProgramCounter_HighByteOnly(t *testing.T) {
 }
 
 func TestReturnFromInterrupt_RestoresCarryFlag(t *testing.T) {
-	mem := memory.NewMemory()
-	cpu := internal.NewCpu(mem)
+	b := bus.NewBus()
+	mem := memory.NewMemory(b)
+	cpu := internal.NewCpu(mem, b)
 
 	pushInterruptState(cpu, 0b00000001, 0x00, 0x00)
 	cpu.ReturnFromInterrupt()
@@ -112,8 +118,9 @@ func TestReturnFromInterrupt_RestoresCarryFlag(t *testing.T) {
 }
 
 func TestReturnFromInterrupt_RestoresZeroFlag(t *testing.T) {
-	mem := memory.NewMemory()
-	cpu := internal.NewCpu(mem)
+	b := bus.NewBus()
+	mem := memory.NewMemory(b)
+	cpu := internal.NewCpu(mem, b)
 
 	pushInterruptState(cpu, 0b00000010, 0x00, 0x00)
 	cpu.ReturnFromInterrupt()
@@ -124,8 +131,9 @@ func TestReturnFromInterrupt_RestoresZeroFlag(t *testing.T) {
 }
 
 func TestReturnFromInterrupt_RestoresIRQFlag(t *testing.T) {
-	mem := memory.NewMemory()
-	cpu := internal.NewCpu(mem)
+	b := bus.NewBus()
+	mem := memory.NewMemory(b)
+	cpu := internal.NewCpu(mem, b)
 
 	pushInterruptState(cpu, 0b00000100, 0x00, 0x00)
 	cpu.ReturnFromInterrupt()
@@ -136,8 +144,9 @@ func TestReturnFromInterrupt_RestoresIRQFlag(t *testing.T) {
 }
 
 func TestReturnFromInterrupt_RestoresDecimalFlag(t *testing.T) {
-	mem := memory.NewMemory()
-	cpu := internal.NewCpu(mem)
+	b := bus.NewBus()
+	mem := memory.NewMemory(b)
+	cpu := internal.NewCpu(mem, b)
 
 	pushInterruptState(cpu, 0b00001000, 0x00, 0x00)
 	cpu.ReturnFromInterrupt()
@@ -148,8 +157,9 @@ func TestReturnFromInterrupt_RestoresDecimalFlag(t *testing.T) {
 }
 
 func TestReturnFromInterrupt_RestoresOverflowFlag(t *testing.T) {
-	mem := memory.NewMemory()
-	cpu := internal.NewCpu(mem)
+	b := bus.NewBus()
+	mem := memory.NewMemory(b)
+	cpu := internal.NewCpu(mem, b)
 
 	pushInterruptState(cpu, 0b01000000, 0x00, 0x00)
 	cpu.ReturnFromInterrupt()
@@ -160,8 +170,9 @@ func TestReturnFromInterrupt_RestoresOverflowFlag(t *testing.T) {
 }
 
 func TestReturnFromInterrupt_RestoresNegativeFlag(t *testing.T) {
-	mem := memory.NewMemory()
-	cpu := internal.NewCpu(mem)
+	b := bus.NewBus()
+	mem := memory.NewMemory(b)
+	cpu := internal.NewCpu(mem, b)
 
 	pushInterruptState(cpu, 0b10000000, 0x00, 0x00)
 	cpu.ReturnFromInterrupt()
@@ -172,8 +183,9 @@ func TestReturnFromInterrupt_RestoresNegativeFlag(t *testing.T) {
 }
 
 func TestReturnFromInterrupt_Bits4And5InFlagsAreIgnored(t *testing.T) {
-	mem := memory.NewMemory()
-	cpu := internal.NewCpu(mem)
+	b := bus.NewBus()
+	mem := memory.NewMemory(b)
+	cpu := internal.NewCpu(mem, b)
 
 	pushInterruptState(cpu, 0b00110000, 0x00, 0x00)
 	cpu.ReturnFromInterrupt()
@@ -185,8 +197,9 @@ func TestReturnFromInterrupt_Bits4And5InFlagsAreIgnored(t *testing.T) {
 }
 
 func TestReturnFromInterrupt_RestoresAllStateAtOnce(t *testing.T) {
-	mem := memory.NewMemory()
-	cpu := internal.NewCpu(mem)
+	b := bus.NewBus()
+	mem := memory.NewMemory(b)
+	cpu := internal.NewCpu(mem, b)
 
 	// carry(0) + IRQ(2) + overflow(6) + negative(7) set; address 0xBEEF
 	flags := uint8(0b11000101)

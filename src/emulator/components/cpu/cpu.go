@@ -16,11 +16,13 @@ type cpu struct {
 	carry, zero, overflow, negative, irq, decimal, bFlag bool
 	stackPointer                                         uint8
 	memory                                               application.Memory
+	bus                                                  application.Bus
 }
 
-func NewCpu(memory application.Memory) application.CPU {
+func NewCpu(memory application.Memory, bus application.Bus) application.CPU {
 	c := &cpu{
 		memory: memory,
+		bus:    bus,
 	}
 	c.Reset()
 	return c
