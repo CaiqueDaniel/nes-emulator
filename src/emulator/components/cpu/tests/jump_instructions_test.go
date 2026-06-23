@@ -35,8 +35,9 @@ func TestJumpProgramCounterByIndirectValue(t *testing.T) {
 }
 
 func TestJumpProgramCounterToSubRoutine(t *testing.T) {
-	mem := memory.NewMemory(bus.NewBus())
-	cpu := internal.NewCpuWithProgramCounter(mem, 0x1234)
+	b := bus.NewBus()
+	mem := memory.NewMemory(b)
+	cpu := internal.NewCpuWithProgramCounter(mem, 0x1234, b)
 
 	cpu.JumpProgramCounterToSubRoutine(0x5678)
 
@@ -54,8 +55,9 @@ func TestJumpProgramCounterToSubRoutine(t *testing.T) {
 }
 
 func TestReturnFromSubRoutine(t *testing.T) {
-	mem := memory.NewMemory(bus.NewBus())
-	cpu := internal.NewCpuWithProgramCounter(mem, 0x1234)
+	b := bus.NewBus()
+	mem := memory.NewMemory(b)
+	cpu := internal.NewCpuWithProgramCounter(mem, 0x1234, b)
 
 	cpu.JumpProgramCounterToSubRoutine(0x5678)
 	cpu.ReturnFromSubRoutine()

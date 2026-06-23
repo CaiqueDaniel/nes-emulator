@@ -121,18 +121,22 @@ func TestNoOpInstruction(t *testing.T) {
 }
 
 func TestBreakInstruction(t *testing.T) {
-	b := bus.NewBus()
+	b := bus.NewBusWithInternalType()
 	mem := memory.NewMemory(b)
 	mem.Write(0xFFFE, 0x12)
-	cpu := internal.NewCpuWithProgramCounter(mem, 0x1234)
+	cpu := internal.NewCpuWithProgramCounter(mem, 0x1234, b)
 
 	// Default irq should be false
 	if cpu.GetIRQFlag() {
 		t.Error("Expected IRQ flag to be false initially")
 	}
 
-	// Call Break
+	b.ResetTickCount()
 	cpu.Break()
+
+	if b.GetTickCount() != 6 {
+		t.Errorf("Expected total cycles to be 6 from instruction, got %d", b.GetTickCount())
+	}
 
 	if !cpu.GetIRQFlag() {
 		t.Error("Expected IRQ flag to be true after Break")

@@ -29,11 +29,12 @@ func NewCpu(memory application.Memory, bus application.Bus) application.CPU {
 	return c
 }
 
-func NewCpuWithProgramCounter(memory application.Memory, programCounter uint16) application.CPU {
+func NewCpuWithProgramCounter(memory application.Memory, programCounter uint16, bus application.Bus) application.CPU {
 	c := &cpu{
 		memory:         memory,
 		programCounter: programCounter,
 		stackPointer:   0xFF,
+		bus:            bus,
 	}
 	return c
 }
@@ -144,4 +145,3 @@ func (c *cpu) GetStackPointer() uint8 {
 //Branch	BCC	BCS	BEQ	BNE	BPL	BMI	BVC	BVS
 //Jump	JMP	JSR	RTS	BRK	RTI
 //Stack	PHA	PLA	PHP	PLP	TXS	TSX
-//Flags	CLC	SEC	CLI	SEI	CLD	SED	CLV

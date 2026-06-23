@@ -34,3 +34,7 @@ func (b *bus) Tick(cycles int) {
 func (b *bus) GetTickCount() uint {
 	return b.tickCount
 }
+
+func (b *bus) ResetTickCount() {
+	b.tickCount = 0
+}
