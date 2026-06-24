@@ -2,6 +2,7 @@ package tests
 
 import (
 	"nes-emu/src/emulator/components/bus"
+	"nes-emu/src/emulator/components/cpu"
 	internal "nes-emu/src/emulator/components/cpu"
 	"nes-emu/src/emulator/components/memory"
 	"testing"
@@ -207,5 +208,58 @@ func TestPullValueFromStackIncrementsStackPointer(t *testing.T) {
 
 	if memory.Read(0x1FD) != 0x0 {
 		t.Errorf("Expected value 0x0 to be pulled from stack, got %d", memory.Read(0x1FD))
+	}
+}
+
+func TestRunProgram(t *testing.T) {
+	bus := bus.NewBus()
+	memory := memory.NewMemory(bus)
+	sut := cpu.NewCpuWithStopAt(memory, bus, 0xC002)
+
+	memory.Write(0xC000, 0xA9) //LDA #
+	memory.Write(0xC001, 34)   //34
+
+	//Pointer to start on 0xC000
+	memory.Write(0xFFFC, 0x00)
+	memory.Write(0xFFFC, 0xC0)
+
+	sut.RunProgram()
+
+	acc := sut.GetDebugData()["acc"]
+	pc := sut.GetProgramCounter()
+
+	if acc != 34 {
+		t.Error("Accumulator should have value")
+		return
+	}
+
+	if pc != 0xC002 {
+		t.Error("Program Counter should have value")
+		return
+	}
+}
+
+func TestRunProgramWithoutCartidge(t *testing.T) {
+	bus := bus.NewBus()
+	memory := memory.NewMemory(bus)
+	sut := cpu.NewCpuWithStopAt(memory, bus, 0)
+
+	memory.Write(0xC000, 0xA9) //LDA #
+	memory.Write(0xC001, 34)   //34
+	memory.Write(0xFFFC, 0)    //Start
+
+	sut.RunProgram()
+
+	acc := sut.GetDebugData()["acc"]
+	pc := sut.GetProgramCounter()
+
+	if acc != 0 {
+		t.Error("Accumulator should not have value")
+		return
+	}
+
+	if pc != 0 {
+		t.Error("Program Counter should not have value")
+		return
 	}
 }

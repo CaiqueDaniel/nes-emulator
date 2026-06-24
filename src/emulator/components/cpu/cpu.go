@@ -9,6 +9,7 @@ const REGISTER_Y = "Y"
 const ACCUMULATOR = "ACC"
 const STACK_START = 0x01FF
 const STACK_END = 0x0100
+const START_POINTER = 0xFFFC
 
 type cpu struct {
 	programCounter                                       uint16
@@ -18,13 +19,28 @@ type cpu struct {
 	memory                                               application.Memory
 	bus                                                  application.Bus
 	totalCycles                                          uint64
+	stopPcAt                                             int
+	instructionSet                                       instructionSet
 }
 
 func NewCpu(memory application.Memory, bus application.Bus) application.CPU {
 	c := &cpu{
-		memory: memory,
-		bus:    bus,
+		memory:   memory,
+		bus:      bus,
+		stopPcAt: -1,
 	}
+	c.instructionSet = c.initInstructions()
+	c.Reset()
+	return c
+}
+
+func NewCpuWithStopAt(memory application.Memory, bus application.Bus, stopPcAt int) application.CPU {
+	c := &cpu{
+		memory:   memory,
+		bus:      bus,
+		stopPcAt: stopPcAt,
+	}
+	c.instructionSet = c.initInstructions()
 	c.Reset()
 	return c
 }
@@ -35,8 +51,28 @@ func NewCpuWithProgramCounter(memory application.Memory, programCounter uint16, 
 		programCounter: programCounter,
 		stackPointer:   0xFF,
 		bus:            bus,
+		stopPcAt:       -1,
 	}
+	c.instructionSet = c.initInstructions()
 	return c
+}
+
+func (c *cpu) RunProgram() {
+	startAddressLow := c.memory.Read(START_POINTER)
+	startAddressHigh := c.memory.Read(START_POINTER + 1)
+	startAddress := (uint16(startAddressHigh) << 8) + uint16(startAddressLow)
+	c.programCounter = startAddress
+
+	for {
+		opCode := c.memory.Read(c.programCounter)
+		c.programCounter++
+
+		c.interpretInstruction(opCode)
+
+		if c.stopPcAt != -1 && c.programCounter == uint16(c.stopPcAt) {
+			break
+		}
+	}
 }
 
 func (c *cpu) Reset() {
@@ -143,5 +179,5 @@ func (c *cpu) GetStackPointer() uint8 {
 //Bitwise	AND	ORA	EOR	BIT
 //Compare	CMP	CPX	CPY
 //Branch	BCC	BCS	BEQ	BNE	BPL	BMI	BVC	BVS
-//Jump	JMP	JSR	RTS	BRK	RTI
+//Jump	JMP	JSR	RTS	RTI
 //Stack	PHA	PLA	PHP	PLP	TXS	TSX

@@ -1,6 +1,7 @@
 package application
 
 type CPU interface {
+	RunProgram()
 	AddWithCarry(value uint8)
 	And(value uint8)
 	ArithmeticShiftLeft()
