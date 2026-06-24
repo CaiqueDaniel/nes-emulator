@@ -69,7 +69,7 @@ func (c *cpu) RunProgram() {
 
 		c.interpretInstruction(opCode)
 
-		if c.stopPcAt != -1 && c.programCounter == uint16(c.stopPcAt) {
+		if c.stopPcAt != -1 && c.programCounter >= uint16(c.stopPcAt) {
 			break
 		}
 	}

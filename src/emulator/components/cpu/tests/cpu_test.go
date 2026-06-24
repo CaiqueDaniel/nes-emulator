@@ -212,7 +212,7 @@ func TestPullValueFromStackIncrementsStackPointer(t *testing.T) {
 }
 
 func TestRunProgram(t *testing.T) {
-	bus := bus.NewBus()
+	bus := bus.NewBusWithInternalType()
 	memory := memory.NewMemory(bus)
 	sut := cpu.NewCpuWithStopAt(memory, bus, 0xC002)
 
@@ -221,12 +221,14 @@ func TestRunProgram(t *testing.T) {
 
 	//Pointer to start on 0xC000
 	memory.Write(0xFFFC, 0x00)
-	memory.Write(0xFFFC, 0xC0)
+	memory.Write(0xFFFD, 0xC0)
 
+	bus.ResetTickCount()
 	sut.RunProgram()
 
 	acc := sut.GetDebugData()["acc"]
 	pc := sut.GetProgramCounter()
+	clockTicks := bus.GetTickCount()
 
 	if acc != 34 {
 		t.Error("Accumulator should have value")
@@ -235,6 +237,11 @@ func TestRunProgram(t *testing.T) {
 
 	if pc != 0xC002 {
 		t.Error("Program Counter should have value")
+		return
+	}
+
+	if clockTicks != 4 {
+		t.Errorf("Bus should have 4 ticks. It got: %d", clockTicks)
 		return
 	}
 }
@@ -254,12 +261,12 @@ func TestRunProgramWithoutCartidge(t *testing.T) {
 	pc := sut.GetProgramCounter()
 
 	if acc != 0 {
-		t.Error("Accumulator should not have value")
+		t.Errorf("Accumulator should not have value. Got %d", acc)
 		return
 	}
 
-	if pc != 0 {
-		t.Error("Program Counter should not have value")
+	if pc != 1 {
+		t.Error("Program Counter should not be greater than 1")
 		return
 	}
 }
