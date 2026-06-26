@@ -1,6 +1,8 @@
 package cpu
 
-import "slices"
+import (
+	"slices"
+)
 
 type instructionSet map[uint8]*instruction
 
@@ -9,12 +11,67 @@ type instruction struct {
 	ArgsBytes int
 }
 
+//LDA	STA	LDX	STX	LDY	STY
+//Transfer	TAX	TXA	TAY	TYA
+//Arithmetic	ADC	SBC	INC	DEC	INX	DEX	INY	DEY
+//Shift	ASL	LSR	ROL	ROR
+//Bitwise	AND	ORA	EOR	BIT
+//Compare	CMP	CPX	CPY
+//Branch	BCC	BCS	BEQ	BNE	BPL	BMI	BVC	BVS
+//Jump	JMP	JSR	RTS	BRK	RTI
+//Stack	PHA	PLA	PHP	PLP	TXS	TSX
+//Flags	CLC	SEC	CLI	SEI	CLD	SED	CLV
+
 func (c *cpu) initInstructions() map[uint8]*instruction {
 	return map[uint8]*instruction{
-		0xA9: &instruction{
-			Method:    func(u []uint8) { c.LoadValueIntoRegister(u[0], ACCUMULATOR) },
+		0x00: &instruction{
+			Method:    func(u []uint8) { c.Break() },
+			ArgsBytes: 0,
+		},
+
+		0xEA: &instruction{
+			Method:    func(u []uint8) { c.NoOp() },
 			ArgsBytes: 1,
 		},
+	}
+}
+
+func (c *cpu) appendLDAInstructions() {
+	c.instructionSet[0xA9] = &instruction{
+		Method:    func(u []uint8) { c.LoadValueIntoRegister(u[0], ACCUMULATOR) },
+		ArgsBytes: 1,
+	}
+	c.instructionSet[0xA5] = &instruction{
+		Method:    func(u []uint8) { c.LoadValueIntoRegister(c.GetValueByZeroPageMode(u[0]), ACCUMULATOR) },
+		ArgsBytes: 1,
+	}
+	c.instructionSet[0xB5] = &instruction{
+		Method:    func(u []uint8) { c.LoadValueIntoRegister(c.GetValueByZeroPageIndexedMode(u[0], c.x), ACCUMULATOR) },
+		ArgsBytes: 1,
+	}
+	c.instructionSet[0xAD] = &instruction{
+		Method:    func(u []uint8) { c.LoadValueIntoRegister(c.GetValueByAbsoluteMode(parseAddress(u)), ACCUMULATOR) },
+		ArgsBytes: 2,
+	}
+	c.instructionSet[0xBD] = &instruction{
+		Method: func(u []uint8) {
+			c.LoadValueIntoRegister(c.GetValueByIndexedAbsoluteMode(parseAddress(u), c.x), ACCUMULATOR)
+		},
+		ArgsBytes: 2,
+	}
+	c.instructionSet[0xB9] = &instruction{
+		Method: func(u []uint8) {
+			c.LoadValueIntoRegister(c.GetValueByIndexedAbsoluteMode(parseAddress(u), c.y), ACCUMULATOR)
+		},
+		ArgsBytes: 2,
+	}
+	c.instructionSet[0xA1] = &instruction{
+		Method:    func(u []uint8) { c.LoadValueIntoRegister(c.GetValueByIndexedIndirectXMode(u[0]), ACCUMULATOR) },
+		ArgsBytes: 1,
+	}
+	c.instructionSet[0xB1] = &instruction{
+		Method:    func(u []uint8) { c.LoadValueIntoRegister(c.GetValueByIndirectIndexedYMode(u[0]), ACCUMULATOR) },
+		ArgsBytes: 1,
 	}
 }
 
@@ -34,4 +91,12 @@ func (c *cpu) interpretInstruction(opCode uint8) {
 
 	slices.Reverse(bytes)
 	instruction.Method(bytes)
+}
+
+func parseAddress(bytes []uint8) uint16 {
+	if len(bytes) != 2 {
+		return 0
+	}
+
+	return (uint16(bytes[0]) << 8) + uint16(bytes[1])
 }

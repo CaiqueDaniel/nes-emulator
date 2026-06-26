@@ -30,9 +30,7 @@ func (c *cpu) SetOverflowFlag() {
 	c.tick(1)
 }
 
-func (c *cpu) NoOp() {
-	c.tick(1)
-}
+func (c *cpu) NoOp() {}
 
 func (c *cpu) Break() {
 	highAddress := uint8(c.programCounter >> 8)
