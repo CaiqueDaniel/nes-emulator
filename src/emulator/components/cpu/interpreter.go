@@ -11,7 +11,6 @@ type instruction struct {
 	ArgsBytes int
 }
 
-//STA	STX	STY
 //Transfer	TAX	TXA	TAY	TYA
 //Arithmetic	ADC	SBC	INC	DEC	INX	DEX	INY	DEY
 //Shift	ASL	LSR	ROL	ROR
@@ -29,6 +28,8 @@ func (c *cpu) initInstructions() instructionSet {
 	c.appendLDXInstructions(&instructionSet)
 	c.appendLDYInstructions(&instructionSet)
 	c.appendSTAInstructions(&instructionSet)
+	c.appendSTXInstructions(&instructionSet)
+	c.appendSTYInstructions(&instructionSet)
 
 	// c.instructionSet[0xEA] = &instruction{
 	// 	Method:    func(u []uint8) { c.NoOp() },
@@ -177,6 +178,44 @@ func (c *cpu) appendSTAInstructions(instructionSet *instructionSet) {
 		ArgsBytes: 1,
 	}
 
+}
+
+func (c *cpu) appendSTXInstructions(instructionSet *instructionSet) {
+	instructionSet[0x86] = &instruction{
+		Method:    func(u []uint8) { c.StoreRegisterIntoAbsoluteMemory(uint16(u[0]), REGISTER_X) },
+		ArgsBytes: 1,
+	}
+
+	instructionSet[0x96] = &instruction{
+		Method: func(u []uint8) {
+			c.StoreRegisterIntoAbsoluteMemory(c.GetAddressByIndexedAbsoluteMode(uint16(u[0]), c.y), REGISTER_X)
+		},
+		ArgsBytes: 1,
+	}
+
+	instructionSet[0x8E] = &instruction{
+		Method:    func(u []uint8) { c.StoreRegisterIntoAbsoluteMemory(parseAddress(u), REGISTER_X) },
+		ArgsBytes: 2,
+	}
+}
+
+func (c *cpu) appendSTYInstructions(instructionSet *instructionSet) {
+	instructionSet[0x84] = &instruction{
+		Method:    func(u []uint8) { c.StoreRegisterIntoAbsoluteMemory(uint16(u[0]), REGISTER_Y) },
+		ArgsBytes: 1,
+	}
+
+	instructionSet[0x94] = &instruction{
+		Method: func(u []uint8) {
+			c.StoreRegisterIntoAbsoluteMemory(c.GetAddressByIndexedAbsoluteMode(uint16(u[0]), c.x), REGISTER_Y)
+		},
+		ArgsBytes: 1,
+	}
+
+	instructionSet[0x8C] = &instruction{
+		Method:    func(u []uint8) { c.StoreRegisterIntoAbsoluteMemory(parseAddress(u), REGISTER_Y) },
+		ArgsBytes: 2,
+	}
 }
 
 func (c *cpu) interpretInstruction(opCode uint8) {
