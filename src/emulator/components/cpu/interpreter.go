@@ -11,7 +11,6 @@ type instruction struct {
 	ArgsBytes int
 }
 
-//Arithmetic DEC	INX	DEX	INY	DEY
 //Shift	ASL	LSR	ROL	ROR
 //Bitwise	AND	ORA	EOR	BIT
 //Compare	CMP	CPX	CPY
@@ -43,6 +42,7 @@ func (c *cpu) initInstructions() instructionSet {
 	c.appendADCInstructions(&instructionSet)
 	c.appendSBCInstructions(&instructionSet)
 	c.appendIncrementInstructions(&instructionSet)
+	c.appendDecrementInstructions(&instructionSet)
 
 	return instructionSet
 }
@@ -368,6 +368,38 @@ func (c *cpu) appendIncrementInstructions(instructionSet *instructionSet) {
 
 	instructionSet[0xC8] = &instruction{
 		Method:    func(u []uint8) { c.IncrementRegister(REGISTER_Y) },
+		ArgsBytes: 2,
+	}
+}
+
+func (c *cpu) appendDecrementInstructions(instructionSet *instructionSet) {
+	instructionSet[0xC6] = &instruction{
+		Method:    func(u []uint8) { c.DecrementMemory(uint16(u[0])) },
+		ArgsBytes: 1,
+	}
+
+	instructionSet[0xD6] = &instruction{
+		Method:    func(u []uint8) { c.DecrementMemory(c.GetAddressByIndexedAbsoluteMode(uint16(u[0]), c.x)) },
+		ArgsBytes: 1,
+	}
+
+	instructionSet[0xCE] = &instruction{
+		Method:    func(u []uint8) { c.DecrementMemory(parseAddress(u)) },
+		ArgsBytes: 2,
+	}
+
+	instructionSet[0xDE] = &instruction{
+		Method:    func(u []uint8) { c.DecrementMemory(c.GetAddressByIndexedAbsoluteMode(parseAddress(u), c.x)) },
+		ArgsBytes: 2,
+	}
+
+	instructionSet[0xCA] = &instruction{
+		Method:    func(u []uint8) { c.DecrementRegister(REGISTER_X) },
+		ArgsBytes: 2,
+	}
+
+	instructionSet[0x88] = &instruction{
+		Method:    func(u []uint8) { c.DecrementRegister(REGISTER_Y) },
 		ArgsBytes: 2,
 	}
 }
