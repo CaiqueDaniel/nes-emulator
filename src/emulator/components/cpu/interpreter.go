@@ -11,7 +11,7 @@ type instruction struct {
 	ArgsBytes int
 }
 
-//LDA	STA	LDX	STX	LDY	STY
+//STA	LDX	STX	LDY	STY
 //Transfer	TAX	TXA	TAY	TYA
 //Arithmetic	ADC	SBC	INC	DEC	INX	DEX	INY	DEY
 //Shift	ASL	LSR	ROL	ROR
@@ -72,6 +72,56 @@ func (c *cpu) appendLDAInstructions() {
 	c.instructionSet[0xB1] = &instruction{
 		Method:    func(u []uint8) { c.LoadValueIntoRegister(c.GetValueByIndirectIndexedYMode(u[0]), ACCUMULATOR) },
 		ArgsBytes: 1,
+	}
+}
+
+func (c *cpu) appendLDXInstructions() {
+	c.instructionSet[0xA2] = &instruction{
+		Method:    func(u []uint8) { c.LoadValueIntoRegister(u[0], REGISTER_X) },
+		ArgsBytes: 1,
+	}
+	c.instructionSet[0xA6] = &instruction{
+		Method:    func(u []uint8) { c.LoadValueIntoRegister(c.GetValueByZeroPageMode(u[0]), REGISTER_X) },
+		ArgsBytes: 1,
+	}
+	c.instructionSet[0xB6] = &instruction{
+		Method:    func(u []uint8) { c.LoadValueIntoRegister(c.GetValueByZeroPageIndexedMode(u[0], c.x), REGISTER_X) },
+		ArgsBytes: 1,
+	}
+	c.instructionSet[0xAE] = &instruction{
+		Method:    func(u []uint8) { c.LoadValueIntoRegister(c.GetValueByAbsoluteMode(parseAddress(u)), REGISTER_X) },
+		ArgsBytes: 2,
+	}
+	c.instructionSet[0xB3] = &instruction{
+		Method: func(u []uint8) {
+			c.LoadValueIntoRegister(c.GetValueByIndexedAbsoluteMode(parseAddress(u), c.y), REGISTER_X)
+		},
+		ArgsBytes: 2,
+	}
+}
+
+func (c *cpu) appendLDYInstructions() {
+	c.instructionSet[0xA0] = &instruction{
+		Method:    func(u []uint8) { c.LoadValueIntoRegister(u[0], REGISTER_X) },
+		ArgsBytes: 1,
+	}
+	c.instructionSet[0xA4] = &instruction{
+		Method:    func(u []uint8) { c.LoadValueIntoRegister(c.GetValueByZeroPageMode(u[0]), REGISTER_X) },
+		ArgsBytes: 1,
+	}
+	c.instructionSet[0xB4] = &instruction{
+		Method:    func(u []uint8) { c.LoadValueIntoRegister(c.GetValueByZeroPageIndexedMode(u[0], c.x), REGISTER_X) },
+		ArgsBytes: 1,
+	}
+	c.instructionSet[0xAC] = &instruction{
+		Method:    func(u []uint8) { c.LoadValueIntoRegister(c.GetValueByAbsoluteMode(parseAddress(u)), REGISTER_X) },
+		ArgsBytes: 2,
+	}
+	c.instructionSet[0xBC] = &instruction{
+		Method: func(u []uint8) {
+			c.LoadValueIntoRegister(c.GetValueByIndexedAbsoluteMode(parseAddress(u), c.y), REGISTER_X)
+		},
+		ArgsBytes: 2,
 	}
 }
 
