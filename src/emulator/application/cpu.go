@@ -39,6 +39,8 @@ type CPU interface {
 	GetValueByIndirectIndexedYMode(initialAddress uint8) uint8
 	GetValueByZeroPageIndexedMode(address uint8, index uint8) uint8
 	GetValueByZeroPageMode(address uint8) uint8
+	GetAddressByIndexedIndirectXMode(initialAddress uint16) uint16
+	GetAddressByIndirectIndexedYMode(initialAddress uint8) uint16
 	GetZeroFlag() bool
 	IncrementMemory(address uint16)
 	IncrementRegister(register string)

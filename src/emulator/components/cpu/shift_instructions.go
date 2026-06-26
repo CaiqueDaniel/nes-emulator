@@ -104,7 +104,7 @@ func (c *cpu) updateFlagsOnShift(value uint8) {
 
 func (c *cpu) getValueByAddress(address uint16, xIndexedMode bool) (uint8, uint16) {
 	if xIndexedMode {
-		address = c.getAddressByIndexedAbsoluteMode(address, c.x)
+		address = c.GetAddressByIndexedAbsoluteMode(address, c.x)
 	}
 
 	return c.GetValueByAbsoluteMode(address), address

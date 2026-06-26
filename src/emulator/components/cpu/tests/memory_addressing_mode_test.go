@@ -113,3 +113,35 @@ func TestGetValueByIndirectIndexedYMode(t *testing.T) {
 		t.Errorf("Expected %d, got %d", 0x80, value)
 	}
 }
+
+func TestGetAddressByIndexedIndirectXMode(t *testing.T) {
+	b := bus.NewBus()
+	memory := memory.NewMemory(b)
+	cpu := internal.NewCpu(memory, b)
+
+	memory.Write(0x01, 0xFF)
+	memory.Write(0x02, 0xFA)
+	cpu.LoadValueIntoRegister(0x1, internal.REGISTER_X)
+
+	address := cpu.GetAddressByIndexedIndirectXMode(0x0)
+
+	if address != 0xFAFF {
+		t.Errorf("Expected %d, got %d", 0xFAFF, address)
+	}
+}
+
+func TestGetAddressByIndirectIndexedYMode(t *testing.T) {
+	b := bus.NewBus()
+	memory := memory.NewMemory(b)
+	cpu := internal.NewCpu(memory, b)
+
+	memory.Write(0x01, 0xFE)
+	memory.Write(0x02, 0xFA)
+	cpu.LoadValueIntoRegister(0x1, internal.REGISTER_Y)
+
+	address := cpu.GetAddressByIndirectIndexedYMode(0x1)
+
+	if address != 0xFAFF {
+		t.Errorf("Expected %d, got %d", 0xFAFF, address)
+	}
+}

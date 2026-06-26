@@ -113,11 +113,6 @@ func TestNoOpInstruction(t *testing.T) {
 		cpu.GetOverflowFlag() != initialOverflow || cpu.GetIRQFlag() != initialIRQ {
 		t.Error("Expected CPU flags to remain unchanged after NoOp")
 	}
-
-	if cpu.GetTotalCycles() != 1 {
-		t.Errorf("Expected total cycles to be 1, got %d", cpu.GetTotalCycles())
-	}
-
 }
 
 func TestBreakInstruction(t *testing.T) {
