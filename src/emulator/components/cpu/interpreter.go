@@ -4,14 +4,14 @@ import (
 	"slices"
 )
 
-type instructionSet map[uint8]*instruction
+type instructionSet [256]*instruction
 
 type instruction struct {
 	Method    func([]uint8)
 	ArgsBytes int
 }
 
-//STA	LDX	STX	LDY	STY
+//STA	STX	STY
 //Transfer	TAX	TXA	TAY	TYA
 //Arithmetic	ADC	SBC	INC	DEC	INX	DEX	INY	DEY
 //Shift	ASL	LSR	ROL	ROR
@@ -22,77 +22,83 @@ type instruction struct {
 //Stack	PHA	PLA	PHP	PLP	TXS	TSX
 //Flags	CLC	SEC	CLI	SEI	CLD	SED	CLV
 
-func (c *cpu) initInstructions() map[uint8]*instruction {
-	return map[uint8]*instruction{
-		0x00: &instruction{
-			Method:    func(u []uint8) { c.Break() },
-			ArgsBytes: 0,
-		},
+func (c *cpu) initInstructions() instructionSet {
+	var instructionSet instructionSet
 
-		0xEA: &instruction{
-			Method:    func(u []uint8) { c.NoOp() },
-			ArgsBytes: 1,
-		},
-	}
+	c.appendLDAInstructions(&instructionSet)
+	c.appendLDXInstructions(&instructionSet)
+	c.appendLDYInstructions(&instructionSet)
+	c.appendSTAInstructions(&instructionSet)
+
+	// c.instructionSet[0xEA] = &instruction{
+	// 	Method:    func(u []uint8) { c.NoOp() },
+	// 	ArgsBytes: 1,
+	// }
+	// 0x00: &instruction{
+	// 	Method:    func(u []uint8) { c.Break() },
+	// 	ArgsBytes: 0,
+	// },
+
+	return instructionSet
 }
 
-func (c *cpu) appendLDAInstructions() {
-	c.instructionSet[0xA9] = &instruction{
+func (c *cpu) appendLDAInstructions(instructionSet *instructionSet) {
+	instructionSet[0xA9] = &instruction{
 		Method:    func(u []uint8) { c.LoadValueIntoRegister(u[0], ACCUMULATOR) },
 		ArgsBytes: 1,
 	}
-	c.instructionSet[0xA5] = &instruction{
+	instructionSet[0xA5] = &instruction{
 		Method:    func(u []uint8) { c.LoadValueIntoRegister(c.GetValueByZeroPageMode(u[0]), ACCUMULATOR) },
 		ArgsBytes: 1,
 	}
-	c.instructionSet[0xB5] = &instruction{
+	instructionSet[0xB5] = &instruction{
 		Method:    func(u []uint8) { c.LoadValueIntoRegister(c.GetValueByZeroPageIndexedMode(u[0], c.x), ACCUMULATOR) },
 		ArgsBytes: 1,
 	}
-	c.instructionSet[0xAD] = &instruction{
+	instructionSet[0xAD] = &instruction{
 		Method:    func(u []uint8) { c.LoadValueIntoRegister(c.GetValueByAbsoluteMode(parseAddress(u)), ACCUMULATOR) },
 		ArgsBytes: 2,
 	}
-	c.instructionSet[0xBD] = &instruction{
+	instructionSet[0xBD] = &instruction{
 		Method: func(u []uint8) {
 			c.LoadValueIntoRegister(c.GetValueByIndexedAbsoluteMode(parseAddress(u), c.x), ACCUMULATOR)
 		},
 		ArgsBytes: 2,
 	}
-	c.instructionSet[0xB9] = &instruction{
+	instructionSet[0xB9] = &instruction{
 		Method: func(u []uint8) {
 			c.LoadValueIntoRegister(c.GetValueByIndexedAbsoluteMode(parseAddress(u), c.y), ACCUMULATOR)
 		},
 		ArgsBytes: 2,
 	}
-	c.instructionSet[0xA1] = &instruction{
+	instructionSet[0xA1] = &instruction{
 		Method:    func(u []uint8) { c.LoadValueIntoRegister(c.GetValueByIndexedIndirectXMode(u[0]), ACCUMULATOR) },
 		ArgsBytes: 1,
 	}
-	c.instructionSet[0xB1] = &instruction{
+	instructionSet[0xB1] = &instruction{
 		Method:    func(u []uint8) { c.LoadValueIntoRegister(c.GetValueByIndirectIndexedYMode(u[0]), ACCUMULATOR) },
 		ArgsBytes: 1,
 	}
 }
 
-func (c *cpu) appendLDXInstructions() {
-	c.instructionSet[0xA2] = &instruction{
+func (c *cpu) appendLDXInstructions(instructionSet *instructionSet) {
+	instructionSet[0xA2] = &instruction{
 		Method:    func(u []uint8) { c.LoadValueIntoRegister(u[0], REGISTER_X) },
 		ArgsBytes: 1,
 	}
-	c.instructionSet[0xA6] = &instruction{
+	instructionSet[0xA6] = &instruction{
 		Method:    func(u []uint8) { c.LoadValueIntoRegister(c.GetValueByZeroPageMode(u[0]), REGISTER_X) },
 		ArgsBytes: 1,
 	}
-	c.instructionSet[0xB6] = &instruction{
+	instructionSet[0xB6] = &instruction{
 		Method:    func(u []uint8) { c.LoadValueIntoRegister(c.GetValueByZeroPageIndexedMode(u[0], c.x), REGISTER_X) },
 		ArgsBytes: 1,
 	}
-	c.instructionSet[0xAE] = &instruction{
+	instructionSet[0xAE] = &instruction{
 		Method:    func(u []uint8) { c.LoadValueIntoRegister(c.GetValueByAbsoluteMode(parseAddress(u)), REGISTER_X) },
 		ArgsBytes: 2,
 	}
-	c.instructionSet[0xB3] = &instruction{
+	instructionSet[0xB3] = &instruction{
 		Method: func(u []uint8) {
 			c.LoadValueIntoRegister(c.GetValueByIndexedAbsoluteMode(parseAddress(u), c.y), REGISTER_X)
 		},
@@ -100,29 +106,77 @@ func (c *cpu) appendLDXInstructions() {
 	}
 }
 
-func (c *cpu) appendLDYInstructions() {
-	c.instructionSet[0xA0] = &instruction{
+func (c *cpu) appendLDYInstructions(instructionSet *instructionSet) {
+	instructionSet[0xA0] = &instruction{
 		Method:    func(u []uint8) { c.LoadValueIntoRegister(u[0], REGISTER_X) },
 		ArgsBytes: 1,
 	}
-	c.instructionSet[0xA4] = &instruction{
+	instructionSet[0xA4] = &instruction{
 		Method:    func(u []uint8) { c.LoadValueIntoRegister(c.GetValueByZeroPageMode(u[0]), REGISTER_X) },
 		ArgsBytes: 1,
 	}
-	c.instructionSet[0xB4] = &instruction{
+	instructionSet[0xB4] = &instruction{
 		Method:    func(u []uint8) { c.LoadValueIntoRegister(c.GetValueByZeroPageIndexedMode(u[0], c.x), REGISTER_X) },
 		ArgsBytes: 1,
 	}
-	c.instructionSet[0xAC] = &instruction{
+	instructionSet[0xAC] = &instruction{
 		Method:    func(u []uint8) { c.LoadValueIntoRegister(c.GetValueByAbsoluteMode(parseAddress(u)), REGISTER_X) },
 		ArgsBytes: 2,
 	}
-	c.instructionSet[0xBC] = &instruction{
+	instructionSet[0xBC] = &instruction{
 		Method: func(u []uint8) {
 			c.LoadValueIntoRegister(c.GetValueByIndexedAbsoluteMode(parseAddress(u), c.y), REGISTER_X)
 		},
 		ArgsBytes: 2,
 	}
+}
+
+func (c *cpu) appendSTAInstructions(instructionSet *instructionSet) {
+	c.instructionSet[0x85] = &instruction{
+		Method:    func(u []uint8) { c.StoreRegisterIntoAbsoluteMemory(uint16(u[0]), ACCUMULATOR) },
+		ArgsBytes: 1,
+	}
+
+	c.instructionSet[0x95] = &instruction{
+		Method: func(u []uint8) {
+			c.StoreRegisterIntoAbsoluteMemory(c.GetAddressByIndexedAbsoluteMode(uint16(u[0]), c.x), ACCUMULATOR)
+		},
+		ArgsBytes: 1,
+	}
+
+	c.instructionSet[0x8D] = &instruction{
+		Method:    func(u []uint8) { c.StoreRegisterIntoAbsoluteMemory(parseAddress(u), ACCUMULATOR) },
+		ArgsBytes: 2,
+	}
+
+	c.instructionSet[0x9D] = &instruction{
+		Method: func(u []uint8) {
+			c.StoreRegisterIntoAbsoluteMemory(c.GetAddressByIndexedAbsoluteMode(parseAddress(u), c.x), ACCUMULATOR)
+		},
+		ArgsBytes: 2,
+	}
+
+	c.instructionSet[0x99] = &instruction{
+		Method: func(u []uint8) {
+			c.StoreRegisterIntoAbsoluteMemory(c.GetAddressByIndexedAbsoluteMode(parseAddress(u), c.y), ACCUMULATOR)
+		},
+		ArgsBytes: 2,
+	}
+
+	c.instructionSet[0x81] = &instruction{
+		Method: func(u []uint8) {
+			c.StoreRegisterIntoAbsoluteMemory(c.GetAddressByIndexedIndirectXMode(uint16(u[0])), ACCUMULATOR)
+		},
+		ArgsBytes: 1,
+	}
+
+	c.instructionSet[0x91] = &instruction{
+		Method: func(u []uint8) {
+			c.StoreRegisterIntoAbsoluteMemory(c.GetAddressByIndirectIndexedYMode(u[0]), ACCUMULATOR)
+		},
+		ArgsBytes: 1,
+	}
+
 }
 
 func (c *cpu) interpretInstruction(opCode uint8) {
