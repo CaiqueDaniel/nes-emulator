@@ -11,7 +11,7 @@ type instruction struct {
 	ArgsBytes int
 }
 
-//Arithmetic	SBC	INC	DEC	INX	DEX	INY	DEY
+//Arithmetic	INC	DEC	INX	DEX	INY	DEY
 //Shift	ASL	LSR	ROL	ROR
 //Bitwise	AND	ORA	EOR	BIT
 //Compare	CMP	CPX	CPY
@@ -42,6 +42,7 @@ func (c *cpu) initInstructions() instructionSet {
 	c.appendTransferInstructions(&instructionSet)
 	c.appendADCInstructions(&instructionSet)
 	c.appendSBCInstructions(&instructionSet)
+	c.appendINCInstructions(&instructionSet)
 
 	return instructionSet
 }
@@ -337,6 +338,28 @@ func (c *cpu) appendSBCInstructions(instructionSet *instructionSet) {
 		ArgsBytes: 1,
 	}
 
+}
+
+func (c *cpu) appendINCInstructions(instructionSet *instructionSet) {
+	instructionSet[0xE6] = &instruction{
+		Method:    func(u []uint8) { c.IncrementMemory(uint16(u[0])) },
+		ArgsBytes: 1,
+	}
+
+	instructionSet[0xF6] = &instruction{
+		Method:    func(u []uint8) { c.IncrementMemory(c.GetAddressByIndexedAbsoluteMode(uint16(u[0]), c.x)) },
+		ArgsBytes: 1,
+	}
+
+	instructionSet[0xEE] = &instruction{
+		Method:    func(u []uint8) { c.IncrementMemory(parseAddress(u)) },
+		ArgsBytes: 2,
+	}
+
+	instructionSet[0xFE] = &instruction{
+		Method:    func(u []uint8) { c.IncrementMemory(c.GetAddressByIndexedAbsoluteMode(parseAddress(u), c.x)) },
+		ArgsBytes: 2,
+	}
 }
 
 func (c *cpu) interpretInstruction(opCode uint8) {
