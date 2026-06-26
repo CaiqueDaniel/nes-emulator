@@ -11,7 +11,7 @@ type instruction struct {
 	ArgsBytes int
 }
 
-//Arithmetic	INC	DEC	INX	DEX	INY	DEY
+//Arithmetic DEC	INX	DEX	INY	DEY
 //Shift	ASL	LSR	ROL	ROR
 //Bitwise	AND	ORA	EOR	BIT
 //Compare	CMP	CPX	CPY
@@ -42,7 +42,7 @@ func (c *cpu) initInstructions() instructionSet {
 	c.appendTransferInstructions(&instructionSet)
 	c.appendADCInstructions(&instructionSet)
 	c.appendSBCInstructions(&instructionSet)
-	c.appendINCInstructions(&instructionSet)
+	c.appendIncrementInstructions(&instructionSet)
 
 	return instructionSet
 }
@@ -340,7 +340,7 @@ func (c *cpu) appendSBCInstructions(instructionSet *instructionSet) {
 
 }
 
-func (c *cpu) appendINCInstructions(instructionSet *instructionSet) {
+func (c *cpu) appendIncrementInstructions(instructionSet *instructionSet) {
 	instructionSet[0xE6] = &instruction{
 		Method:    func(u []uint8) { c.IncrementMemory(uint16(u[0])) },
 		ArgsBytes: 1,
@@ -358,6 +358,16 @@ func (c *cpu) appendINCInstructions(instructionSet *instructionSet) {
 
 	instructionSet[0xFE] = &instruction{
 		Method:    func(u []uint8) { c.IncrementMemory(c.GetAddressByIndexedAbsoluteMode(parseAddress(u), c.x)) },
+		ArgsBytes: 2,
+	}
+
+	instructionSet[0xE8] = &instruction{
+		Method:    func(u []uint8) { c.IncrementRegister(REGISTER_X) },
+		ArgsBytes: 2,
+	}
+
+	instructionSet[0xC8] = &instruction{
+		Method:    func(u []uint8) { c.IncrementRegister(REGISTER_Y) },
 		ArgsBytes: 2,
 	}
 }
