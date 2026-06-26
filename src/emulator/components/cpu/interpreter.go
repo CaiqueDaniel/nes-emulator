@@ -40,6 +40,7 @@ func (c *cpu) initInstructions() instructionSet {
 	c.appendSTXInstructions(&instructionSet)
 	c.appendSTYInstructions(&instructionSet)
 	c.appendTransferInstructions(&instructionSet)
+	c.appendADCInstructions(&instructionSet)
 
 	return instructionSet
 }
@@ -249,6 +250,49 @@ func (c *cpu) appendTransferInstructions(instructionSet *instructionSet) {
 		Method:    func(u []uint8) { c.TransferXToStack() },
 		ArgsBytes: 1,
 	}
+}
+
+func (c *cpu) appendADCInstructions(instructionSet *instructionSet) {
+	instructionSet[0x69] = &instruction{
+		Method:    func(u []uint8) { c.AddWithCarry(u[0]) },
+		ArgsBytes: 1,
+	}
+
+	instructionSet[0x65] = &instruction{
+		Method:    func(u []uint8) { c.AddWithCarry(c.GetValueByZeroPageMode(u[0])) },
+		ArgsBytes: 1,
+	}
+
+	instructionSet[0x75] = &instruction{
+		Method:    func(u []uint8) { c.AddWithCarry(c.GetValueByZeroPageIndexedMode(u[0], c.x)) },
+		ArgsBytes: 1,
+	}
+
+	instructionSet[0x6D] = &instruction{
+		Method:    func(u []uint8) { c.AddWithCarry(c.GetValueByAbsoluteMode(parseAddress(u))) },
+		ArgsBytes: 2,
+	}
+
+	instructionSet[0x7D] = &instruction{
+		Method:    func(u []uint8) { c.AddWithCarry(c.GetValueByIndexedAbsoluteMode(parseAddress(u), c.x)) },
+		ArgsBytes: 2,
+	}
+
+	instructionSet[0x79] = &instruction{
+		Method:    func(u []uint8) { c.AddWithCarry(c.GetValueByIndexedAbsoluteMode(parseAddress(u), c.y)) },
+		ArgsBytes: 2,
+	}
+
+	instructionSet[0x61] = &instruction{
+		Method:    func(u []uint8) { c.AddWithCarry(c.GetValueByIndexedIndirectXMode(u[0])) },
+		ArgsBytes: 1,
+	}
+
+	instructionSet[0x71] = &instruction{
+		Method:    func(u []uint8) { c.AddWithCarry(c.GetValueByIndirectIndexedYMode(u[0])) },
+		ArgsBytes: 1,
+	}
+
 }
 
 func (c *cpu) interpretInstruction(opCode uint8) {
