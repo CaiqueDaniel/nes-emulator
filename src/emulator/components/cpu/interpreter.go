@@ -11,7 +11,7 @@ type instruction struct {
 	ArgsBytes int
 }
 
-//Arithmetic	ADC	SBC	INC	DEC	INX	DEX	INY	DEY
+//Arithmetic	SBC	INC	DEC	INX	DEX	INY	DEY
 //Shift	ASL	LSR	ROL	ROR
 //Bitwise	AND	ORA	EOR	BIT
 //Compare	CMP	CPX	CPY
@@ -41,6 +41,7 @@ func (c *cpu) initInstructions() instructionSet {
 	c.appendSTYInstructions(&instructionSet)
 	c.appendTransferInstructions(&instructionSet)
 	c.appendADCInstructions(&instructionSet)
+	c.appendSBCInstructions(&instructionSet)
 
 	return instructionSet
 }
@@ -290,6 +291,49 @@ func (c *cpu) appendADCInstructions(instructionSet *instructionSet) {
 
 	instructionSet[0x71] = &instruction{
 		Method:    func(u []uint8) { c.AddWithCarry(c.GetValueByIndirectIndexedYMode(u[0])) },
+		ArgsBytes: 1,
+	}
+
+}
+
+func (c *cpu) appendSBCInstructions(instructionSet *instructionSet) {
+	instructionSet[0xE9] = &instruction{
+		Method:    func(u []uint8) { c.SubtractWithCarry(u[0]) },
+		ArgsBytes: 1,
+	}
+
+	instructionSet[0xE5] = &instruction{
+		Method:    func(u []uint8) { c.SubtractWithCarry(c.GetValueByZeroPageMode(u[0])) },
+		ArgsBytes: 1,
+	}
+
+	instructionSet[0xF5] = &instruction{
+		Method:    func(u []uint8) { c.SubtractWithCarry(c.GetValueByZeroPageIndexedMode(u[0], c.x)) },
+		ArgsBytes: 1,
+	}
+
+	instructionSet[0xED] = &instruction{
+		Method:    func(u []uint8) { c.SubtractWithCarry(c.GetValueByAbsoluteMode(parseAddress(u))) },
+		ArgsBytes: 2,
+	}
+
+	instructionSet[0xFD] = &instruction{
+		Method:    func(u []uint8) { c.SubtractWithCarry(c.GetValueByIndexedAbsoluteMode(parseAddress(u), c.x)) },
+		ArgsBytes: 2,
+	}
+
+	instructionSet[0xF9] = &instruction{
+		Method:    func(u []uint8) { c.SubtractWithCarry(c.GetValueByIndexedAbsoluteMode(parseAddress(u), c.y)) },
+		ArgsBytes: 2,
+	}
+
+	instructionSet[0xE1] = &instruction{
+		Method:    func(u []uint8) { c.SubtractWithCarry(c.GetValueByIndexedIndirectXMode(u[0])) },
+		ArgsBytes: 1,
+	}
+
+	instructionSet[0xF1] = &instruction{
+		Method:    func(u []uint8) { c.SubtractWithCarry(c.GetValueByIndirectIndexedYMode(u[0])) },
 		ArgsBytes: 1,
 	}
 
