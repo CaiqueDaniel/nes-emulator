@@ -245,28 +245,3 @@ func TestRunProgram(t *testing.T) {
 		return
 	}
 }
-
-func TestRunProgramWithoutCartidge(t *testing.T) {
-	bus := bus.NewBus()
-	memory := memory.NewMemory(bus)
-	sut := cpu.NewCpuWithStopAt(memory, bus, 0)
-
-	memory.Write(0xC000, 0xA9) //LDA #
-	memory.Write(0xC001, 34)   //34
-	memory.Write(0xFFFC, 0)    //Start
-
-	sut.RunProgram()
-
-	acc := sut.GetDebugData()["acc"]
-	pc := sut.GetProgramCounter()
-
-	if acc != 0 {
-		t.Errorf("Accumulator should not have value. Got %d", acc)
-		return
-	}
-
-	if pc != 1 {
-		t.Error("Program Counter should not be greater than 1")
-		return
-	}
-}

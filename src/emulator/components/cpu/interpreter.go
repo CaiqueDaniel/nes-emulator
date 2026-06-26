@@ -11,7 +11,6 @@ type instruction struct {
 	ArgsBytes int
 }
 
-//Transfer	TAX	TXA	TAY	TYA
 //Arithmetic	ADC	SBC	INC	DEC	INX	DEX	INY	DEY
 //Shift	ASL	LSR	ROL	ROR
 //Bitwise	AND	ORA	EOR	BIT
@@ -24,21 +23,23 @@ type instruction struct {
 func (c *cpu) initInstructions() instructionSet {
 	var instructionSet instructionSet
 
+	instructionSet[0xEA] = &instruction{
+		Method:    func(u []uint8) { c.NoOp() },
+		ArgsBytes: 1,
+	}
+
+	instructionSet[0x00] = &instruction{
+		Method:    func(u []uint8) { c.Break() },
+		ArgsBytes: 0,
+	}
+
 	c.appendLDAInstructions(&instructionSet)
 	c.appendLDXInstructions(&instructionSet)
 	c.appendLDYInstructions(&instructionSet)
 	c.appendSTAInstructions(&instructionSet)
 	c.appendSTXInstructions(&instructionSet)
 	c.appendSTYInstructions(&instructionSet)
-
-	// c.instructionSet[0xEA] = &instruction{
-	// 	Method:    func(u []uint8) { c.NoOp() },
-	// 	ArgsBytes: 1,
-	// }
-	// 0x00: &instruction{
-	// 	Method:    func(u []uint8) { c.Break() },
-	// 	ArgsBytes: 0,
-	// },
+	c.appendTransferInstructions(&instructionSet)
 
 	return instructionSet
 }
@@ -215,6 +216,38 @@ func (c *cpu) appendSTYInstructions(instructionSet *instructionSet) {
 	instructionSet[0x8C] = &instruction{
 		Method:    func(u []uint8) { c.StoreRegisterIntoAbsoluteMemory(parseAddress(u), REGISTER_Y) },
 		ArgsBytes: 2,
+	}
+}
+
+func (c *cpu) appendTransferInstructions(instructionSet *instructionSet) {
+	instructionSet[0xAA] = &instruction{
+		Method:    func(u []uint8) { c.TransferFromAccumulatorToRegister(REGISTER_X) },
+		ArgsBytes: 1,
+	}
+
+	instructionSet[0xA8] = &instruction{
+		Method:    func(u []uint8) { c.TransferFromAccumulatorToRegister(REGISTER_Y) },
+		ArgsBytes: 1,
+	}
+
+	instructionSet[0xBA] = &instruction{
+		Method:    func(u []uint8) { c.TransferStackToX() },
+		ArgsBytes: 1,
+	}
+
+	instructionSet[0x8A] = &instruction{
+		Method:    func(u []uint8) { c.TransferFromRegisterToAccumulator(REGISTER_X) },
+		ArgsBytes: 1,
+	}
+
+	instructionSet[0x98] = &instruction{
+		Method:    func(u []uint8) { c.TransferFromRegisterToAccumulator(REGISTER_Y) },
+		ArgsBytes: 1,
+	}
+
+	instructionSet[0x9A] = &instruction{
+		Method:    func(u []uint8) { c.TransferXToStack() },
+		ArgsBytes: 1,
 	}
 }
 
