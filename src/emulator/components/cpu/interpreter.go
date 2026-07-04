@@ -145,45 +145,45 @@ func (c *cpu) appendLDYInstructions(instructionSet *instructionSet) {
 }
 
 func (c *cpu) appendSTAInstructions(instructionSet *instructionSet) {
-	c.instructionSet[0x85] = &instruction{
+	instructionSet[0x85] = &instruction{
 		Method:    func(u []uint8) { c.StoreRegisterIntoAbsoluteMemory(uint16(u[0]), ACCUMULATOR) },
 		ArgsBytes: 1,
 	}
 
-	c.instructionSet[0x95] = &instruction{
+	instructionSet[0x95] = &instruction{
 		Method: func(u []uint8) {
 			c.StoreRegisterIntoAbsoluteMemory(c.GetAddressByIndexedAbsoluteMode(uint16(u[0]), c.x), ACCUMULATOR)
 		},
 		ArgsBytes: 1,
 	}
 
-	c.instructionSet[0x8D] = &instruction{
+	instructionSet[0x8D] = &instruction{
 		Method:    func(u []uint8) { c.StoreRegisterIntoAbsoluteMemory(parseAddress(u), ACCUMULATOR) },
 		ArgsBytes: 2,
 	}
 
-	c.instructionSet[0x9D] = &instruction{
+	instructionSet[0x9D] = &instruction{
 		Method: func(u []uint8) {
 			c.StoreRegisterIntoAbsoluteMemory(c.GetAddressByIndexedAbsoluteMode(parseAddress(u), c.x), ACCUMULATOR)
 		},
 		ArgsBytes: 2,
 	}
 
-	c.instructionSet[0x99] = &instruction{
+	instructionSet[0x99] = &instruction{
 		Method: func(u []uint8) {
 			c.StoreRegisterIntoAbsoluteMemory(c.GetAddressByIndexedAbsoluteMode(parseAddress(u), c.y), ACCUMULATOR)
 		},
 		ArgsBytes: 2,
 	}
 
-	c.instructionSet[0x81] = &instruction{
+	instructionSet[0x81] = &instruction{
 		Method: func(u []uint8) {
 			c.StoreRegisterIntoAbsoluteMemory(c.GetAddressByIndexedIndirectXMode(uint16(u[0])), ACCUMULATOR)
 		},
 		ArgsBytes: 1,
 	}
 
-	c.instructionSet[0x91] = &instruction{
+	instructionSet[0x91] = &instruction{
 		Method: func(u []uint8) {
 			c.StoreRegisterIntoAbsoluteMemory(c.GetAddressByIndirectIndexedYMode(u[0]), ACCUMULATOR)
 		},

@@ -57,6 +57,17 @@ func NewCpuWithProgramCounter(memory application.Memory, programCounter uint16, 
 	return c
 }
 
+func NewCpuWithInternal(memory application.Memory, bus application.Bus) *cpu {
+	c := &cpu{
+		memory:   memory,
+		bus:      bus,
+		stopPcAt: -1,
+	}
+	c.instructionSet = c.initInstructions()
+	c.Reset()
+	return c
+}
+
 func (c *cpu) RunProgram() {
 	startAddressLow := c.memory.Read(START_POINTER)
 	startAddressHigh := c.memory.Read(START_POINTER + 1)
@@ -168,6 +179,20 @@ func (c *cpu) tick(cycles int) {
 
 func (c *cpu) GetStackPointer() uint8 {
 	return c.stackPointer
+}
+
+func (c *cpu) GetNumberOfInstructions() int {
+	count := 0
+
+	for _, instruction := range c.instructionSet {
+		if instruction == nil {
+			continue
+		}
+
+		count++
+	}
+
+	return count
 }
 
 //Arithmetic		SBC

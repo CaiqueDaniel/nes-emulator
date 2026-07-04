@@ -245,3 +245,12 @@ func TestRunProgram(t *testing.T) {
 		return
 	}
 }
+
+func TestNumberOfInstructions(t *testing.T) {
+	bus := bus.NewBus()
+	cpu := cpu.NewCpuWithInternal(memory.NewMemory(bus), bus)
+
+	if cpu.GetNumberOfInstructions() != 151 {
+		t.Errorf("Incorrect number of instructions loaded (%d)", cpu.GetNumberOfInstructions())
+	}
+}
