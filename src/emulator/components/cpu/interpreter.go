@@ -371,12 +371,12 @@ func (c *cpu) appendIncrementInstructions(instructionSet *instructionSet) {
 
 	instructionSet[0xE8] = &instruction{
 		Method:    func(u []uint8) { c.IncrementRegister(REGISTER_X) },
-		ArgsBytes: 2,
+		ArgsBytes: 0,
 	}
 
 	instructionSet[0xC8] = &instruction{
 		Method:    func(u []uint8) { c.IncrementRegister(REGISTER_Y) },
-		ArgsBytes: 2,
+		ArgsBytes: 0,
 	}
 }
 
@@ -403,12 +403,12 @@ func (c *cpu) appendDecrementInstructions(instructionSet *instructionSet) {
 
 	instructionSet[0xCA] = &instruction{
 		Method:    func(u []uint8) { c.DecrementRegister(REGISTER_X) },
-		ArgsBytes: 2,
+		ArgsBytes: 0,
 	}
 
 	instructionSet[0x88] = &instruction{
 		Method:    func(u []uint8) { c.DecrementRegister(REGISTER_Y) },
-		ArgsBytes: 2,
+		ArgsBytes: 0,
 	}
 }
 

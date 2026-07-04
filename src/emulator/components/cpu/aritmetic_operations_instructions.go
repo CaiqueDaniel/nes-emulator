@@ -42,8 +42,6 @@ func (c *cpu) CompareWithRegister(value uint8, register string) {
 }
 
 func (c *cpu) IncrementMemory(address uint16) {
-	c.memory.Read(address)
-
 	oldValue := c.memory.Read(address)
 	newValue := oldValue + 1
 
@@ -55,6 +53,8 @@ func (c *cpu) IncrementMemory(address uint16) {
 }
 
 func (c *cpu) IncrementRegister(register string) {
+	c.bus.Tick(1)
+
 	var registerValue uint8
 
 	switch register {
@@ -71,8 +71,6 @@ func (c *cpu) IncrementRegister(register string) {
 }
 
 func (c *cpu) DecrementMemory(address uint16) {
-	c.memory.Read(address)
-
 	oldValue := c.memory.Read(address)
 	newValue := oldValue - 1
 
@@ -84,6 +82,8 @@ func (c *cpu) DecrementMemory(address uint16) {
 }
 
 func (c *cpu) DecrementRegister(register string) {
+	c.bus.Tick(1)
+
 	var registerValue uint8
 
 	switch register {

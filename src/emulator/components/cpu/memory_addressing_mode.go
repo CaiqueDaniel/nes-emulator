@@ -24,6 +24,7 @@ func (c *cpu) GetValueByIndirectAbsoluteMode(initialAddress uint16) uint8 {
 }
 
 func (c *cpu) GetValueByIndexedIndirectXMode(initialAddress uint8) uint8 {
+	c.memory.Read(uint16(initialAddress))
 	return c.memory.Read(c.GetAddressByIndexedIndirectXMode(uint16(initialAddress)))
 }
 

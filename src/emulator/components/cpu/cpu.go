@@ -165,6 +165,10 @@ func (c *cpu) GetTotalCycles() uint64 {
 	return c.totalCycles
 }
 
+func (c *cpu) doDummyMemoryRead(address uint16) {
+	c.memory.Read(address)
+}
+
 func transformFlagIntoUint8(flag bool) uint8 {
 	if flag {
 		return 1
