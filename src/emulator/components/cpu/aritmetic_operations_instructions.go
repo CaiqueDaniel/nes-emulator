@@ -41,14 +41,17 @@ func (c *cpu) CompareWithRegister(value uint8, register string) {
 	c.negative = c.isValueNegative(registerValue & value)
 }
 
-// TODO: adicionar tests unitários para essas operações
 func (c *cpu) IncrementMemory(address uint16) {
-	value := c.memory.Read(address) + 1
+	c.memory.Read(address)
 
-	c.memory.Write(address, value)
+	oldValue := c.memory.Read(address)
+	newValue := oldValue + 1
 
-	c.zero = c.isValueZero(value)
-	c.negative = c.isValueNegative(value)
+	c.memory.Write(address, oldValue)
+	c.memory.Write(address, newValue)
+
+	c.zero = c.isValueZero(newValue)
+	c.negative = c.isValueNegative(newValue)
 }
 
 func (c *cpu) IncrementRegister(register string) {
@@ -68,12 +71,16 @@ func (c *cpu) IncrementRegister(register string) {
 }
 
 func (c *cpu) DecrementMemory(address uint16) {
-	value := c.memory.Read(address) - 1
+	c.memory.Read(address)
 
-	c.memory.Write(address, value)
+	oldValue := c.memory.Read(address)
+	newValue := oldValue - 1
 
-	c.zero = c.isValueZero(value)
-	c.negative = c.isValueNegative(value)
+	c.memory.Write(address, oldValue)
+	c.memory.Write(address, newValue)
+
+	c.zero = c.isValueZero(newValue)
+	c.negative = c.isValueNegative(newValue)
 }
 
 func (c *cpu) DecrementRegister(register string) {
