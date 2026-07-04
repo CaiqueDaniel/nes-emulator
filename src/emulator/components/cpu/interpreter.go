@@ -152,7 +152,7 @@ func (c *cpu) appendSTAInstructions(instructionSet *instructionSet) {
 
 	instructionSet[0x95] = &instruction{
 		Method: func(u []uint8) {
-			c.StoreRegisterIntoAbsoluteMemory(c.GetAddressByIndexedAbsoluteMode(uint16(u[0]), c.x), ACCUMULATOR)
+			c.StoreRegisterIntoAbsoluteMemory(c.GetAddressByIndexedAbsoluteModeWithDummyRead(uint16(u[0]), c.x), ACCUMULATOR)
 		},
 		ArgsBytes: 1,
 	}
@@ -164,14 +164,14 @@ func (c *cpu) appendSTAInstructions(instructionSet *instructionSet) {
 
 	instructionSet[0x9D] = &instruction{
 		Method: func(u []uint8) {
-			c.StoreRegisterIntoAbsoluteMemory(c.GetAddressByIndexedAbsoluteMode(parseAddress(u), c.x), ACCUMULATOR)
+			c.StoreRegisterIntoAbsoluteMemory(c.GetAddressByIndexedAbsoluteModeWithDummyRead(parseAddress(u), c.x), ACCUMULATOR)
 		},
 		ArgsBytes: 2,
 	}
 
 	instructionSet[0x99] = &instruction{
 		Method: func(u []uint8) {
-			c.StoreRegisterIntoAbsoluteMemory(c.GetAddressByIndexedAbsoluteMode(parseAddress(u), c.y), ACCUMULATOR)
+			c.StoreRegisterIntoAbsoluteMemory(c.GetAddressByIndexedAbsoluteModeWithDummyRead(parseAddress(u), c.y), ACCUMULATOR)
 		},
 		ArgsBytes: 2,
 	}
@@ -200,7 +200,7 @@ func (c *cpu) appendSTXInstructions(instructionSet *instructionSet) {
 
 	instructionSet[0x96] = &instruction{
 		Method: func(u []uint8) {
-			c.StoreRegisterIntoAbsoluteMemory(c.GetAddressByIndexedAbsoluteMode(uint16(u[0]), c.y), REGISTER_X)
+			c.StoreRegisterIntoAbsoluteMemory(c.GetAddressByIndexedAbsoluteModeWithDummyRead(uint16(u[0]), c.y), REGISTER_X)
 		},
 		ArgsBytes: 1,
 	}
@@ -219,7 +219,7 @@ func (c *cpu) appendSTYInstructions(instructionSet *instructionSet) {
 
 	instructionSet[0x94] = &instruction{
 		Method: func(u []uint8) {
-			c.StoreRegisterIntoAbsoluteMemory(c.GetAddressByIndexedAbsoluteMode(uint16(u[0]), c.x), REGISTER_Y)
+			c.StoreRegisterIntoAbsoluteMemory(c.GetAddressByIndexedAbsoluteModeWithDummyRead(uint16(u[0]), c.x), REGISTER_Y)
 		},
 		ArgsBytes: 1,
 	}
@@ -274,7 +274,7 @@ func (c *cpu) appendADCInstructions(instructionSet *instructionSet) {
 	}
 
 	instructionSet[0x75] = &instruction{
-		Method:    func(u []uint8) { c.AddWithCarry(c.GetValueByZeroPageIndexedMode(u[0], c.x)) },
+		Method:    func(u []uint8) { c.AddWithCarry(c.GetValueByZeroPageIndexedModeWithDummyRead(u[0], c.x)) },
 		ArgsBytes: 1,
 	}
 
@@ -355,7 +355,7 @@ func (c *cpu) appendIncrementInstructions(instructionSet *instructionSet) {
 	}
 
 	instructionSet[0xF6] = &instruction{
-		Method:    func(u []uint8) { c.IncrementMemory(c.GetAddressByIndexedAbsoluteMode(uint16(u[0]), c.x)) },
+		Method:    func(u []uint8) { c.IncrementMemory(c.GetAddressByIndexedAbsoluteModeWithDummyRead(uint16(u[0]), c.x)) },
 		ArgsBytes: 1,
 	}
 
@@ -365,7 +365,9 @@ func (c *cpu) appendIncrementInstructions(instructionSet *instructionSet) {
 	}
 
 	instructionSet[0xFE] = &instruction{
-		Method:    func(u []uint8) { c.IncrementMemory(c.GetAddressByIndexedAbsoluteMode(parseAddress(u), c.x)) },
+		Method: func(u []uint8) {
+			c.IncrementMemory(c.GetAddressByIndexedAbsoluteModeWithDummyRead(parseAddress(u), c.x))
+		},
 		ArgsBytes: 2,
 	}
 
@@ -387,7 +389,7 @@ func (c *cpu) appendDecrementInstructions(instructionSet *instructionSet) {
 	}
 
 	instructionSet[0xD6] = &instruction{
-		Method:    func(u []uint8) { c.DecrementMemory(c.GetAddressByIndexedAbsoluteMode(uint16(u[0]), c.x)) },
+		Method:    func(u []uint8) { c.DecrementMemory(c.GetAddressByIndexedAbsoluteModeWithDummyRead(uint16(u[0]), c.x)) },
 		ArgsBytes: 1,
 	}
 
@@ -397,7 +399,9 @@ func (c *cpu) appendDecrementInstructions(instructionSet *instructionSet) {
 	}
 
 	instructionSet[0xDE] = &instruction{
-		Method:    func(u []uint8) { c.DecrementMemory(c.GetAddressByIndexedAbsoluteMode(parseAddress(u), c.x)) },
+		Method: func(u []uint8) {
+			c.DecrementMemory(c.GetAddressByIndexedAbsoluteModeWithDummyRead(parseAddress(u), c.x))
+		},
 		ArgsBytes: 2,
 	}
 
@@ -466,7 +470,7 @@ func (c *cpu) appendBitwiseInstructions(instructionSet *instructionSet) {
 	// EOR
 	instructionSet[0x49] = &instruction{Method: func(u []uint8) { c.Xor(u[0]) }, ArgsBytes: 1}
 	instructionSet[0x45] = &instruction{Method: func(u []uint8) { c.Xor(c.GetValueByZeroPageMode(u[0])) }, ArgsBytes: 1}
-	instructionSet[0x55] = &instruction{Method: func(u []uint8) { c.Xor(c.GetValueByZeroPageIndexedMode(u[0], c.x)) }, ArgsBytes: 1}
+	instructionSet[0x55] = &instruction{Method: func(u []uint8) { c.Xor(c.GetValueByZeroPageIndexedModeWithDummyRead(u[0], c.x)) }, ArgsBytes: 1}
 	instructionSet[0x4D] = &instruction{Method: func(u []uint8) { c.Xor(c.GetValueByAbsoluteMode(parseAddress(u))) }, ArgsBytes: 2}
 	instructionSet[0x5D] = &instruction{Method: func(u []uint8) { c.Xor(c.GetValueByIndexedAbsoluteMode(parseAddress(u), c.x)) }, ArgsBytes: 2}
 	instructionSet[0x59] = &instruction{Method: func(u []uint8) { c.Xor(c.GetValueByIndexedAbsoluteMode(parseAddress(u), c.y)) }, ArgsBytes: 2}

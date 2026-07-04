@@ -16,6 +16,11 @@ func (c *cpu) GetValueByZeroPageIndexedMode(address uint8, index uint8) uint8 {
 	return c.memory.Read(uint16(address) + uint16(index))
 }
 
+func (c *cpu) GetValueByZeroPageIndexedModeWithDummyRead(address uint8, index uint8) uint8 {
+	c.doDummyMemoryRead(uint16(address))
+	return c.memory.Read(uint16(address) + uint16(index))
+}
+
 func (c *cpu) GetValueByIndirectAbsoluteMode(initialAddress uint16) uint8 {
 	lastByte := c.memory.Read(initialAddress)
 	firstByte := c.memory.Read(initialAddress + 1)
@@ -34,6 +39,11 @@ func (c *cpu) GetValueByIndirectIndexedYMode(initialAddress uint8) uint8 {
 
 func (c *cpu) GetAddressByIndexedAbsoluteMode(address uint16, index uint8) uint16 {
 	return address + uint16(index)
+}
+
+func (c *cpu) GetAddressByIndexedAbsoluteModeWithDummyRead(address uint16, index uint8) uint16 {
+	c.doDummyMemoryRead(address)
+	return c.GetAddressByIndexedAbsoluteMode(address, index)
 }
 
 func (c *cpu) GetAddressByIndexedIndirectXMode(initialAddress uint16) uint16 {
