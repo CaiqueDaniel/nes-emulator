@@ -90,3 +90,91 @@ func TestInstructionCycles(t *testing.T) {
 		}
 	}
 }
+
+func TestInstructionCyclesPageCross(t *testing.T) {
+	// Instructions that get +1 cycle on page cross
+	absXOps := []uint8{0xBD, 0x7D, 0xFD, 0xDD, 0x3D, 0x1D, 0x5D, 0xBC}
+	absYOps := []uint8{0xB9, 0xBE, 0x79, 0xF9, 0xD9, 0x39, 0x19, 0x59}
+	indYOps := []uint8{0xB1, 0x71, 0xF1, 0xD1, 0x31, 0x11, 0x51}
+
+	type pageCrossTest struct {
+		opcode         uint8
+		name           string
+		register       string
+		registerValue  uint8
+		args           []uint8
+		expectedCycles uint
+	}
+
+	var tests []pageCrossTest
+
+	for _, op := range absXOps {
+		tests = append(tests, pageCrossTest{
+			opcode:         op,
+			name:           "AbsX Page Cross",
+			register:       internal.REGISTER_X,
+			registerValue:  0x01,
+			args:           []uint8{0xFF, 0x01}, // Address 0x01FF
+			expectedCycles: 5,                   // 4 + 1
+		})
+	}
+
+	for _, op := range absYOps {
+		tests = append(tests, pageCrossTest{
+			opcode:         op,
+			name:           "AbsY Page Cross",
+			register:       internal.REGISTER_Y,
+			registerValue:  0x01,
+			args:           []uint8{0xFF, 0x01}, // Address 0x01FF
+			expectedCycles: 5,                   // 4 + 1
+		})
+	}
+
+	for _, op := range indYOps {
+		tests = append(tests, pageCrossTest{
+			opcode:         op,
+			name:           "IndY Page Cross",
+			register:       internal.REGISTER_Y,
+			registerValue:  0x01,
+			args:           []uint8{0x80}, // Zero page pointer
+			expectedCycles: 6,             // 5 + 1
+		})
+	}
+
+	for _, tt := range tests {
+		b := bus.NewBusWithInternalType()
+		mem := memory.NewMemory(b)
+
+		// Set the Reset vector to 0x8000
+		mem.Write(0xFFFC, 0x00)
+		mem.Write(0xFFFD, 0x80)
+
+		if tt.name == "IndY Page Cross" {
+			mem.Write(0x80, 0xFF)
+			mem.Write(0x81, 0x01)
+		}
+
+		pc := uint16(0x8000)
+
+		mem.Write(pc, tt.opcode)
+		pc++
+
+		for _, arg := range tt.args {
+			mem.Write(pc, arg)
+			pc++
+		}
+
+		cpu := internal.NewCpuWithStopAt(mem, b, int(pc))
+		cpu.LoadValueIntoRegister(tt.registerValue, tt.register)
+
+		b.ResetTickCount()
+		cpu.RunProgram()
+
+		// Subtract Reset Vector read cycles (2 cycles)
+		actualCycles := b.GetTickCount() - 2
+
+		if actualCycles != tt.expectedCycles {
+			t.Errorf("Instruction 0x%02X (%s): expected %d cycles, got %d", tt.opcode, tt.name, tt.expectedCycles, actualCycles)
+		}
+	}
+}

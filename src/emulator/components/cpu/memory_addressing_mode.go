@@ -38,7 +38,15 @@ func (c *cpu) GetValueByIndirectIndexedYMode(initialAddress uint8) uint8 {
 }
 
 func (c *cpu) GetAddressByIndexedAbsoluteMode(address uint16, index uint8) uint16 {
-	return address + uint16(index)
+	prevHighAddress := uint8(address >> 8)
+	newAddress := address + uint16(index)
+	currentHighAddress := uint8(newAddress >> 8)
+
+	if prevHighAddress != currentHighAddress {
+		c.doDummyMemoryRead(address)
+	}
+
+	return newAddress
 }
 
 func (c *cpu) GetAddressByIndexedAbsoluteModeWithDummyRead(address uint16, index uint8) uint16 {
@@ -60,9 +68,16 @@ func (c *cpu) GetAddressByIndexedIndirectXMode(initialAddress uint16) uint16 {
 }
 
 func (c *cpu) GetAddressByIndirectIndexedYMode(initialAddress uint8) uint16 {
-	lastByte := c.memory.Read(uint16(initialAddress))
-	firstByte := c.memory.Read(uint16(initialAddress) + 1)
-	return uint16(firstByte)<<8 | uint16(lastByte) + uint16(c.y)
+	lowByte := c.memory.Read(uint16(initialAddress))
+	highByte := c.memory.Read(uint16(initialAddress) + 1)
+	baseAddress := uint16(highByte)<<8 | uint16(lowByte)
+	newAddresss := baseAddress + uint16(c.y)
+
+	if uint8(newAddresss>>8) != highByte {
+		c.doDummyMemoryRead(baseAddress)
+	}
+
+	return newAddresss
 }
 
 func (c *cpu) GetAddressByIndirectIndexedYModeWithDummyRead(initialAddress uint8) uint16 {
