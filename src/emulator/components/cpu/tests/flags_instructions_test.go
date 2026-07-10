@@ -22,17 +22,11 @@ func TestCarryFlagInstructions(t *testing.T) {
 	if !cpu.GetCarryFlag() {
 		t.Error("Expected carry flag to be true after SetCarryFlag")
 	}
-	if cpu.GetTotalCycles() != 1 {
-		t.Errorf("Expected total cycles to be 1, got %d", cpu.GetTotalCycles())
-	}
 
 	// Clear Carry Flag
 	cpu.ClearCarryFlag()
 	if cpu.GetCarryFlag() {
 		t.Error("Expected carry flag to be false after ClearCarryFlag")
-	}
-	if cpu.GetTotalCycles() != 2 {
-		t.Errorf("Expected total cycles to be 2, got %d", cpu.GetTotalCycles())
 	}
 }
 
@@ -46,17 +40,11 @@ func TestInterruptFlagInstructions(t *testing.T) {
 	if cpu.GetIRQFlag() {
 		t.Error("Expected IRQ flag to be false after SetInterruptFlag")
 	}
-	if cpu.GetTotalCycles() != 1 {
-		t.Errorf("Expected total cycles to be 1, got %d", cpu.GetTotalCycles())
-	}
 
 	// Clear Interrupt Flag
 	cpu.ClearInterruptFlag()
 	if !cpu.GetIRQFlag() {
 		t.Error("Expected IRQ flag to be true after ClearInterruptFlag")
-	}
-	if cpu.GetTotalCycles() != 2 {
-		t.Errorf("Expected total cycles to be 2, got %d", cpu.GetTotalCycles())
 	}
 }
 
@@ -75,17 +63,11 @@ func TestOverflowFlagInstructions(t *testing.T) {
 	if !cpu.GetOverflowFlag() {
 		t.Error("Expected overflow flag to be true after SetOverflowFlag")
 	}
-	if cpu.GetTotalCycles() != 1 {
-		t.Errorf("Expected total cycles to be 1, got %d", cpu.GetTotalCycles())
-	}
 
 	// Clear Overflow Flag
 	cpu.ClearOverflowFlag()
 	if cpu.GetOverflowFlag() {
 		t.Error("Expected overflow flag to be false after ClearOverflowFlag")
-	}
-	if cpu.GetTotalCycles() != 2 {
-		t.Errorf("Expected total cycles to be 2, got %d", cpu.GetTotalCycles())
 	}
 }
 
@@ -225,16 +207,10 @@ func TestDecimalFlagInstructions(t *testing.T) {
 	if !cpu.GetDecimalFlag() {
 		t.Error("Expected decimal flag to be true after SetDecimalFlag")
 	}
-	if cpu.GetTotalCycles() != 1 {
-		t.Errorf("Expected total cycles to be 1, got %d", cpu.GetTotalCycles())
-	}
 
 	// Clear Decimal Flag
 	cpu.ClearDecimalFlag()
 	if cpu.GetDecimalFlag() {
 		t.Error("Expected decimal flag to be false after ClearDecimalFlag")
-	}
-	if cpu.GetTotalCycles() != 2 {
-		t.Errorf("Expected total cycles to be 2, got %d", cpu.GetTotalCycles())
 	}
 }

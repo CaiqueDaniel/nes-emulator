@@ -53,8 +53,6 @@ func (c *cpu) IncrementMemory(address uint16) {
 }
 
 func (c *cpu) IncrementRegister(register string) {
-	c.bus.Tick(1)
-
 	var registerValue uint8
 
 	switch register {
@@ -82,8 +80,6 @@ func (c *cpu) DecrementMemory(address uint16) {
 }
 
 func (c *cpu) DecrementRegister(register string) {
-	c.bus.Tick(1)
-
 	var registerValue uint8
 
 	switch register {

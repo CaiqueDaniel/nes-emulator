@@ -1,23 +1,11 @@
 package cpu
 
-import (
-	"slices"
-)
-
 type instructionSet [256]*instruction
 
 type instruction struct {
 	Method    func([]uint8)
 	ArgsBytes int
 }
-
-//Shift	ASL	LSR	ROL	ROR
-//Bitwise	AND	ORA	EOR	BIT
-//Compare	CMP	CPX	CPY
-//Branch	BCC	BCS	BEQ	BNE	BPL	BMI	BVC	BVS
-//Jump	JMP	JSR	RTS	BRK	RTI
-//Stack	PHA	PLA	PHP	PLP	TXS	TSX
-//Flags	CLC	SEC	CLI	SEI	CLD	SED	CLV
 
 func (c *cpu) initInstructions() instructionSet {
 	var instructionSet instructionSet
@@ -65,7 +53,9 @@ func (c *cpu) appendLDAInstructions(instructionSet *instructionSet) {
 		ArgsBytes: 1,
 	}
 	instructionSet[0xB5] = &instruction{
-		Method:    func(u []uint8) { c.LoadValueIntoRegister(c.GetValueByZeroPageIndexedMode(u[0], c.x), ACCUMULATOR) },
+		Method: func(u []uint8) {
+			c.LoadValueIntoRegister(c.GetValueByZeroPageIndexedModeWithDummyRead(u[0], c.x), ACCUMULATOR)
+		},
 		ArgsBytes: 1,
 	}
 	instructionSet[0xAD] = &instruction{
@@ -104,14 +94,16 @@ func (c *cpu) appendLDXInstructions(instructionSet *instructionSet) {
 		ArgsBytes: 1,
 	}
 	instructionSet[0xB6] = &instruction{
-		Method:    func(u []uint8) { c.LoadValueIntoRegister(c.GetValueByZeroPageIndexedMode(u[0], c.x), REGISTER_X) },
+		Method: func(u []uint8) {
+			c.LoadValueIntoRegister(c.GetValueByZeroPageIndexedModeWithDummyRead(u[0], c.x), REGISTER_X)
+		},
 		ArgsBytes: 1,
 	}
 	instructionSet[0xAE] = &instruction{
 		Method:    func(u []uint8) { c.LoadValueIntoRegister(c.GetValueByAbsoluteMode(parseAddress(u)), REGISTER_X) },
 		ArgsBytes: 2,
 	}
-	instructionSet[0xB3] = &instruction{
+	instructionSet[0xBE] = &instruction{
 		Method: func(u []uint8) {
 			c.LoadValueIntoRegister(c.GetValueByIndexedAbsoluteMode(parseAddress(u), c.y), REGISTER_X)
 		},
@@ -129,7 +121,9 @@ func (c *cpu) appendLDYInstructions(instructionSet *instructionSet) {
 		ArgsBytes: 1,
 	}
 	instructionSet[0xB4] = &instruction{
-		Method:    func(u []uint8) { c.LoadValueIntoRegister(c.GetValueByZeroPageIndexedMode(u[0], c.x), REGISTER_X) },
+		Method: func(u []uint8) {
+			c.LoadValueIntoRegister(c.GetValueByZeroPageIndexedModeWithDummyRead(u[0], c.x), REGISTER_X)
+		},
 		ArgsBytes: 1,
 	}
 	instructionSet[0xAC] = &instruction{
@@ -178,14 +172,14 @@ func (c *cpu) appendSTAInstructions(instructionSet *instructionSet) {
 
 	instructionSet[0x81] = &instruction{
 		Method: func(u []uint8) {
-			c.StoreRegisterIntoAbsoluteMemory(c.GetAddressByIndexedIndirectXMode(uint16(u[0])), ACCUMULATOR)
+			c.StoreRegisterIntoAbsoluteMemory(c.GetAddressByIndexedIndirectXModeWithDummyRead(uint16(u[0])), ACCUMULATOR)
 		},
 		ArgsBytes: 1,
 	}
 
 	instructionSet[0x91] = &instruction{
 		Method: func(u []uint8) {
-			c.StoreRegisterIntoAbsoluteMemory(c.GetAddressByIndirectIndexedYMode(u[0]), ACCUMULATOR)
+			c.StoreRegisterIntoAbsoluteMemory(c.GetAddressByIndirectIndexedYModeWithDummyRead(u[0]), ACCUMULATOR)
 		},
 		ArgsBytes: 1,
 	}
@@ -317,7 +311,7 @@ func (c *cpu) appendSBCInstructions(instructionSet *instructionSet) {
 	}
 
 	instructionSet[0xF5] = &instruction{
-		Method:    func(u []uint8) { c.SubtractWithCarry(c.GetValueByZeroPageIndexedMode(u[0], c.x)) },
+		Method:    func(u []uint8) { c.SubtractWithCarry(c.GetValueByZeroPageIndexedModeWithDummyRead(u[0], c.x)) },
 		ArgsBytes: 1,
 	}
 
@@ -450,7 +444,7 @@ func (c *cpu) appendBitwiseInstructions(instructionSet *instructionSet) {
 	// AND
 	instructionSet[0x29] = &instruction{Method: func(u []uint8) { c.And(u[0]) }, ArgsBytes: 1}
 	instructionSet[0x25] = &instruction{Method: func(u []uint8) { c.And(c.GetValueByZeroPageMode(u[0])) }, ArgsBytes: 1}
-	instructionSet[0x35] = &instruction{Method: func(u []uint8) { c.And(c.GetValueByZeroPageIndexedMode(u[0], c.x)) }, ArgsBytes: 1}
+	instructionSet[0x35] = &instruction{Method: func(u []uint8) { c.And(c.GetValueByZeroPageIndexedModeWithDummyRead(u[0], c.x)) }, ArgsBytes: 1}
 	instructionSet[0x2D] = &instruction{Method: func(u []uint8) { c.And(c.GetValueByAbsoluteMode(parseAddress(u))) }, ArgsBytes: 2}
 	instructionSet[0x3D] = &instruction{Method: func(u []uint8) { c.And(c.GetValueByIndexedAbsoluteMode(parseAddress(u), c.x)) }, ArgsBytes: 2}
 	instructionSet[0x39] = &instruction{Method: func(u []uint8) { c.And(c.GetValueByIndexedAbsoluteMode(parseAddress(u), c.y)) }, ArgsBytes: 2}
@@ -460,7 +454,7 @@ func (c *cpu) appendBitwiseInstructions(instructionSet *instructionSet) {
 	// ORA
 	instructionSet[0x09] = &instruction{Method: func(u []uint8) { c.Or(u[0]) }, ArgsBytes: 1}
 	instructionSet[0x05] = &instruction{Method: func(u []uint8) { c.Or(c.GetValueByZeroPageMode(u[0])) }, ArgsBytes: 1}
-	instructionSet[0x15] = &instruction{Method: func(u []uint8) { c.Or(c.GetValueByZeroPageIndexedMode(u[0], c.x)) }, ArgsBytes: 1}
+	instructionSet[0x15] = &instruction{Method: func(u []uint8) { c.Or(c.GetValueByZeroPageIndexedModeWithDummyRead(u[0], c.x)) }, ArgsBytes: 1}
 	instructionSet[0x0D] = &instruction{Method: func(u []uint8) { c.Or(c.GetValueByAbsoluteMode(parseAddress(u))) }, ArgsBytes: 2}
 	instructionSet[0x1D] = &instruction{Method: func(u []uint8) { c.Or(c.GetValueByIndexedAbsoluteMode(parseAddress(u), c.x)) }, ArgsBytes: 2}
 	instructionSet[0x19] = &instruction{Method: func(u []uint8) { c.Or(c.GetValueByIndexedAbsoluteMode(parseAddress(u), c.y)) }, ArgsBytes: 2}
@@ -486,7 +480,9 @@ func (c *cpu) appendCompareInstructions(instructionSet *instructionSet) {
 	// CMP
 	instructionSet[0xC9] = &instruction{Method: func(u []uint8) { c.CompareWithRegister(u[0], ACCUMULATOR) }, ArgsBytes: 1}
 	instructionSet[0xC5] = &instruction{Method: func(u []uint8) { c.CompareWithRegister(c.GetValueByZeroPageMode(u[0]), ACCUMULATOR) }, ArgsBytes: 1}
-	instructionSet[0xD5] = &instruction{Method: func(u []uint8) { c.CompareWithRegister(c.GetValueByZeroPageIndexedMode(u[0], c.x), ACCUMULATOR) }, ArgsBytes: 1}
+	instructionSet[0xD5] = &instruction{Method: func(u []uint8) {
+		c.CompareWithRegister(c.GetValueByZeroPageIndexedModeWithDummyRead(u[0], c.x), ACCUMULATOR)
+	}, ArgsBytes: 1}
 	instructionSet[0xCD] = &instruction{Method: func(u []uint8) { c.CompareWithRegister(c.GetValueByAbsoluteMode(parseAddress(u)), ACCUMULATOR) }, ArgsBytes: 2}
 	instructionSet[0xDD] = &instruction{Method: func(u []uint8) {
 		c.CompareWithRegister(c.GetValueByIndexedAbsoluteMode(parseAddress(u), c.x), ACCUMULATOR)
@@ -542,24 +538,6 @@ func (c *cpu) appendFlagsInstructions(instructionSet *instructionSet) {
 	instructionSet[0xD8] = &instruction{Method: func(u []uint8) { c.ClearDecimalFlag() }, ArgsBytes: 0}
 	instructionSet[0xF8] = &instruction{Method: func(u []uint8) { c.SetDecimalFlag() }, ArgsBytes: 0}
 	instructionSet[0xB8] = &instruction{Method: func(u []uint8) { c.ClearOverflowFlag() }, ArgsBytes: 0}
-}
-
-func (c *cpu) interpretInstruction(opCode uint8) {
-	instruction := c.instructionSet[opCode]
-
-	if instruction == nil {
-		return
-	}
-
-	bytes := make([]uint8, 0)
-
-	for i := 0; i < instruction.ArgsBytes; i++ {
-		bytes = append(bytes, c.memory.Read(c.programCounter))
-		c.programCounter++
-	}
-
-	slices.Reverse(bytes)
-	instruction.Method(bytes)
 }
 
 func parseAddress(bytes []uint8) uint16 {

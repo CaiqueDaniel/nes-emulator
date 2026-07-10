@@ -2,6 +2,7 @@ package cpu
 
 import (
 	"nes-emu/src/emulator/application"
+	"slices"
 )
 
 const REGISTER_X = "X"
@@ -163,6 +164,28 @@ func (c *cpu) GetDecimalFlag() bool {
 
 func (c *cpu) GetTotalCycles() uint64 {
 	return c.totalCycles
+}
+
+func (c *cpu) interpretInstruction(opCode uint8) {
+	instruction := c.instructionSet[opCode]
+
+	if instruction == nil {
+		return
+	}
+
+	bytes := make([]uint8, 0)
+
+	for i := 0; i < instruction.ArgsBytes; i++ {
+		bytes = append(bytes, c.memory.Read(c.programCounter))
+		c.programCounter++
+	}
+
+	if instruction.ArgsBytes == 0 {
+		c.doDummyMemoryRead(c.programCounter)
+	}
+
+	slices.Reverse(bytes)
+	instruction.Method(bytes)
 }
 
 func (c *cpu) doDummyMemoryRead(address uint16) {
