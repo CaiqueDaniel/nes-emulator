@@ -45,7 +45,7 @@ func TestRegisterConstantsValues(t *testing.T) {
 func TestNewCpuInitialization(t *testing.T) {
 	b := bus.NewBus()
 	memory := memory.NewMemory(b)
-	cpu := internal.NewCpu(memory, b)
+	cpu := internal.NewCpuWithInternal(memory, b)
 
 	debugData := cpu.GetDebugData()
 
@@ -63,7 +63,7 @@ func TestNewCpuInitialization(t *testing.T) {
 func TestCpuResetClearsAllRegisters(t *testing.T) {
 	b := bus.NewBus()
 	memory := memory.NewMemory(b)
-	cpu := internal.NewCpu(memory, b)
+	cpu := internal.NewCpuWithInternal(memory, b)
 
 	// Set some values to non-zero
 	cpu.LoadValueIntoRegister(0xFF, internal.ACCUMULATOR)
@@ -101,7 +101,7 @@ func TestCpuResetClearsAllRegisters(t *testing.T) {
 func TestGetDebugDataReturnsCurrentRegisterState(t *testing.T) {
 	b := bus.NewBus()
 	memory := memory.NewMemory(b)
-	cpu := internal.NewCpu(memory, b)
+	cpu := internal.NewCpuWithInternal(memory, b)
 
 	// Set specific values
 	cpu.LoadValueIntoRegister(0x42, internal.ACCUMULATOR)
@@ -130,7 +130,7 @@ func TestGetDebugDataReturnsCurrentRegisterState(t *testing.T) {
 func TestGetDebugDataIsIndependent(t *testing.T) {
 	b := bus.NewBus()
 	memory := memory.NewMemory(b)
-	cpu := internal.NewCpu(memory, b)
+	cpu := internal.NewCpuWithInternal(memory, b)
 
 	// Get initial debug data
 	debugData1 := cpu.GetDebugData()
@@ -148,7 +148,7 @@ func TestGetDebugDataIsIndependent(t *testing.T) {
 func TestPushValueToStackDecrementsStackPointer(t *testing.T) {
 	b := bus.NewBus()
 	memory := memory.NewMemory(b)
-	cpu := internal.NewCpu(memory, b)
+	cpu := internal.NewCpuWithInternal(memory, b)
 
 	cpu.PushValueToStack(0x42)
 
@@ -164,7 +164,7 @@ func TestPushValueToStackDecrementsStackPointer(t *testing.T) {
 func TestPushValueToStackMultipleTimesDecrementsStackPointerCorrectly(t *testing.T) {
 	b := bus.NewBus()
 	memory := memory.NewMemory(b)
-	cpu := internal.NewCpu(memory, b)
+	cpu := internal.NewCpuWithInternal(memory, b)
 
 	cpu.PushValueToStack(0x42)
 	cpu.PushValueToStack(0x43)
@@ -190,7 +190,7 @@ func TestPushValueToStackMultipleTimesDecrementsStackPointerCorrectly(t *testing
 func TestPullValueFromStackIncrementsStackPointer(t *testing.T) {
 	b := bus.NewBus()
 	memory := memory.NewMemory(b)
-	cpu := internal.NewCpu(memory, b)
+	cpu := internal.NewCpuWithInternal(memory, b)
 
 	cpu.PushValueToStack(0x42)
 	cpu.PushValueToStack(0x43)

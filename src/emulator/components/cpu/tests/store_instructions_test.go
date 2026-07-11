@@ -34,7 +34,7 @@ func TestShouldStoreRegisterIntoAbsoluteMemory(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			b := bus.NewBus()
 			mem := memory.NewMemory(b)
-			cpu := internal.NewCpu(mem, b)
+			cpu := internal.NewCpuWithInternal(mem, b)
 
 			cpu.LoadValueIntoRegister(tt.value, tt.register)
 			cpu.StoreRegisterIntoAbsoluteMemory(0x1234, tt.register)

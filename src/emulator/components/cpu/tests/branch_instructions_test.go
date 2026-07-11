@@ -10,7 +10,7 @@ import (
 func TestBranchIfCarryIsClearAndValuePositive(t *testing.T) {
 	b := bus.NewBus()
 	memory := memory.NewMemory(b)
-	cpu := internal.NewCpu(memory, b)
+	cpu := internal.NewCpuWithInternal(memory, b)
 
 	cpu.BranchIfCarryIsClear(0x10)
 
@@ -48,7 +48,7 @@ func TestBranchIfCarryIsClear_CarryIsSet(t *testing.T) {
 func TestBranchIfCarryIsSetAndValuePositive(t *testing.T) {
 	b := bus.NewBus()
 	memory := memory.NewMemory(b)
-	cpu := internal.NewCpu(memory, b)
+	cpu := internal.NewCpuWithInternal(memory, b)
 
 	cpu.AddWithCarry(255)
 	cpu.AddWithCarry(1)
@@ -88,7 +88,7 @@ func TestBranchIfCarryIsSet_CarryIsClear(t *testing.T) {
 func TestBranchIfEqualWithValuePositive(t *testing.T) {
 	b := bus.NewBus()
 	memory := memory.NewMemory(b)
-	cpu := internal.NewCpu(memory, b)
+	cpu := internal.NewCpuWithInternal(memory, b)
 
 	cpu.AddWithCarry(0)
 	cpu.BranchIfEqual(0x10)

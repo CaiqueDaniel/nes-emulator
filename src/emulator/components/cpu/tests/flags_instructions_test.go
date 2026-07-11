@@ -10,7 +10,7 @@ import (
 func TestCarryFlagInstructions(t *testing.T) {
 	b := bus.NewBus()
 	mem := memory.NewMemory(b)
-	cpu := internal.NewCpu(mem, b)
+	cpu := internal.NewCpuWithInternal(mem, b)
 
 	// Default should be false
 	if cpu.GetCarryFlag() {
@@ -33,7 +33,7 @@ func TestCarryFlagInstructions(t *testing.T) {
 func TestInterruptFlagInstructions(t *testing.T) {
 	b := bus.NewBus()
 	mem := memory.NewMemory(b)
-	cpu := internal.NewCpu(mem, b)
+	cpu := internal.NewCpuWithInternal(mem, b)
 
 	// Set Interrupt Flag
 	cpu.SetInterruptFlag()
@@ -51,7 +51,7 @@ func TestInterruptFlagInstructions(t *testing.T) {
 func TestOverflowFlagInstructions(t *testing.T) {
 	b := bus.NewBus()
 	mem := memory.NewMemory(b)
-	cpu := internal.NewCpu(mem, b)
+	cpu := internal.NewCpuWithInternal(mem, b)
 
 	// Default should be false
 	if cpu.GetOverflowFlag() {
@@ -74,7 +74,7 @@ func TestOverflowFlagInstructions(t *testing.T) {
 func TestNoOpInstruction(t *testing.T) {
 	b := bus.NewBus()
 	mem := memory.NewMemory(b)
-	cpu := internal.NewCpu(mem, b)
+	cpu := internal.NewCpuWithInternal(mem, b)
 
 	// Save initial CPU state
 	initialDebug := cpu.GetDebugData()
@@ -145,7 +145,7 @@ func TestBreakInstruction(t *testing.T) {
 func TestGetZeroFlag(t *testing.T) {
 	b := bus.NewBus()
 	mem := memory.NewMemory(b)
-	cpu := internal.NewCpu(mem, b)
+	cpu := internal.NewCpuWithInternal(mem, b)
 
 	// Default should be false
 	if cpu.GetZeroFlag() {
@@ -170,7 +170,7 @@ func TestGetZeroFlag(t *testing.T) {
 func TestGetNegativeFlag(t *testing.T) {
 	b := bus.NewBus()
 	mem := memory.NewMemory(b)
-	cpu := internal.NewCpu(mem, b)
+	cpu := internal.NewCpuWithInternal(mem, b)
 
 	// Default should be false
 	if cpu.GetNegativeFlag() {
@@ -195,7 +195,7 @@ func TestGetNegativeFlag(t *testing.T) {
 func TestDecimalFlagInstructions(t *testing.T) {
 	b := bus.NewBus()
 	mem := memory.NewMemory(b)
-	cpu := internal.NewCpu(mem, b)
+	cpu := internal.NewCpuWithInternal(mem, b)
 
 	// Default should be false
 	if cpu.GetDecimalFlag() {

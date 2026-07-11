@@ -10,7 +10,7 @@ import (
 func TestArithmeticShiftLeftOnAccWithPositiveValue(t *testing.T) {
 	b := bus.NewBus()
 	mem := memory.NewMemory(b)
-	cpu := internal.NewCpu(mem, b)
+	cpu := internal.NewCpuWithInternal(mem, b)
 
 	cpu.AddWithCarry(1)
 	cpu.ArithmeticShiftLeft()
@@ -39,7 +39,7 @@ func TestArithmeticShiftLeftOnAccWithPositiveValue(t *testing.T) {
 func TestArithmeticShiftLeftOnAccWithNegativeValue(t *testing.T) {
 	b := bus.NewBus()
 	mem := memory.NewMemory(b)
-	cpu := internal.NewCpu(mem, b)
+	cpu := internal.NewCpuWithInternal(mem, b)
 
 	cpu.LoadValueIntoRegister(0, internal.ACCUMULATOR)
 	cpu.AddWithCarry(127)
@@ -69,7 +69,7 @@ func TestArithmeticShiftLeftOnAccWithNegativeValue(t *testing.T) {
 func TestArithmeticShiftLeftOnAccWithOverflowValue(t *testing.T) {
 	b := bus.NewBus()
 	mem := memory.NewMemory(b)
-	cpu := internal.NewCpu(mem, b)
+	cpu := internal.NewCpuWithInternal(mem, b)
 
 	cpu.LoadValueIntoRegister(0, internal.ACCUMULATOR)
 	cpu.AddWithCarry(129)
@@ -99,7 +99,7 @@ func TestArithmeticShiftLeftOnAccWithOverflowValue(t *testing.T) {
 func TestArithmeticShiftLeftOnAbsoluteAddressWithPositiveValue(t *testing.T) {
 	b := bus.NewBus()
 	mem := memory.NewMemory(b)
-	cpu := internal.NewCpu(mem, b)
+	cpu := internal.NewCpuWithInternal(mem, b)
 
 	mem.Write(0, 1)
 	cpu.ArithmeticShiftLeftAbsolute(0x0000, false)
@@ -128,7 +128,7 @@ func TestArithmeticShiftLeftOnAbsoluteAddressWithPositiveValue(t *testing.T) {
 func TestArithmeticShiftLeftOnAbsoluteAddressWithPositiveValueAndXIndexedMode(t *testing.T) {
 	b := bus.NewBus()
 	mem := memory.NewMemory(b)
-	cpu := internal.NewCpu(mem, b)
+	cpu := internal.NewCpuWithInternal(mem, b)
 
 	cpu.LoadValueIntoRegister(1, internal.REGISTER_X)
 	mem.Write(1, 1)
@@ -158,7 +158,7 @@ func TestArithmeticShiftLeftOnAbsoluteAddressWithPositiveValueAndXIndexedMode(t 
 func TestLogicalShiftRightOnAccWithPositiveValue(t *testing.T) {
 	b := bus.NewBus()
 	mem := memory.NewMemory(b)
-	cpu := internal.NewCpu(mem, b)
+	cpu := internal.NewCpuWithInternal(mem, b)
 
 	cpu.LoadValueIntoRegister(0, internal.ACCUMULATOR)
 	cpu.AddWithCarry(1)
@@ -188,7 +188,7 @@ func TestLogicalShiftRightOnAccWithPositiveValue(t *testing.T) {
 func TestLogicalShiftRightOnAccWithNegativeValue(t *testing.T) {
 	b := bus.NewBus()
 	mem := memory.NewMemory(b)
-	cpu := internal.NewCpu(mem, b)
+	cpu := internal.NewCpuWithInternal(mem, b)
 
 	cpu.LoadValueIntoRegister(254, internal.ACCUMULATOR)
 	cpu.LogicalShiftRight()
@@ -217,7 +217,7 @@ func TestLogicalShiftRightOnAccWithNegativeValue(t *testing.T) {
 func TestLogicalShiftRightOnAbsoluteAddressWithPositiveValue(t *testing.T) {
 	b := bus.NewBus()
 	mem := memory.NewMemory(b)
-	cpu := internal.NewCpu(mem, b)
+	cpu := internal.NewCpuWithInternal(mem, b)
 
 	mem.Write(0, 1)
 	cpu.LogicalShiftRightAbsolute(0x0000, false)
@@ -248,7 +248,7 @@ func TestLogicalShiftRightOnAbsoluteAddressWithPositiveValue(t *testing.T) {
 func TestRotateLeftOnAccWithNoCarry(t *testing.T) {
 	b := bus.NewBus()
 	mem := memory.NewMemory(b)
-	cpu := internal.NewCpu(mem, b)
+	cpu := internal.NewCpuWithInternal(mem, b)
 
 	// acc = 0b00000011 (3), carry = false → result = 0b00000110 (6)
 	cpu.LoadValueIntoRegister(0b00000011, internal.ACCUMULATOR)
@@ -271,7 +271,7 @@ func TestRotateLeftOnAccWithNoCarry(t *testing.T) {
 func TestRotateLeftOnAccWithPriorCarrySet(t *testing.T) {
 	b := bus.NewBus()
 	mem := memory.NewMemory(b)
-	cpu := internal.NewCpu(mem, b)
+	cpu := internal.NewCpuWithInternal(mem, b)
 
 	// acc = 0b00000001 (1), carry = true → result = 0b00000011 (3)
 	// old carry (1) is shifted into bit 0
@@ -296,7 +296,7 @@ func TestRotateLeftOnAccWithPriorCarrySet(t *testing.T) {
 func TestRotateLeftOnAccWithMSBSet(t *testing.T) {
 	b := bus.NewBus()
 	mem := memory.NewMemory(b)
-	cpu := internal.NewCpu(mem, b)
+	cpu := internal.NewCpuWithInternal(mem, b)
 
 	cpu.LoadValueIntoRegister(0b10000001, internal.ACCUMULATOR)
 	cpu.RotateLeft()
@@ -319,7 +319,7 @@ func TestRotateLeftOnAccWithMSBSet(t *testing.T) {
 func TestRotateLeftAbsoluteWithNoCarry(t *testing.T) {
 	b := bus.NewBus()
 	mem := memory.NewMemory(b)
-	cpu := internal.NewCpu(mem, b)
+	cpu := internal.NewCpuWithInternal(mem, b)
 
 	mem.Write(0x0010, 0b00000010)
 	cpu.ClearCarryFlag()
@@ -345,7 +345,7 @@ func TestRotateLeftAbsoluteWithNoCarry(t *testing.T) {
 func TestRotateLeftAbsoluteWithPriorCarry(t *testing.T) {
 	b := bus.NewBus()
 	mem := memory.NewMemory(b)
-	cpu := internal.NewCpu(mem, b)
+	cpu := internal.NewCpuWithInternal(mem, b)
 
 	// value = 0b00000010 (2), old carry = 1 → result = 0b00000101 (5)
 	mem.Write(0x0010, 0b00000010)
@@ -364,7 +364,7 @@ func TestRotateLeftAbsoluteWithPriorCarry(t *testing.T) {
 func TestRotateLeftAbsoluteWithXIndexedMode(t *testing.T) {
 	b := bus.NewBus()
 	mem := memory.NewMemory(b)
-	cpu := internal.NewCpu(mem, b)
+	cpu := internal.NewCpuWithInternal(mem, b)
 
 	// X = 2, base address = 0x0010 → effective address = 0x0012
 	cpu.LoadValueIntoRegister(2, internal.REGISTER_X)
@@ -385,7 +385,7 @@ func TestRotateLeftAbsoluteWithXIndexedMode(t *testing.T) {
 func TestRotateLeftZeroPageWithNoCarry(t *testing.T) {
 	b := bus.NewBus()
 	mem := memory.NewMemory(b)
-	cpu := internal.NewCpu(mem, b)
+	cpu := internal.NewCpuWithInternal(mem, b)
 
 	mem.Write(0x0005, 0b00000100)
 	cpu.ClearCarryFlag()
@@ -409,7 +409,7 @@ func TestRotateLeftZeroPageWithNoCarry(t *testing.T) {
 func TestRotateRightOnAccWithNoCarry(t *testing.T) {
 	b := bus.NewBus()
 	mem := memory.NewMemory(b)
-	cpu := internal.NewCpu(mem, b)
+	cpu := internal.NewCpuWithInternal(mem, b)
 
 	// acc = 0b00000110 (6), carry = false → result = 0b00000011 (3)
 	cpu.LoadValueIntoRegister(0b00000110, internal.ACCUMULATOR)
@@ -433,7 +433,7 @@ func TestRotateRightOnAccWithNoCarry(t *testing.T) {
 func TestRotateRightOnAccWithPriorCarrySet(t *testing.T) {
 	b := bus.NewBus()
 	mem := memory.NewMemory(b)
-	cpu := internal.NewCpu(mem, b)
+	cpu := internal.NewCpuWithInternal(mem, b)
 
 	cpu.LoadValueIntoRegister(0b00000100, internal.ACCUMULATOR)
 	cpu.SetCarryFlag()
@@ -454,7 +454,7 @@ func TestRotateRightOnAccWithPriorCarrySet(t *testing.T) {
 func TestRotateRightOnAccWithLSBSet(t *testing.T) {
 	b := bus.NewBus()
 	mem := memory.NewMemory(b)
-	cpu := internal.NewCpu(mem, b)
+	cpu := internal.NewCpuWithInternal(mem, b)
 
 	// acc = 0b00000011 (3), carry = false → result = 0b00000001 (1)
 	// LSB of original value was 1 → carry = true
@@ -480,7 +480,7 @@ func TestRotateRightOnAccWithLSBSet(t *testing.T) {
 func TestRotateRightAbsoluteWithNoCarry(t *testing.T) {
 	b := bus.NewBus()
 	mem := memory.NewMemory(b)
-	cpu := internal.NewCpu(mem, b)
+	cpu := internal.NewCpuWithInternal(mem, b)
 
 	mem.Write(0x0010, 0b00001000)
 	cpu.ClearCarryFlag()
@@ -506,7 +506,7 @@ func TestRotateRightAbsoluteWithNoCarry(t *testing.T) {
 func TestRotateRightAbsoluteWithPriorCarry(t *testing.T) {
 	b := bus.NewBus()
 	mem := memory.NewMemory(b)
-	cpu := internal.NewCpu(mem, b)
+	cpu := internal.NewCpuWithInternal(mem, b)
 
 	mem.Write(0x0010, 0b00000100)
 	cpu.SetCarryFlag()
@@ -528,7 +528,7 @@ func TestRotateRightAbsoluteWithPriorCarry(t *testing.T) {
 func TestRotateRightAbsoluteWithXIndexedMode(t *testing.T) {
 	b := bus.NewBus()
 	mem := memory.NewMemory(b)
-	cpu := internal.NewCpu(mem, b)
+	cpu := internal.NewCpuWithInternal(mem, b)
 
 	// X = 2, base address = 0x0010 → effective address = 0x0012
 	cpu.LoadValueIntoRegister(2, internal.REGISTER_X)
@@ -548,7 +548,7 @@ func TestRotateRightAbsoluteWithXIndexedMode(t *testing.T) {
 func TestRotateRightAbsoluteWithLSBSet(t *testing.T) {
 	b := bus.NewBus()
 	mem := memory.NewMemory(b)
-	cpu := internal.NewCpu(mem, b)
+	cpu := internal.NewCpuWithInternal(mem, b)
 
 	// value = 0b00000011 (3), carry = false → result = 0b00000001 (1), carry = true
 	mem.Write(0x0020, 0b00000011)
@@ -569,7 +569,7 @@ func TestRotateRightAbsoluteWithLSBSet(t *testing.T) {
 func TestRotateRightZeroPageWithNoCarry(t *testing.T) {
 	b := bus.NewBus()
 	mem := memory.NewMemory(b)
-	cpu := internal.NewCpu(mem, b)
+	cpu := internal.NewCpuWithInternal(mem, b)
 
 	mem.Write(0x0005, 0b00010000)
 	cpu.ClearCarryFlag()

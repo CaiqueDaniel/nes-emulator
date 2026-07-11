@@ -35,7 +35,7 @@ func NewCpu(memory application.Memory, bus application.Bus) application.CPU {
 	return c
 }
 
-func NewCpuWithStopAt(memory application.Memory, bus application.Bus, stopPcAt int) application.CPU {
+func NewCpuWithStopAt(memory application.Memory, bus application.Bus, stopPcAt int) *cpu {
 	c := &cpu{
 		memory:   memory,
 		bus:      bus,
@@ -46,7 +46,7 @@ func NewCpuWithStopAt(memory application.Memory, bus application.Bus, stopPcAt i
 	return c
 }
 
-func NewCpuWithProgramCounter(memory application.Memory, programCounter uint16, bus application.Bus) application.CPU {
+func NewCpuWithProgramCounter(memory application.Memory, programCounter uint16, bus application.Bus) *cpu {
 	c := &cpu{
 		memory:         memory,
 		programCounter: programCounter,
