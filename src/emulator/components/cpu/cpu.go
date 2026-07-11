@@ -95,6 +95,7 @@ func (c *cpu) Reset() {
 	c.zero = false
 	c.overflow = false
 	c.negative = false
+	c.irq = true
 	c.stackPointer = 0xFF
 }
 

@@ -58,6 +58,24 @@ func TestNewCpuInitialization(t *testing.T) {
 	if debugData["y"] != 0 {
 		t.Errorf("Expected y to be 0 on initialization, got %d", debugData["y"])
 	}
+	if cpu.GetCarryFlag() {
+		t.Errorf("Expected carry flag to be disabled")
+	}
+	if cpu.GetDecimalFlag() {
+		t.Errorf("Expected decimal flag to be disabled")
+	}
+	if cpu.GetNegativeFlag() {
+		t.Errorf("Expected negative flag to be disabled")
+	}
+	if cpu.GetOverflowFlag() {
+		t.Errorf("Expected overflow flag to be disabled")
+	}
+	if cpu.GetZeroFlag() {
+		t.Errorf("Expected zero flag to be disabled")
+	}
+	if !cpu.GetIRQFlag() {
+		t.Errorf("Expected interrupt flag to be enabled")
+	}
 }
 
 func TestCpuResetClearsAllRegisters(t *testing.T) {
