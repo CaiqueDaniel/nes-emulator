@@ -17,7 +17,7 @@ func (c *cpu) initInstructions() instructionSet {
 
 	instructionSet[0x00] = &instruction{
 		Method:    func(u []uint8) { c.Break() },
-		ArgsBytes: 0,
+		ArgsBytes: 1,
 	}
 
 	c.appendLDAInstructions(&instructionSet)

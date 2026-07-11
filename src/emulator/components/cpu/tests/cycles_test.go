@@ -178,3 +178,36 @@ func TestInstructionCyclesPageCross(t *testing.T) {
 		}
 	}
 }
+
+func TestBreakInstructionCycles(t *testing.T) {
+	b := bus.NewBusWithInternalType()
+	mem := memory.NewMemory(b)
+
+	// Set Reset vector to 0x8000
+	mem.Write(0xFFFC, 0x00)
+	mem.Write(0xFFFD, 0x80)
+
+	// BRK instruction at 0x8000
+	mem.Write(0x8000, 0x00)
+
+	// Dummy byte for BRK padding
+	mem.Write(0x8001, 0x00)
+
+	// Set Interrupt vector to 0x8005
+	mem.Write(0xFFFE, 0x05)
+	mem.Write(0xFFFF, 0x80)
+
+	// Stop at 0x8005 (where the interrupt vector points)
+	sut := internal.NewCpuWithStopAt(mem, b, 0x8005)
+
+	b.ResetTickCount()
+	sut.RunProgram()
+
+	// RunProgram reads the reset vector (2 cycles)
+	// BRK should take 7 cycles
+	actualCycles := b.GetTickCount() - 2
+
+	if actualCycles != 7 {
+		t.Errorf("Expected 7 cycles for BRK instruction, got %d", actualCycles)
+	}
+}

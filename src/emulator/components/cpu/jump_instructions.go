@@ -43,3 +43,20 @@ func (c *cpu) ReturnFromInterrupt() {
 	c.negative = flags&0b10000000 != 0
 	c.programCounter = uint16(lowAddress) + uint16(highAddress)<<8
 }
+
+func (c *cpu) Break() {
+	pcHighAddress := uint8(c.programCounter >> 8)
+	pcLowAddress := uint8(c.programCounter)
+
+	c.irq = true
+	c.bFlag = true
+
+	c.PushValueToStack(pcHighAddress)
+	c.PushValueToStack(pcLowAddress)
+	c.PushStatusIntoStack()
+
+	newPcLowAddress := uint16(c.memory.Read(0xFFFE))
+	newPcHighAddress := uint16(c.memory.Read(0xFFFF))
+
+	c.programCounter = newPcLowAddress | (newPcHighAddress << 8)
+}
