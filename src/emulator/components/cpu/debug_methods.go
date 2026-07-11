@@ -36,10 +36,6 @@ func (c *cpu) GetDecimalFlag() bool {
 	return c.decimal
 }
 
-func (c *cpu) GetTotalCycles() uint64 {
-	return c.totalCycles
-}
-
 func (c *cpu) GetStackPointer() uint8 {
 	return c.stackPointer
 }

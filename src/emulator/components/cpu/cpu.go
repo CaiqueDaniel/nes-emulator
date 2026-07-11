@@ -19,7 +19,6 @@ type cpu struct {
 	stackPointer                                         uint8
 	memory                                               application.Memory
 	bus                                                  application.Bus
-	totalCycles                                          uint64
 	stopPcAt                                             int
 	instructionSet                                       instructionSet
 }
@@ -157,9 +156,4 @@ func transformFlagIntoUint8(flag bool) uint8 {
 		return 1
 	}
 	return 0
-}
-
-func (c *cpu) tick(cycles int) {
-	c.bus.Tick(cycles)
-	c.totalCycles += uint64(cycles)
 }
