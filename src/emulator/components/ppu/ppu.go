@@ -42,6 +42,7 @@ var colorPallet = [64]uint32{
 }
 
 type ppu struct {
+	vMemory      application.Memory
 	scanline     uint16
 	pixel        uint8
 	enableRender bool
@@ -51,10 +52,11 @@ type ppu struct {
 	w            bool
 }
 
-func NewPPU(nmiBus application.MNIBus) *ppu {
+func NewPPU(bus application.MNIBus, vMemory application.Memory) *ppu {
 	return &ppu{
 		enableRender: false,
-		bus:          nmiBus,
+		bus:          bus,
+		vMemory:      vMemory,
 	}
 }
 
