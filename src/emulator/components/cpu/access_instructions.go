@@ -3,11 +3,11 @@ package cpu
 func (c *cpu) StoreRegisterIntoAbsoluteMemory(value uint16, register string) {
 	switch register {
 	case REGISTER_X:
-		c.memory.Write(value, c.x)
+		c.writeToMemory(value, c.x)
 	case REGISTER_Y:
-		c.memory.Write(value, c.y)
+		c.writeToMemory(value, c.y)
 	case ACCUMULATOR:
-		c.memory.Write(value, c.acc)
+		c.writeToMemory(value, c.acc)
 	}
 }
 

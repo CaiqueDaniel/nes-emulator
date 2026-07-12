@@ -93,8 +93,8 @@ func (c *cpu) RotateRightZeroPage(address uint8, xIndexedMode bool) {
 }
 
 func (c *cpu) doubleWriteToMemory(address uint16, prevValue, currentValue uint8) {
-	c.memory.Write(address, prevValue)
-	c.memory.Write(address, currentValue)
+	c.writeToMemory(address, prevValue)
+	c.writeToMemory(address, currentValue)
 }
 
 func (c *cpu) updateFlagsOnShift(value uint8) {

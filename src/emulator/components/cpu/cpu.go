@@ -69,8 +69,8 @@ func NewCpuWithInternal(memory application.Memory, bus application.Bus) *cpu {
 }
 
 func (c *cpu) RunProgram() {
-	startAddressLow := c.memory.Read(START_POINTER)
-	startAddressHigh := c.memory.Read(START_POINTER + 1)
+	startAddressLow := c.readFromMemory(START_POINTER)
+	startAddressHigh := c.readFromMemory(START_POINTER + 1)
 	startAddress := (uint16(startAddressHigh) << 8) + uint16(startAddressLow)
 	c.programCounter = startAddress
 
@@ -80,7 +80,7 @@ func (c *cpu) RunProgram() {
 			c.nmi = false
 		}
 
-		opCode := c.memory.Read(c.programCounter)
+		opCode := c.readFromMemory(c.programCounter)
 		c.programCounter++
 
 		c.interpretInstruction(opCode)
@@ -114,22 +114,22 @@ func (c *cpu) HandleNMI() {
 
 	c.PushStatusIntoStack()
 
-	lowByte := c.memory.Read(nmi_handler_byte_ptr)
-	highByte := c.memory.Read(nmi_handler_byte_ptr + 1)
+	lowByte := c.readFromMemory(nmi_handler_byte_ptr)
+	highByte := c.readFromMemory(nmi_handler_byte_ptr + 1)
 
 	c.programCounter = uint16(highByte)<<8 | uint16(lowByte)
 }
 
 func (c *cpu) PushValueToStack(value uint8) {
-	c.memory.Write(STACK_END+uint16(c.stackPointer), value)
+	c.writeToMemory(STACK_END+uint16(c.stackPointer), value)
 	c.stackPointer--
 }
 
 func (c *cpu) PullValueFromStack() uint8 {
 	c.stackPointer++
-	value := c.memory.Read(STACK_END + uint16(c.stackPointer))
+	value := c.readFromMemory(STACK_END + uint16(c.stackPointer))
 
-	c.memory.Write(STACK_END+uint16(c.stackPointer), 0)
+	c.writeToMemory(STACK_END+uint16(c.stackPointer), 0)
 
 	return value
 }
@@ -157,7 +157,7 @@ func (c *cpu) interpretInstruction(opCode uint8) {
 	bytes := make([]uint8, 0)
 
 	for i := 0; i < instruction.ArgsBytes; i++ {
-		bytes = append(bytes, c.memory.Read(c.programCounter))
+		bytes = append(bytes, c.readFromMemory(c.programCounter))
 		c.programCounter++
 	}
 
@@ -169,8 +169,16 @@ func (c *cpu) interpretInstruction(opCode uint8) {
 	instruction.Method(bytes)
 }
 
+func (c *cpu) writeToMemory(address uint16, value uint8) {
+	c.memory.Write(address, value)
+}
+
+func (c *cpu) readFromMemory(address uint16) uint8 {
+	return c.memory.Read(address)
+}
+
 func (c *cpu) doDummyMemoryRead(address uint16) {
-	c.memory.Read(address)
+	c.readFromMemory(address)
 }
 
 func transformFlagIntoUint8(flag bool) uint8 {

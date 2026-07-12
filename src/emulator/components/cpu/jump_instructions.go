@@ -5,7 +5,7 @@ func (c *cpu) JumpProgramCounterToValue(value uint16) {
 }
 
 func (c *cpu) JumpProgramCounterByIndirectValue(address uint16) {
-	ptrValue := c.memory.Read(address)
+	ptrValue := c.readFromMemory(address)
 	lowAddress := uint8(address) + ptrValue
 	highAddress := address & 0xFF00
 
@@ -55,8 +55,8 @@ func (c *cpu) Break() {
 	c.PushValueToStack(pcLowAddress)
 	c.PushStatusIntoStack()
 
-	newPcLowAddress := uint16(c.memory.Read(0xFFFE))
-	newPcHighAddress := uint16(c.memory.Read(0xFFFF))
+	newPcLowAddress := uint16(c.readFromMemory(0xFFFE))
+	newPcHighAddress := uint16(c.readFromMemory(0xFFFF))
 
 	c.programCounter = newPcLowAddress | (newPcHighAddress << 8)
 }

@@ -42,11 +42,11 @@ func (c *cpu) CompareWithRegister(value uint8, register string) {
 }
 
 func (c *cpu) IncrementMemory(address uint16) {
-	oldValue := c.memory.Read(address)
+	oldValue := c.readFromMemory(address)
 	newValue := oldValue + 1
 
-	c.memory.Write(address, oldValue)
-	c.memory.Write(address, newValue)
+	c.writeToMemory(address, oldValue)
+	c.writeToMemory(address, newValue)
 
 	c.zero = c.isValueZero(newValue)
 	c.negative = c.isValueNegative(newValue)
@@ -69,11 +69,11 @@ func (c *cpu) IncrementRegister(register string) {
 }
 
 func (c *cpu) DecrementMemory(address uint16) {
-	oldValue := c.memory.Read(address)
+	oldValue := c.readFromMemory(address)
 	newValue := oldValue - 1
 
-	c.memory.Write(address, oldValue)
-	c.memory.Write(address, newValue)
+	c.writeToMemory(address, oldValue)
+	c.writeToMemory(address, newValue)
 
 	c.zero = c.isValueZero(newValue)
 	c.negative = c.isValueNegative(newValue)
