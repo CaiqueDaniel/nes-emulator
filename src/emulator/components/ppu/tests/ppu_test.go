@@ -11,7 +11,7 @@ import (
 func TestPPURender_ShouldDrawAPixel(t *testing.T) {
 	memory := memory.NewMemory()
 	bus := bus.NewBus(memory)
-	ppu := ppu.NewPPUWithInternal(memory, bus)
+	ppu := ppu.NewPPU(bus)
 
 	ppu.Render()
 
@@ -27,7 +27,7 @@ func TestPPURender_ShouldDrawAPixel(t *testing.T) {
 func TestPPURender_ShouldWrapScanlineToStart(t *testing.T) {
 	memory := memory.NewMemory()
 	bus := bus.NewBus(memory)
-	ppu := ppu.NewPPUWithInternal(memory, bus)
+	ppu := ppu.NewPPU(bus)
 	i := 0
 
 	for {
@@ -55,7 +55,7 @@ func TestPPURender_ShouldNotTriggerAnNMIOnVBlank_WhenNMIFlagDisabled(t *testing.
 
 	bus.AttachNMI(mockCpu)
 
-	ppu := ppu.NewPPUWithInternal(memory, bus)
+	ppu := ppu.NewPPU(bus)
 	i := 0
 
 	for {
@@ -87,7 +87,7 @@ func TestPPURender_ShouldTriggerAnNMIOnVBlank_WhenNMIFlagEnabled(t *testing.T) {
 
 	bus.AttachNMI(mockCpu)
 
-	ppu := ppu.NewPPUWithInternal(memory, bus)
+	ppu := ppu.NewPPU(bus)
 	i := 0
 
 	memory.Write(0x2000, 0b10000000)
