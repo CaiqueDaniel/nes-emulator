@@ -34,7 +34,7 @@ func (b *bus) Tick(cycles int) {
 }
 
 func (b *bus) AttachNMI(cpu application.CPU) {
-	b.nmiMethod = func() { cpu.CallNMI() }
+	b.nmiMethod = func() { cpu.SetNMI() }
 }
 
 func (b *bus) CallNMIHandler() {

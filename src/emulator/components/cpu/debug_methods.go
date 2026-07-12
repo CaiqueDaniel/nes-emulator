@@ -53,3 +53,7 @@ func (c *cpu) GetNumberOfInstructions() int {
 
 	return count
 }
+
+func (c *cpu) GetNMIFlag() bool {
+	return c.nmi
+}

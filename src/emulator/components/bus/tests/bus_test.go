@@ -19,7 +19,7 @@ type mockCPU struct {
 
 func (m *mockCPU) RunProgram() {}
 func (m *mockCPU) Reset()      {}
-func (m *mockCPU) CallNMI() {
+func (m *mockCPU) SetNMI() {
 	m.nmiCalled++
 }
 

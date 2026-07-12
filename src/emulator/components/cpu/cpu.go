@@ -13,14 +13,14 @@ const STACK_END = 0x0100
 const START_POINTER = 0xFFFC
 
 type cpu struct {
-	programCounter                                       uint16
-	acc, x, y                                            uint8
-	carry, zero, overflow, negative, irq, decimal, bFlag bool
-	stackPointer                                         uint8
-	memory                                               application.Memory
-	bus                                                  application.Bus
-	stopPcAt                                             int
-	instructionSet                                       instructionSet
+	programCounter                                            uint16
+	acc, x, y                                                 uint8
+	carry, zero, overflow, negative, irq, decimal, bFlag, nmi bool
+	stackPointer                                              uint8
+	memory                                                    application.Memory
+	bus                                                       application.Bus
+	stopPcAt                                                  int
+	instructionSet                                            instructionSet
 }
 
 func NewCpu(memory application.Memory, bus application.Bus) application.CPU {
@@ -75,6 +75,11 @@ func (c *cpu) RunProgram() {
 	c.programCounter = startAddress
 
 	for {
+		if c.nmi {
+			c.HandleNMI()
+			c.nmi = false
+		}
+
 		opCode := c.memory.Read(c.programCounter)
 		c.programCounter++
 
@@ -97,10 +102,22 @@ func (c *cpu) Reset() {
 	c.negative = false
 	c.irq = true
 	c.stackPointer = 0xFF
+	c.nmi = false
 }
 
-func (c *cpu) CallNMI() {
+func (c *cpu) SetNMI() {
+	c.nmi = true
+}
 
+func (c *cpu) HandleNMI() {
+	const nmi_handler_byte_ptr = 0xFFFA
+
+	c.PushStatusIntoStack()
+
+	lowByte := c.memory.Read(nmi_handler_byte_ptr)
+	highByte := c.memory.Read(nmi_handler_byte_ptr + 1)
+
+	c.programCounter = uint16(highByte)<<8 | uint16(lowByte)
 }
 
 func (c *cpu) PushValueToStack(value uint8) {
