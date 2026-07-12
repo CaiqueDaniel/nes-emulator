@@ -2,6 +2,7 @@ package tests
 
 import (
 	"nes-emu/src/emulator/components/bus"
+	"nes-emu/test/fixtures"
 	"testing"
 )
 
@@ -11,16 +12,6 @@ type mockTickable struct {
 
 func (m *mockTickable) Tick() {
 	m.tickCalled++
-}
-
-type mockCPU struct {
-	nmiCalled int
-}
-
-func (m *mockCPU) RunProgram() {}
-func (m *mockCPU) Reset()      {}
-func (m *mockCPU) SetNMI() {
-	m.nmiCalled++
 }
 
 func TestNewBus(t *testing.T) {
@@ -61,18 +52,18 @@ func TestAttachTickableAndTick(t *testing.T) {
 
 func TestAttachNMIAndCallNMIHandler(t *testing.T) {
 	b := bus.NewBus()
-	cpu := &mockCPU{}
+	cpu := &fixtures.MockCPU{}
 
 	b.AttachNMI(cpu)
 	b.CallNMIHandler()
 
-	if cpu.nmiCalled != 1 {
-		t.Errorf("Expected cpu.CallNMI to be called 1 time, got %d", cpu.nmiCalled)
+	if cpu.NmiCalled != 1 {
+		t.Errorf("Expected cpu.CallNMI to be called 1 time, got %d", cpu.NmiCalled)
 	}
 
 	b.CallNMIHandler()
 
-	if cpu.nmiCalled != 2 {
-		t.Errorf("Expected cpu.CallNMI to be called 2 times, got %d", cpu.nmiCalled)
+	if cpu.NmiCalled != 2 {
+		t.Errorf("Expected cpu.CallNMI to be called 2 times, got %d", cpu.NmiCalled)
 	}
 }
