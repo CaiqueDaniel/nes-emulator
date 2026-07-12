@@ -10,7 +10,7 @@ import (
 func TestShouldLoadAcumulator(t *testing.T) {
 	memory := memory.NewMemory()
 	b := bus.NewBus(memory)
-	cpu := internal.NewCpuWithInternal(memory, b)
+	cpu := internal.NewCpuWithInternal(b)
 	cpu.LoadValueIntoRegister(0x42, internal.ACCUMULATOR)
 
 	if cpu.GetDebugData()["acc"] != 0x42 {
@@ -29,7 +29,7 @@ func TestShouldLoadAcumulator(t *testing.T) {
 func TestShouldLoadAcumulatorWithZero(t *testing.T) {
 	memory := memory.NewMemory()
 	b := bus.NewBus(memory)
-	cpu := internal.NewCpuWithInternal(memory, b)
+	cpu := internal.NewCpuWithInternal(b)
 	cpu.LoadValueIntoRegister(0x00, internal.ACCUMULATOR)
 
 	if cpu.GetDebugData()["acc"] != 0x00 {
@@ -48,7 +48,7 @@ func TestShouldLoadAcumulatorWithZero(t *testing.T) {
 func TestShouldLoadAcumulatorWithNegativeValue(t *testing.T) {
 	memory := memory.NewMemory()
 	b := bus.NewBus(memory)
-	cpu := internal.NewCpuWithInternal(memory, b)
+	cpu := internal.NewCpuWithInternal(b)
 	cpu.LoadValueIntoRegister(128, internal.ACCUMULATOR)
 
 	if cpu.GetDebugData()["acc"] != 128 {
@@ -67,7 +67,7 @@ func TestShouldLoadAcumulatorWithNegativeValue(t *testing.T) {
 func TestShouldLoadXRegister(t *testing.T) {
 	memory := memory.NewMemory()
 	b := bus.NewBus(memory)
-	cpu := internal.NewCpuWithInternal(memory, b)
+	cpu := internal.NewCpuWithInternal(b)
 	cpu.LoadValueIntoRegister(0x42, internal.REGISTER_X)
 
 	if cpu.GetDebugData()["x"] != 0x42 {
@@ -78,7 +78,7 @@ func TestShouldLoadXRegister(t *testing.T) {
 func TestShouldLoadYRegister(t *testing.T) {
 	memory := memory.NewMemory()
 	b := bus.NewBus(memory)
-	cpu := internal.NewCpuWithInternal(memory, b)
+	cpu := internal.NewCpuWithInternal(b)
 	cpu.LoadValueIntoRegister(0x42, internal.REGISTER_Y)
 
 	if cpu.GetDebugData()["y"] != 0x42 {

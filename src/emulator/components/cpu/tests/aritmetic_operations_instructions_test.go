@@ -135,7 +135,7 @@ func TestAddWithCarry(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			mem := memory.NewMemory()
 			b := bus.NewBus(mem)
-			cpu := internal.NewCpuWithInternal(mem, b)
+			cpu := internal.NewCpuWithInternal(b)
 
 			cpu.LoadValueIntoRegister(tt.initialAcc, internal.ACCUMULATOR)
 			if tt.initialCarry {
@@ -274,7 +274,7 @@ func TestSubtractWithCarry(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			mem := memory.NewMemory()
 			b := bus.NewBus(mem)
-			cpu := internal.NewCpuWithInternal(mem, b)
+			cpu := internal.NewCpuWithInternal(b)
 
 			cpu.LoadValueIntoRegister(tt.initialAcc, internal.ACCUMULATOR)
 			if tt.initialCarry {
@@ -443,7 +443,7 @@ func TestCompareWithRegister(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			mem := memory.NewMemory()
 			b := bus.NewBus(mem)
-			cpu := internal.NewCpuWithInternal(mem, b)
+			cpu := internal.NewCpuWithInternal(b)
 
 			cpu.LoadValueIntoRegister(tt.initialRegister, tt.register)
 			cpu.CompareWithRegister(tt.value, tt.register)
@@ -522,7 +522,7 @@ func TestIncrementMemory(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			mem := memory.NewMemory()
 			b := bus.NewBus(mem)
-			cpu := internal.NewCpuWithInternal(mem, b)
+			cpu := internal.NewCpuWithInternal(b)
 
 			mem.Write(tt.address, tt.initialValue)
 			cpu.IncrementMemory(tt.address)
@@ -604,7 +604,7 @@ func TestIncrementRegister(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			mem := memory.NewMemory()
 			b := bus.NewBus(mem)
-			cpu := internal.NewCpuWithInternal(mem, b)
+			cpu := internal.NewCpuWithInternal(b)
 
 			cpu.LoadValueIntoRegister(tt.initialValue, tt.register)
 			cpu.IncrementRegister(tt.register)
@@ -678,7 +678,7 @@ func TestDecrementMemory(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			mem := memory.NewMemory()
 			b := bus.NewBus(mem)
-			cpu := internal.NewCpuWithInternal(mem, b)
+			cpu := internal.NewCpuWithInternal(b)
 
 			mem.Write(tt.address, tt.initialValue)
 			cpu.DecrementMemory(tt.address)
@@ -760,7 +760,7 @@ func TestDecrementRegister(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			mem := memory.NewMemory()
 			b := bus.NewBus(mem)
-			cpu := internal.NewCpuWithInternal(mem, b)
+			cpu := internal.NewCpuWithInternal(b)
 
 			cpu.LoadValueIntoRegister(tt.initialValue, tt.register)
 			cpu.DecrementRegister(tt.register)

@@ -10,7 +10,7 @@ import (
 func TestCarryFlagInstructions(t *testing.T) {
 	mem := memory.NewMemory()
 	b := bus.NewBus(mem)
-	cpu := internal.NewCpuWithInternal(mem, b)
+	cpu := internal.NewCpuWithInternal(b)
 
 	// Default should be false
 	if cpu.GetCarryFlag() {
@@ -33,7 +33,7 @@ func TestCarryFlagInstructions(t *testing.T) {
 func TestInterruptFlagInstructions(t *testing.T) {
 	mem := memory.NewMemory()
 	b := bus.NewBus(mem)
-	cpu := internal.NewCpuWithInternal(mem, b)
+	cpu := internal.NewCpuWithInternal(b)
 
 	// Set Interrupt Flag
 	cpu.SetInterruptFlag()
@@ -51,7 +51,7 @@ func TestInterruptFlagInstructions(t *testing.T) {
 func TestOverflowFlagInstructions(t *testing.T) {
 	mem := memory.NewMemory()
 	b := bus.NewBus(mem)
-	cpu := internal.NewCpuWithInternal(mem, b)
+	cpu := internal.NewCpuWithInternal(b)
 
 	// Default should be false
 	if cpu.GetOverflowFlag() {
@@ -74,7 +74,7 @@ func TestOverflowFlagInstructions(t *testing.T) {
 func TestNoOpInstruction(t *testing.T) {
 	mem := memory.NewMemory()
 	b := bus.NewBus(mem)
-	cpu := internal.NewCpuWithInternal(mem, b)
+	cpu := internal.NewCpuWithInternal(b)
 
 	// Save initial CPU state
 	initialDebug := cpu.GetDebugData()
@@ -100,7 +100,7 @@ func TestNoOpInstruction(t *testing.T) {
 func TestGetZeroFlag(t *testing.T) {
 	mem := memory.NewMemory()
 	b := bus.NewBus(mem)
-	cpu := internal.NewCpuWithInternal(mem, b)
+	cpu := internal.NewCpuWithInternal(b)
 
 	// Default should be false
 	if cpu.GetZeroFlag() {
@@ -125,7 +125,7 @@ func TestGetZeroFlag(t *testing.T) {
 func TestGetNegativeFlag(t *testing.T) {
 	mem := memory.NewMemory()
 	b := bus.NewBus(mem)
-	cpu := internal.NewCpuWithInternal(mem, b)
+	cpu := internal.NewCpuWithInternal(b)
 
 	// Default should be false
 	if cpu.GetNegativeFlag() {
@@ -150,7 +150,7 @@ func TestGetNegativeFlag(t *testing.T) {
 func TestDecimalFlagInstructions(t *testing.T) {
 	mem := memory.NewMemory()
 	b := bus.NewBus(mem)
-	cpu := internal.NewCpuWithInternal(mem, b)
+	cpu := internal.NewCpuWithInternal(b)
 
 	// Default should be false
 	if cpu.GetDecimalFlag() {

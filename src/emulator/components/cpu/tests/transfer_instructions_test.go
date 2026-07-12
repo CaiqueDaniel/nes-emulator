@@ -30,7 +30,7 @@ func TestTransferFromAccumulatorToRegisters(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			mem := memory.NewMemory()
 			b := bus.NewBus(mem)
-			cpu := internal.NewCpuWithInternal(mem, b)
+			cpu := internal.NewCpuWithInternal(b)
 
 			cpu.LoadValueIntoRegister(0x42, internal.ACCUMULATOR)
 			cpu.TransferFromAccumulatorToRegister(tt.constant)
@@ -77,7 +77,7 @@ func TestTransferFromAccumulatorToRegistersWithFlaggableValues(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			mem := memory.NewMemory()
 			b := bus.NewBus(mem)
-			cpu := internal.NewCpuWithInternal(mem, b)
+			cpu := internal.NewCpuWithInternal(b)
 
 			cpu.LoadValueIntoRegister(0, internal.ACCUMULATOR)
 			cpu.TransferFromAccumulatorToRegister(tt.constant)
@@ -126,7 +126,7 @@ func TestTransferFromRegisterToAccumulator(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			mem := memory.NewMemory()
 			b := bus.NewBus(mem)
-			cpu := internal.NewCpuWithInternal(mem, b)
+			cpu := internal.NewCpuWithInternal(b)
 
 			cpu.LoadValueIntoRegister(0x42, tt.constant)
 			cpu.TransferFromRegisterToAccumulator(tt.constant)

@@ -45,7 +45,7 @@ func TestRegisterConstantsValues(t *testing.T) {
 func TestNewCpuInitialization(t *testing.T) {
 	memory := memory.NewMemory()
 	b := bus.NewBus(memory)
-	cpu := internal.NewCpuWithInternal(memory, b)
+	cpu := internal.NewCpuWithInternal(b)
 
 	debugData := cpu.GetDebugData()
 
@@ -81,7 +81,7 @@ func TestNewCpuInitialization(t *testing.T) {
 func TestCpuResetClearsAllRegisters(t *testing.T) {
 	memory := memory.NewMemory()
 	b := bus.NewBus(memory)
-	cpu := internal.NewCpuWithInternal(memory, b)
+	cpu := internal.NewCpuWithInternal(b)
 
 	// Set some values to non-zero
 	cpu.LoadValueIntoRegister(0xFF, internal.ACCUMULATOR)
@@ -119,7 +119,7 @@ func TestCpuResetClearsAllRegisters(t *testing.T) {
 func TestGetDebugDataReturnsCurrentRegisterState(t *testing.T) {
 	memory := memory.NewMemory()
 	b := bus.NewBus(memory)
-	cpu := internal.NewCpuWithInternal(memory, b)
+	cpu := internal.NewCpuWithInternal(b)
 
 	// Set specific values
 	cpu.LoadValueIntoRegister(0x42, internal.ACCUMULATOR)
@@ -148,7 +148,7 @@ func TestGetDebugDataReturnsCurrentRegisterState(t *testing.T) {
 func TestGetDebugDataIsIndependent(t *testing.T) {
 	memory := memory.NewMemory()
 	b := bus.NewBus(memory)
-	cpu := internal.NewCpuWithInternal(memory, b)
+	cpu := internal.NewCpuWithInternal(b)
 
 	// Get initial debug data
 	debugData1 := cpu.GetDebugData()
@@ -166,7 +166,7 @@ func TestGetDebugDataIsIndependent(t *testing.T) {
 func TestPushValueToStackDecrementsStackPointer(t *testing.T) {
 	memory := memory.NewMemory()
 	b := bus.NewBus(memory)
-	cpu := internal.NewCpuWithInternal(memory, b)
+	cpu := internal.NewCpuWithInternal(b)
 
 	cpu.PushValueToStack(0x42)
 
@@ -182,7 +182,7 @@ func TestPushValueToStackDecrementsStackPointer(t *testing.T) {
 func TestPushValueToStackMultipleTimesDecrementsStackPointerCorrectly(t *testing.T) {
 	memory := memory.NewMemory()
 	b := bus.NewBus(memory)
-	cpu := internal.NewCpuWithInternal(memory, b)
+	cpu := internal.NewCpuWithInternal(b)
 
 	cpu.PushValueToStack(0x42)
 	cpu.PushValueToStack(0x43)
@@ -208,7 +208,7 @@ func TestPushValueToStackMultipleTimesDecrementsStackPointerCorrectly(t *testing
 func TestPullValueFromStackIncrementsStackPointer(t *testing.T) {
 	memory := memory.NewMemory()
 	b := bus.NewBus(memory)
-	cpu := internal.NewCpuWithInternal(memory, b)
+	cpu := internal.NewCpuWithInternal(b)
 
 	cpu.PushValueToStack(0x42)
 	cpu.PushValueToStack(0x43)
@@ -232,7 +232,7 @@ func TestPullValueFromStackIncrementsStackPointer(t *testing.T) {
 func TestRunProgram(t *testing.T) {
 	memory := memory.NewMemory()
 	bus := bus.NewBus(memory)
-	sut := cpu.NewCpuWithStopAt(memory, bus, 0xC002)
+	sut := cpu.NewCpuWithStopAt(bus, 0xC002)
 
 	memory.Write(0xC000, 0xA9) //LDA #
 	memory.Write(0xC001, 34)   //34
@@ -267,7 +267,7 @@ func TestRunProgram(t *testing.T) {
 func TestNumberOfInstructions(t *testing.T) {
 	memory := memory.NewMemory()
 	bus := bus.NewBus(memory)
-	cpu := cpu.NewCpuWithInternal(memory, bus)
+	cpu := cpu.NewCpuWithInternal(bus)
 
 	if cpu.GetNumberOfInstructions() != 151 {
 		t.Errorf("Incorrect number of instructions loaded (%d)", cpu.GetNumberOfInstructions())
@@ -277,7 +277,7 @@ func TestNumberOfInstructions(t *testing.T) {
 func TestSetNMI(t *testing.T) {
 	memory := memory.NewMemory()
 	b := bus.NewBus(memory)
-	cpu := internal.NewCpuWithInternal(memory, b)
+	cpu := internal.NewCpuWithInternal(b)
 
 	if cpu.GetNMIFlag() {
 		t.Errorf("Expected NMI flag to be false initially")
@@ -293,7 +293,7 @@ func TestSetNMI(t *testing.T) {
 func TestHandleNMI(t *testing.T) {
 	memory := memory.NewMemory()
 	b := bus.NewBus(memory)
-	cpu := internal.NewCpuWithProgramCounter(memory, 0x1234, b)
+	cpu := internal.NewCpuWithProgramCounter(0x1234, b)
 
 	// Configure NMI vector in memory (0xFFFA and 0xFFFB)
 	memory.Write(0xFFFA, 0x00)
@@ -322,7 +322,7 @@ func TestHandleNMI(t *testing.T) {
 func TestRunProgramHandlesNMI(t *testing.T) {
 	memory := memory.NewMemory()
 	b := bus.NewBus(memory)
-	cpu := internal.NewCpuWithStopAt(memory, b, 0x8001)
+	cpu := internal.NewCpuWithStopAt(b, 0x8001)
 
 	// Set Start Pointer (0xFFFC) to 0xC000
 	memory.Write(0xFFFC, 0x00)

@@ -10,7 +10,7 @@ import (
 func TestJump(t *testing.T) {
 	mem := memory.NewMemory()
 	b := bus.NewBus(mem)
-	cpu := internal.NewCpuWithInternal(mem, b)
+	cpu := internal.NewCpuWithInternal(b)
 
 	cpu.JumpProgramCounterToValue(0x1234)
 
@@ -22,7 +22,7 @@ func TestJump(t *testing.T) {
 func TestJumpProgramCounterByIndirectValue(t *testing.T) {
 	mem := memory.NewMemory()
 	b := bus.NewBus(mem)
-	cpu := internal.NewCpuWithInternal(mem, b)
+	cpu := internal.NewCpuWithInternal(b)
 
 	mem.Write(0x03FF, 1)
 	mem.Write(0x4000, 123)
@@ -37,7 +37,7 @@ func TestJumpProgramCounterByIndirectValue(t *testing.T) {
 func TestJumpProgramCounterToSubRoutine(t *testing.T) {
 	mem := memory.NewMemory()
 	b := bus.NewBus(mem)
-	cpu := internal.NewCpuWithProgramCounter(mem, 0x1234, b)
+	cpu := internal.NewCpuWithProgramCounter(0x1234, b)
 
 	cpu.JumpProgramCounterToSubRoutine(0x5678)
 
@@ -57,7 +57,7 @@ func TestJumpProgramCounterToSubRoutine(t *testing.T) {
 func TestReturnFromSubRoutine(t *testing.T) {
 	mem := memory.NewMemory()
 	b := bus.NewBus(mem)
-	cpu := internal.NewCpuWithProgramCounter(mem, 0x1234, b)
+	cpu := internal.NewCpuWithProgramCounter(0x1234, b)
 
 	cpu.JumpProgramCounterToSubRoutine(0x5678)
 	cpu.ReturnFromSubRoutine()
@@ -83,7 +83,7 @@ func pushInterruptState(cpu interface {
 func TestReturnFromInterrupt_RestoresProgramCounter(t *testing.T) {
 	mem := memory.NewMemory()
 	b := bus.NewBus(mem)
-	cpu := internal.NewCpuWithInternal(mem, b)
+	cpu := internal.NewCpuWithInternal(b)
 
 	pushInterruptState(cpu, 0x00, 0x34, 0x12)
 	cpu.ReturnFromInterrupt()
@@ -96,7 +96,7 @@ func TestReturnFromInterrupt_RestoresProgramCounter(t *testing.T) {
 func TestReturnFromInterrupt_RestoresProgramCounter_HighByteOnly(t *testing.T) {
 	mem := memory.NewMemory()
 	b := bus.NewBus(mem)
-	cpu := internal.NewCpuWithInternal(mem, b)
+	cpu := internal.NewCpuWithInternal(b)
 
 	pushInterruptState(cpu, 0x00, 0x00, 0xAB)
 	cpu.ReturnFromInterrupt()
@@ -109,7 +109,7 @@ func TestReturnFromInterrupt_RestoresProgramCounter_HighByteOnly(t *testing.T) {
 func TestReturnFromInterrupt_RestoresCarryFlag(t *testing.T) {
 	mem := memory.NewMemory()
 	b := bus.NewBus(mem)
-	cpu := internal.NewCpuWithInternal(mem, b)
+	cpu := internal.NewCpuWithInternal(b)
 
 	pushInterruptState(cpu, 0b00000001, 0x00, 0x00)
 	cpu.ReturnFromInterrupt()
@@ -122,7 +122,7 @@ func TestReturnFromInterrupt_RestoresCarryFlag(t *testing.T) {
 func TestReturnFromInterrupt_RestoresZeroFlag(t *testing.T) {
 	mem := memory.NewMemory()
 	b := bus.NewBus(mem)
-	cpu := internal.NewCpuWithInternal(mem, b)
+	cpu := internal.NewCpuWithInternal(b)
 
 	pushInterruptState(cpu, 0b00000010, 0x00, 0x00)
 	cpu.ReturnFromInterrupt()
@@ -135,7 +135,7 @@ func TestReturnFromInterrupt_RestoresZeroFlag(t *testing.T) {
 func TestReturnFromInterrupt_RestoresIRQFlag(t *testing.T) {
 	mem := memory.NewMemory()
 	b := bus.NewBus(mem)
-	cpu := internal.NewCpuWithInternal(mem, b)
+	cpu := internal.NewCpuWithInternal(b)
 
 	pushInterruptState(cpu, 0b00000100, 0x00, 0x00)
 	cpu.ReturnFromInterrupt()
@@ -148,7 +148,7 @@ func TestReturnFromInterrupt_RestoresIRQFlag(t *testing.T) {
 func TestReturnFromInterrupt_RestoresDecimalFlag(t *testing.T) {
 	mem := memory.NewMemory()
 	b := bus.NewBus(mem)
-	cpu := internal.NewCpuWithInternal(mem, b)
+	cpu := internal.NewCpuWithInternal(b)
 
 	pushInterruptState(cpu, 0b00001000, 0x00, 0x00)
 	cpu.ReturnFromInterrupt()
@@ -161,7 +161,7 @@ func TestReturnFromInterrupt_RestoresDecimalFlag(t *testing.T) {
 func TestReturnFromInterrupt_RestoresOverflowFlag(t *testing.T) {
 	mem := memory.NewMemory()
 	b := bus.NewBus(mem)
-	cpu := internal.NewCpuWithInternal(mem, b)
+	cpu := internal.NewCpuWithInternal(b)
 
 	pushInterruptState(cpu, 0b01000000, 0x00, 0x00)
 	cpu.ReturnFromInterrupt()
@@ -174,7 +174,7 @@ func TestReturnFromInterrupt_RestoresOverflowFlag(t *testing.T) {
 func TestReturnFromInterrupt_RestoresNegativeFlag(t *testing.T) {
 	mem := memory.NewMemory()
 	b := bus.NewBus(mem)
-	cpu := internal.NewCpuWithInternal(mem, b)
+	cpu := internal.NewCpuWithInternal(b)
 
 	pushInterruptState(cpu, 0b10000000, 0x00, 0x00)
 	cpu.ReturnFromInterrupt()
@@ -187,7 +187,7 @@ func TestReturnFromInterrupt_RestoresNegativeFlag(t *testing.T) {
 func TestReturnFromInterrupt_Bits4And5InFlagsAreIgnored(t *testing.T) {
 	mem := memory.NewMemory()
 	b := bus.NewBus(mem)
-	cpu := internal.NewCpuWithInternal(mem, b)
+	cpu := internal.NewCpuWithInternal(b)
 
 	pushInterruptState(cpu, 0b00110000, 0x00, 0x00)
 	cpu.ReturnFromInterrupt()
@@ -201,7 +201,7 @@ func TestReturnFromInterrupt_Bits4And5InFlagsAreIgnored(t *testing.T) {
 func TestReturnFromInterrupt_RestoresAllStateAtOnce(t *testing.T) {
 	mem := memory.NewMemory()
 	b := bus.NewBus(mem)
-	cpu := internal.NewCpuWithInternal(mem, b)
+	cpu := internal.NewCpuWithInternal(b)
 
 	// carry(0) + IRQ(2) + overflow(6) + negative(7) set; address 0xBEEF
 	flags := uint8(0b11000101)
@@ -235,7 +235,7 @@ func TestBreakInstruction(t *testing.T) {
 	mem := memory.NewMemory()
 	b := bus.NewBus(mem)
 	mem.Write(0xFFFE, 0x12)
-	cpu := internal.NewCpuWithProgramCounter(mem, 0x1234, b)
+	cpu := internal.NewCpuWithProgramCounter(0x1234, b)
 
 	// Default irq should be false
 	if cpu.GetIRQFlag() {

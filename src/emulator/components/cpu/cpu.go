@@ -23,9 +23,8 @@ type cpu struct {
 	instructionSet                                            instructionSet
 }
 
-func NewCpu(memory application.Memory, bus application.Bus) application.CPU {
+func NewCpu(bus application.Bus) application.CPU {
 	c := &cpu{
-		memory:   memory,
 		bus:      bus,
 		stopPcAt: -1,
 	}
@@ -34,9 +33,8 @@ func NewCpu(memory application.Memory, bus application.Bus) application.CPU {
 	return c
 }
 
-func NewCpuWithStopAt(memory application.Memory, bus application.Bus, stopPcAt int) *cpu {
+func NewCpuWithStopAt(bus application.Bus, stopPcAt int) *cpu {
 	c := &cpu{
-		memory:   memory,
 		bus:      bus,
 		stopPcAt: stopPcAt,
 	}
@@ -45,9 +43,8 @@ func NewCpuWithStopAt(memory application.Memory, bus application.Bus, stopPcAt i
 	return c
 }
 
-func NewCpuWithProgramCounter(memory application.Memory, programCounter uint16, bus application.Bus) *cpu {
+func NewCpuWithProgramCounter(programCounter uint16, bus application.Bus) *cpu {
 	c := &cpu{
-		memory:         memory,
 		programCounter: programCounter,
 		stackPointer:   0xFF,
 		bus:            bus,
@@ -57,9 +54,8 @@ func NewCpuWithProgramCounter(memory application.Memory, programCounter uint16, 
 	return c
 }
 
-func NewCpuWithInternal(memory application.Memory, bus application.Bus) *cpu {
+func NewCpuWithInternal(bus application.Bus) *cpu {
 	c := &cpu{
-		memory:   memory,
 		bus:      bus,
 		stopPcAt: -1,
 	}

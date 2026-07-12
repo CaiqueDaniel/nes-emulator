@@ -74,7 +74,7 @@ func TestInstructionCycles(t *testing.T) {
 
 		// Stop right after the instruction is fetched (PC increments)
 		// RunProgram stops when programCounter >= stopPcAt
-		cpu := internal.NewCpuWithStopAt(mem, b, 0x8001)
+		cpu := internal.NewCpuWithStopAt(b, 0x8001)
 
 		b.ResetTickCount()
 		cpu.RunProgram()
@@ -164,7 +164,7 @@ func TestInstructionCyclesPageCross(t *testing.T) {
 			pc++
 		}
 
-		cpu := internal.NewCpuWithStopAt(mem, b, int(pc))
+		cpu := internal.NewCpuWithStopAt(b, int(pc))
 		cpu.LoadValueIntoRegister(tt.registerValue, tt.register)
 
 		b.ResetTickCount()
@@ -198,7 +198,7 @@ func TestBreakInstructionCycles(t *testing.T) {
 	mem.Write(0xFFFF, 0x80)
 
 	// Stop at 0x8005 (where the interrupt vector points)
-	sut := internal.NewCpuWithStopAt(mem, b, 0x8005)
+	sut := internal.NewCpuWithStopAt(b, 0x8005)
 
 	b.ResetTickCount()
 	sut.RunProgram()
