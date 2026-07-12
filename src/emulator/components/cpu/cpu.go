@@ -170,11 +170,11 @@ func (c *cpu) interpretInstruction(opCode uint8) {
 }
 
 func (c *cpu) writeToMemory(address uint16, value uint8) {
-	c.memory.Write(address, value)
+	c.bus.WriteToMemory(address, value)
 }
 
 func (c *cpu) readFromMemory(address uint16) uint8 {
-	return c.memory.Read(address)
+	return c.bus.ReadFromMemory(address)
 }
 
 func (c *cpu) doDummyMemoryRead(address uint16) {

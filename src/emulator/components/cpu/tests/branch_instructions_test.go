@@ -8,8 +8,8 @@ import (
 )
 
 func TestBranchIfCarryIsClearAndValuePositive(t *testing.T) {
-	b := bus.NewBus()
-	memory := memory.NewMemory(b)
+	memory := memory.NewMemory()
+	b := bus.NewBus(memory)
 	cpu := internal.NewCpuWithInternal(memory, b)
 
 	cpu.BranchIfCarryIsClear(0x10)
@@ -20,8 +20,8 @@ func TestBranchIfCarryIsClearAndValuePositive(t *testing.T) {
 }
 
 func TestBranchIfCarryIsClearAndValueNegative(t *testing.T) {
-	b := bus.NewBus()
-	memory := memory.NewMemory(b)
+	memory := memory.NewMemory()
+	b := bus.NewBus(memory)
 	cpu := internal.NewCpuWithProgramCounter(memory, 0xA, b)
 
 	cpu.BranchIfCarryIsClear(128)
@@ -32,8 +32,8 @@ func TestBranchIfCarryIsClearAndValueNegative(t *testing.T) {
 }
 
 func TestBranchIfCarryIsClear_CarryIsSet(t *testing.T) {
-	b := bus.NewBus()
-	memory := memory.NewMemory(b)
+	memory := memory.NewMemory()
+	b := bus.NewBus(memory)
 	cpu := internal.NewCpuWithProgramCounter(memory, 0xA, b)
 
 	cpu.AddWithCarry(0xFF)
@@ -46,8 +46,8 @@ func TestBranchIfCarryIsClear_CarryIsSet(t *testing.T) {
 }
 
 func TestBranchIfCarryIsSetAndValuePositive(t *testing.T) {
-	b := bus.NewBus()
-	memory := memory.NewMemory(b)
+	memory := memory.NewMemory()
+	b := bus.NewBus(memory)
 	cpu := internal.NewCpuWithInternal(memory, b)
 
 	cpu.AddWithCarry(255)
@@ -60,8 +60,8 @@ func TestBranchIfCarryIsSetAndValuePositive(t *testing.T) {
 }
 
 func TestBranchIfCarryIsSetAndValueNegative(t *testing.T) {
-	b := bus.NewBus()
-	memory := memory.NewMemory(b)
+	memory := memory.NewMemory()
+	b := bus.NewBus(memory)
 	cpu := internal.NewCpuWithProgramCounter(memory, 0xA, b)
 
 	cpu.AddWithCarry(255)
@@ -74,8 +74,8 @@ func TestBranchIfCarryIsSetAndValueNegative(t *testing.T) {
 }
 
 func TestBranchIfCarryIsSet_CarryIsClear(t *testing.T) {
-	b := bus.NewBus()
-	memory := memory.NewMemory(b)
+	memory := memory.NewMemory()
+	b := bus.NewBus(memory)
 	cpu := internal.NewCpuWithProgramCounter(memory, 0xA, b)
 
 	cpu.BranchIfCarryIsSet(10)
@@ -86,8 +86,8 @@ func TestBranchIfCarryIsSet_CarryIsClear(t *testing.T) {
 }
 
 func TestBranchIfEqualWithValuePositive(t *testing.T) {
-	b := bus.NewBus()
-	memory := memory.NewMemory(b)
+	memory := memory.NewMemory()
+	b := bus.NewBus(memory)
 	cpu := internal.NewCpuWithInternal(memory, b)
 
 	cpu.AddWithCarry(0)
@@ -99,8 +99,8 @@ func TestBranchIfEqualWithValuePositive(t *testing.T) {
 }
 
 func TestBranchIfEqualWithValueNegative(t *testing.T) {
-	b := bus.NewBus()
-	memory := memory.NewMemory(b)
+	memory := memory.NewMemory()
+	b := bus.NewBus(memory)
 	cpu := internal.NewCpuWithProgramCounter(memory, 0xA, b)
 
 	cpu.AddWithCarry(0)
@@ -112,8 +112,8 @@ func TestBranchIfEqualWithValueNegative(t *testing.T) {
 }
 
 func TestBranchIfEqual_ZeroIsNotClear(t *testing.T) {
-	b := bus.NewBus()
-	memory := memory.NewMemory(b)
+	memory := memory.NewMemory()
+	b := bus.NewBus(memory)
 	cpu := internal.NewCpuWithProgramCounter(memory, 0xA, b)
 
 	cpu.BranchIfEqual(10)
@@ -124,8 +124,8 @@ func TestBranchIfEqual_ZeroIsNotClear(t *testing.T) {
 }
 
 func TestBranchIfEqual_ZeroIsClear(t *testing.T) {
-	b := bus.NewBus()
-	memory := memory.NewMemory(b)
+	memory := memory.NewMemory()
+	b := bus.NewBus(memory)
 	cpu := internal.NewCpuWithProgramCounter(memory, 0xA, b)
 
 	cpu.AddWithCarry(1)
@@ -137,8 +137,8 @@ func TestBranchIfEqual_ZeroIsClear(t *testing.T) {
 }
 
 func TestBranchIfPositiveWithValuePositive(t *testing.T) {
-	b := bus.NewBus()
-	memory := memory.NewMemory(b)
+	memory := memory.NewMemory()
+	b := bus.NewBus(memory)
 	cpu := internal.NewCpuWithProgramCounter(memory, 0xA, b)
 
 	cpu.AddWithCarry(1)
@@ -150,8 +150,8 @@ func TestBranchIfPositiveWithValuePositive(t *testing.T) {
 }
 
 func TestBranchIfPositiveWithValueNegative(t *testing.T) {
-	b := bus.NewBus()
-	memory := memory.NewMemory(b)
+	memory := memory.NewMemory()
+	b := bus.NewBus(memory)
 	cpu := internal.NewCpuWithProgramCounter(memory, 0xA, b)
 
 	cpu.AddWithCarry(128)
@@ -163,8 +163,8 @@ func TestBranchIfPositiveWithValueNegative(t *testing.T) {
 }
 
 func TestBranchIfNegativeWithValuePositive(t *testing.T) {
-	b := bus.NewBus()
-	memory := memory.NewMemory(b)
+	memory := memory.NewMemory()
+	b := bus.NewBus(memory)
 	cpu := internal.NewCpuWithProgramCounter(memory, 0xA, b)
 
 	cpu.AddWithCarry(1)
@@ -176,8 +176,8 @@ func TestBranchIfNegativeWithValuePositive(t *testing.T) {
 }
 
 func TestBranchIfNegativeWithValueNegative(t *testing.T) {
-	b := bus.NewBus()
-	memory := memory.NewMemory(b)
+	memory := memory.NewMemory()
+	b := bus.NewBus(memory)
 	cpu := internal.NewCpuWithProgramCounter(memory, 0xA, b)
 
 	cpu.AddWithCarry(128)
@@ -189,8 +189,8 @@ func TestBranchIfNegativeWithValueNegative(t *testing.T) {
 }
 
 func TestBranchIfNotEqual_ZeroIsNotClear(t *testing.T) {
-	b := bus.NewBus()
-	memory := memory.NewMemory(b)
+	memory := memory.NewMemory()
+	b := bus.NewBus(memory)
 	cpu := internal.NewCpuWithProgramCounter(memory, 0xA, b)
 
 	cpu.AddWithCarry(1)
@@ -202,8 +202,8 @@ func TestBranchIfNotEqual_ZeroIsNotClear(t *testing.T) {
 }
 
 func TestBranchIfNotEqual_ZeroIsClear(t *testing.T) {
-	b := bus.NewBus()
-	memory := memory.NewMemory(b)
+	memory := memory.NewMemory()
+	b := bus.NewBus(memory)
 	cpu := internal.NewCpuWithProgramCounter(memory, 0xA, b)
 
 	cpu.AddWithCarry(0)
@@ -215,8 +215,8 @@ func TestBranchIfNotEqual_ZeroIsClear(t *testing.T) {
 }
 
 func TestBranchIfOverflowClear_OverflowIsSet(t *testing.T) {
-	b := bus.NewBus()
-	memory := memory.NewMemory(b)
+	memory := memory.NewMemory()
+	b := bus.NewBus(memory)
 	cpu := internal.NewCpuWithProgramCounter(memory, 0xA, b)
 
 	cpu.AddWithCarry(127)
@@ -229,8 +229,8 @@ func TestBranchIfOverflowClear_OverflowIsSet(t *testing.T) {
 }
 
 func TestBranchIfOverflowClear_OverflowIsClear(t *testing.T) {
-	b := bus.NewBus()
-	memory := memory.NewMemory(b)
+	memory := memory.NewMemory()
+	b := bus.NewBus(memory)
 	cpu := internal.NewCpuWithProgramCounter(memory, 0xA, b)
 
 	cpu.AddWithCarry(1)
@@ -242,8 +242,8 @@ func TestBranchIfOverflowClear_OverflowIsClear(t *testing.T) {
 }
 
 func TestBranchIfOverflowSet_OverflowIsClear(t *testing.T) {
-	b := bus.NewBus()
-	memory := memory.NewMemory(b)
+	memory := memory.NewMemory()
+	b := bus.NewBus(memory)
 	cpu := internal.NewCpuWithProgramCounter(memory, 0xA, b)
 
 	cpu.AddWithCarry(1)
@@ -255,8 +255,8 @@ func TestBranchIfOverflowSet_OverflowIsClear(t *testing.T) {
 }
 
 func TestBranchIfOverflowSet_OverflowIsSet(t *testing.T) {
-	b := bus.NewBus()
-	memory := memory.NewMemory(b)
+	memory := memory.NewMemory()
+	b := bus.NewBus(memory)
 	cpu := internal.NewCpuWithProgramCounter(memory, 0xA, b)
 
 	cpu.AddWithCarry(127)

@@ -9,8 +9,8 @@ import (
 )
 
 func TestPPURender_ShouldDrawAPixel(t *testing.T) {
-	bus := bus.NewBus()
-	memory := memory.NewMemory(bus)
+	memory := memory.NewMemory()
+	bus := bus.NewBus(memory)
 	ppu := ppu.NewPPUWithInternal(memory, bus)
 
 	ppu.Render()
@@ -25,8 +25,8 @@ func TestPPURender_ShouldDrawAPixel(t *testing.T) {
 }
 
 func TestPPURender_ShouldWrapScanlineToStart(t *testing.T) {
-	bus := bus.NewBus()
-	memory := memory.NewMemory(bus)
+	memory := memory.NewMemory()
+	bus := bus.NewBus(memory)
 	ppu := ppu.NewPPUWithInternal(memory, bus)
 	i := 0
 
@@ -49,8 +49,8 @@ func TestPPURender_ShouldWrapScanlineToStart(t *testing.T) {
 }
 
 func TestPPURender_ShouldNotTriggerAnNMIOnVBlank_WhenNMIFlagDisabled(t *testing.T) {
-	bus := bus.NewBus()
-	memory := memory.NewMemory(bus)
+	memory := memory.NewMemory()
+	bus := bus.NewBus(memory)
 	mockCpu := &fixtures.MockCPU{}
 
 	bus.AttachNMI(mockCpu)
@@ -81,8 +81,8 @@ func TestPPURender_ShouldNotTriggerAnNMIOnVBlank_WhenNMIFlagDisabled(t *testing.
 }
 
 func TestPPURender_ShouldTriggerAnNMIOnVBlank_WhenNMIFlagEnabled(t *testing.T) {
-	bus := bus.NewBus()
-	memory := memory.NewMemory(bus)
+	memory := memory.NewMemory()
+	bus := bus.NewBus(memory)
 	mockCpu := &fixtures.MockCPU{}
 
 	bus.AttachNMI(mockCpu)

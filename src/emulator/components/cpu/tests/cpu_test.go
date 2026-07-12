@@ -43,8 +43,8 @@ func TestRegisterConstantsValues(t *testing.T) {
 
 // CPU Initialization and Reset Tests
 func TestNewCpuInitialization(t *testing.T) {
-	b := bus.NewBus()
-	memory := memory.NewMemory(b)
+	memory := memory.NewMemory()
+	b := bus.NewBus(memory)
 	cpu := internal.NewCpuWithInternal(memory, b)
 
 	debugData := cpu.GetDebugData()
@@ -79,8 +79,8 @@ func TestNewCpuInitialization(t *testing.T) {
 }
 
 func TestCpuResetClearsAllRegisters(t *testing.T) {
-	b := bus.NewBus()
-	memory := memory.NewMemory(b)
+	memory := memory.NewMemory()
+	b := bus.NewBus(memory)
 	cpu := internal.NewCpuWithInternal(memory, b)
 
 	// Set some values to non-zero
@@ -117,8 +117,8 @@ func TestCpuResetClearsAllRegisters(t *testing.T) {
 }
 
 func TestGetDebugDataReturnsCurrentRegisterState(t *testing.T) {
-	b := bus.NewBus()
-	memory := memory.NewMemory(b)
+	memory := memory.NewMemory()
+	b := bus.NewBus(memory)
 	cpu := internal.NewCpuWithInternal(memory, b)
 
 	// Set specific values
@@ -146,8 +146,8 @@ func TestGetDebugDataReturnsCurrentRegisterState(t *testing.T) {
 }
 
 func TestGetDebugDataIsIndependent(t *testing.T) {
-	b := bus.NewBus()
-	memory := memory.NewMemory(b)
+	memory := memory.NewMemory()
+	b := bus.NewBus(memory)
 	cpu := internal.NewCpuWithInternal(memory, b)
 
 	// Get initial debug data
@@ -164,8 +164,8 @@ func TestGetDebugDataIsIndependent(t *testing.T) {
 }
 
 func TestPushValueToStackDecrementsStackPointer(t *testing.T) {
-	b := bus.NewBus()
-	memory := memory.NewMemory(b)
+	memory := memory.NewMemory()
+	b := bus.NewBus(memory)
 	cpu := internal.NewCpuWithInternal(memory, b)
 
 	cpu.PushValueToStack(0x42)
@@ -180,8 +180,8 @@ func TestPushValueToStackDecrementsStackPointer(t *testing.T) {
 }
 
 func TestPushValueToStackMultipleTimesDecrementsStackPointerCorrectly(t *testing.T) {
-	b := bus.NewBus()
-	memory := memory.NewMemory(b)
+	memory := memory.NewMemory()
+	b := bus.NewBus(memory)
 	cpu := internal.NewCpuWithInternal(memory, b)
 
 	cpu.PushValueToStack(0x42)
@@ -206,8 +206,8 @@ func TestPushValueToStackMultipleTimesDecrementsStackPointerCorrectly(t *testing
 }
 
 func TestPullValueFromStackIncrementsStackPointer(t *testing.T) {
-	b := bus.NewBus()
-	memory := memory.NewMemory(b)
+	memory := memory.NewMemory()
+	b := bus.NewBus(memory)
 	cpu := internal.NewCpuWithInternal(memory, b)
 
 	cpu.PushValueToStack(0x42)
@@ -230,8 +230,8 @@ func TestPullValueFromStackIncrementsStackPointer(t *testing.T) {
 }
 
 func TestRunProgram(t *testing.T) {
-	bus := bus.NewBusWithInternalType()
-	memory := memory.NewMemory(bus)
+	memory := memory.NewMemory()
+	bus := bus.NewBus(memory)
 	sut := cpu.NewCpuWithStopAt(memory, bus, 0xC002)
 
 	memory.Write(0xC000, 0xA9) //LDA #
@@ -265,8 +265,9 @@ func TestRunProgram(t *testing.T) {
 }
 
 func TestNumberOfInstructions(t *testing.T) {
-	bus := bus.NewBus()
-	cpu := cpu.NewCpuWithInternal(memory.NewMemory(bus), bus)
+	memory := memory.NewMemory()
+	bus := bus.NewBus(memory)
+	cpu := cpu.NewCpuWithInternal(memory, bus)
 
 	if cpu.GetNumberOfInstructions() != 151 {
 		t.Errorf("Incorrect number of instructions loaded (%d)", cpu.GetNumberOfInstructions())
@@ -274,8 +275,8 @@ func TestNumberOfInstructions(t *testing.T) {
 }
 
 func TestSetNMI(t *testing.T) {
-	b := bus.NewBus()
-	memory := memory.NewMemory(b)
+	memory := memory.NewMemory()
+	b := bus.NewBus(memory)
 	cpu := internal.NewCpuWithInternal(memory, b)
 
 	if cpu.GetNMIFlag() {
@@ -290,8 +291,8 @@ func TestSetNMI(t *testing.T) {
 }
 
 func TestHandleNMI(t *testing.T) {
-	b := bus.NewBus()
-	memory := memory.NewMemory(b)
+	memory := memory.NewMemory()
+	b := bus.NewBus(memory)
 	cpu := internal.NewCpuWithProgramCounter(memory, 0x1234, b)
 
 	// Configure NMI vector in memory (0xFFFA and 0xFFFB)
@@ -319,8 +320,8 @@ func TestHandleNMI(t *testing.T) {
 }
 
 func TestRunProgramHandlesNMI(t *testing.T) {
-	b := bus.NewBus()
-	memory := memory.NewMemory(b)
+	memory := memory.NewMemory()
+	b := bus.NewBus(memory)
 	cpu := internal.NewCpuWithStopAt(memory, b, 0x8001)
 
 	// Set Start Pointer (0xFFFC) to 0xC000

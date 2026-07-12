@@ -2,6 +2,7 @@ package tests
 
 import (
 	"nes-emu/src/emulator/components/bus"
+	"nes-emu/src/emulator/components/memory"
 	"nes-emu/test/fixtures"
 	"testing"
 )
@@ -15,14 +16,16 @@ func (m *mockTickable) Tick() {
 }
 
 func TestNewBus(t *testing.T) {
-	b := bus.NewBus()
+	mem := memory.NewMemory()
+	b := bus.NewBus(mem)
 	if b == nil {
 		t.Errorf("Expected NewBus to return a non-nil object")
 	}
 }
 
 func TestAttachTickableAndTick(t *testing.T) {
-	b := bus.NewBus()
+	mem := memory.NewMemory()
+	b := bus.NewBus(mem)
 	mock1 := &mockTickable{}
 	mock2 := &mockTickable{}
 
@@ -51,7 +54,8 @@ func TestAttachTickableAndTick(t *testing.T) {
 }
 
 func TestAttachNMIAndCallNMIHandler(t *testing.T) {
-	b := bus.NewBus()
+	mem := memory.NewMemory()
+	b := bus.NewBus(mem)
 	cpu := &fixtures.MockCPU{}
 
 	b.AttachNMI(cpu)

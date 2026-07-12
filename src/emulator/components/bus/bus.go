@@ -11,15 +11,12 @@ type bus struct {
 	nmiMethod func()
 }
 
-func NewBus() *bus {
-	return NewBusWithInternalType()
-}
-
-func NewBusWithInternalType() *bus {
+func NewBus(memory application.Memory) *bus {
 	return &bus{
 		tickables: make([]application.Tickable, 0),
 		tickCount: 0,
 		nmiMethod: func() {},
+		memory:    memory,
 	}
 }
 
