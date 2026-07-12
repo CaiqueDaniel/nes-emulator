@@ -1,12 +1,17 @@
 package tests
 
 import (
+	"nes-emu/src/emulator/components/bus"
+	"nes-emu/src/emulator/components/memory"
 	"nes-emu/src/emulator/components/ppu"
+	"nes-emu/test/fixtures"
 	"testing"
 )
 
 func TestPPURender_ShouldDrawAPixel(t *testing.T) {
-	ppu := ppu.NewPPUWithInternal()
+	bus := bus.NewBus()
+	memory := memory.NewMemory(bus)
+	ppu := ppu.NewPPUWithInternal(memory, &fixtures.NMIBusMock{})
 
 	ppu.Render()
 
@@ -20,7 +25,9 @@ func TestPPURender_ShouldDrawAPixel(t *testing.T) {
 }
 
 func TestPPURender_ShouldWrapScanlineToStart(t *testing.T) {
-	ppu := ppu.NewPPUWithInternal()
+	bus := bus.NewBus()
+	memory := memory.NewMemory(bus)
+	ppu := ppu.NewPPUWithInternal(memory, &fixtures.NMIBusMock{})
 	i := 0
 
 	for {
@@ -38,5 +45,65 @@ func TestPPURender_ShouldWrapScanlineToStart(t *testing.T) {
 
 	if ppu.GetCurrentScanlinePixel() != 0 {
 		t.Errorf("expected to be at pixel 0, got %d", ppu.GetCurrentScanlinePixel())
+	}
+}
+
+func TestPPURender_ShouldNotTriggerAnNMIOnVBlank_WhenNMIFlagDisabled(t *testing.T) {
+	bus := bus.NewBus()
+	memory := memory.NewMemory(bus)
+	nmiBus := &fixtures.NMIBusMock{}
+	ppu := ppu.NewPPUWithInternal(memory, nmiBus)
+	i := 0
+
+	for {
+		ppu.Render()
+		i++
+
+		if i == 256*240 {
+			break
+		}
+	}
+
+	if ppu.GetCurrentScanline() != 240 {
+		t.Errorf("scanline expected to be 0, got %d", ppu.GetCurrentScanline())
+	}
+
+	if ppu.GetCurrentScanlinePixel() != 0 {
+		t.Errorf("expected to be at pixel 0, got %d", ppu.GetCurrentScanlinePixel())
+	}
+
+	if nmiBus.NMICalled > 0 {
+		t.Errorf("did not expect NMI to be called")
+	}
+}
+
+func TestPPURender_ShouldTriggerAnNMIOnVBlank_WhenNMIFlagEnabled(t *testing.T) {
+	bus := bus.NewBus()
+	memory := memory.NewMemory(bus)
+	nmiBus := &fixtures.NMIBusMock{}
+	ppu := ppu.NewPPUWithInternal(memory, nmiBus)
+	i := 0
+
+	memory.Write(0x2000, 0b10000000)
+
+	for {
+		ppu.Render()
+		i++
+
+		if i == 256*240 {
+			break
+		}
+	}
+
+	if ppu.GetCurrentScanline() != 240 {
+		t.Errorf("scanline expected to be 0, got %d", ppu.GetCurrentScanline())
+	}
+
+	if ppu.GetCurrentScanlinePixel() != 0 {
+		t.Errorf("expected to be at pixel 0, got %d", ppu.GetCurrentScanlinePixel())
+	}
+
+	if nmiBus.NMICalled == 0 {
+		t.Errorf("did expect NMI to be called")
 	}
 }

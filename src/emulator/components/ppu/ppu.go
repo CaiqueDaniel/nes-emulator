@@ -29,15 +29,19 @@ type ppu struct {
 	scanline     uint16
 	pixel        uint8
 	enableRender bool
+	nmiBus       application.MNIBus
+	memory       application.Memory
 }
 
-func NewPPU() application.PPU {
-	return NewPPUWithInternal()
+func NewPPU(memory application.Memory, nmiBus application.MNIBus) *ppu {
+	return NewPPUWithInternal(memory, nmiBus)
 }
 
-func NewPPUWithInternal() *ppu {
+func NewPPUWithInternal(memory application.Memory, nmiBus application.MNIBus) *ppu {
 	return &ppu{
 		enableRender: false,
+		nmiBus:       nmiBus,
+		memory:       memory,
 	}
 }
 
@@ -50,6 +54,10 @@ func (p *ppu) Render() {
 	}
 
 	p.pixel++
+
+	if p.checkIfNMIShouldBeCalled() {
+		p.nmiBus.CallNMIHandler()
+	}
 }
 
 func (p *ppu) GetCurrentScanline() uint16 {
@@ -58,4 +66,13 @@ func (p *ppu) GetCurrentScanline() uint16 {
 
 func (p *ppu) GetCurrentScanlinePixel() uint8 {
 	return p.pixel
+}
+
+func (p *ppu) checkIfNMIShouldBeCalled() bool {
+	return p.isNMIFlagEnabled() && p.scanline == v_blank_scanline_start && p.pixel == v_blank_pixel_start
+}
+
+func (p *ppu) isNMIFlagEnabled() bool {
+	const nmiFlagMask = 0b10000000
+	return p.memory.Read(ppu_control)&nmiFlagMask != 0
 }
