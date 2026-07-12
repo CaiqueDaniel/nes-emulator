@@ -11,7 +11,7 @@ import (
 func TestPPURender_ShouldDrawAPixel(t *testing.T) {
 	bus := bus.NewBus()
 	memory := memory.NewMemory(bus)
-	ppu := ppu.NewPPUWithInternal(memory, &fixtures.NMIBusMock{})
+	ppu := ppu.NewPPUWithInternal(memory, bus)
 
 	ppu.Render()
 
@@ -27,7 +27,7 @@ func TestPPURender_ShouldDrawAPixel(t *testing.T) {
 func TestPPURender_ShouldWrapScanlineToStart(t *testing.T) {
 	bus := bus.NewBus()
 	memory := memory.NewMemory(bus)
-	ppu := ppu.NewPPUWithInternal(memory, &fixtures.NMIBusMock{})
+	ppu := ppu.NewPPUWithInternal(memory, bus)
 	i := 0
 
 	for {
@@ -51,8 +51,11 @@ func TestPPURender_ShouldWrapScanlineToStart(t *testing.T) {
 func TestPPURender_ShouldNotTriggerAnNMIOnVBlank_WhenNMIFlagDisabled(t *testing.T) {
 	bus := bus.NewBus()
 	memory := memory.NewMemory(bus)
-	nmiBus := &fixtures.NMIBusMock{}
-	ppu := ppu.NewPPUWithInternal(memory, nmiBus)
+	mockCpu := &fixtures.MockCPU{}
+
+	bus.AttachNMI(mockCpu)
+
+	ppu := ppu.NewPPUWithInternal(memory, bus)
 	i := 0
 
 	for {
@@ -72,7 +75,7 @@ func TestPPURender_ShouldNotTriggerAnNMIOnVBlank_WhenNMIFlagDisabled(t *testing.
 		t.Errorf("expected to be at pixel 0, got %d", ppu.GetCurrentScanlinePixel())
 	}
 
-	if nmiBus.NMICalled > 0 {
+	if mockCpu.NmiCalled > 0 {
 		t.Errorf("did not expect NMI to be called")
 	}
 }
@@ -80,8 +83,11 @@ func TestPPURender_ShouldNotTriggerAnNMIOnVBlank_WhenNMIFlagDisabled(t *testing.
 func TestPPURender_ShouldTriggerAnNMIOnVBlank_WhenNMIFlagEnabled(t *testing.T) {
 	bus := bus.NewBus()
 	memory := memory.NewMemory(bus)
-	nmiBus := &fixtures.NMIBusMock{}
-	ppu := ppu.NewPPUWithInternal(memory, nmiBus)
+	mockCpu := &fixtures.MockCPU{}
+
+	bus.AttachNMI(mockCpu)
+
+	ppu := ppu.NewPPUWithInternal(memory, bus)
 	i := 0
 
 	memory.Write(0x2000, 0b10000000)
@@ -103,7 +109,7 @@ func TestPPURender_ShouldTriggerAnNMIOnVBlank_WhenNMIFlagEnabled(t *testing.T) {
 		t.Errorf("expected to be at pixel 0, got %d", ppu.GetCurrentScanlinePixel())
 	}
 
-	if nmiBus.NMICalled == 0 {
+	if mockCpu.NmiCalled == 0 {
 		t.Errorf("did expect NMI to be called")
 	}
 }
