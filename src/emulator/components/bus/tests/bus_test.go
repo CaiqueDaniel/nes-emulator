@@ -71,3 +71,51 @@ func TestAttachNMIAndCallNMIHandler(t *testing.T) {
 		t.Errorf("Expected cpu.CallNMI to be called 2 times, got %d", cpu.NmiCalled)
 	}
 }
+
+func TestReadFromMemory(t *testing.T) {
+	mem := memory.NewMemory()
+	b := bus.NewBus(mem)
+	
+	mockTick := &mockTickable{}
+	b.AttachTickable(mockTick)
+
+	mem.Write(0x1234, 0x42)
+
+	result := b.ReadFromMemory(0x1234)
+
+	if result != 0x42 {
+		t.Errorf("Expected to read 0x42 from memory, got %d", result)
+	}
+
+	if b.GetTickCount() != 1 {
+		t.Errorf("Expected tick count to be 1, got %d", b.GetTickCount())
+	}
+
+	if mockTick.tickCalled != 1 {
+		t.Errorf("Expected attached tickable to be ticked 1 time, got %d", mockTick.tickCalled)
+	}
+}
+
+func TestWriteToMemory(t *testing.T) {
+	mem := memory.NewMemory()
+	b := bus.NewBus(mem)
+
+	mockTick := &mockTickable{}
+	b.AttachTickable(mockTick)
+
+	b.WriteToMemory(0x1234, 0x42)
+
+	result := mem.Read(0x1234)
+
+	if result != 0x42 {
+		t.Errorf("Expected to write 0x42 to memory, got %d", result)
+	}
+
+	if b.GetTickCount() != 1 {
+		t.Errorf("Expected tick count to be 1, got %d", b.GetTickCount())
+	}
+
+	if mockTick.tickCalled != 1 {
+		t.Errorf("Expected attached tickable to be ticked 1 time, got %d", mockTick.tickCalled)
+	}
+}
