@@ -5,6 +5,10 @@ type Bus interface {
 	AttachTickable(tickable Tickable)
 }
 
+type MNIBus interface {
+	CallNMIHandler()
+}
+
 type Tickable interface {
 	Tick()
 }

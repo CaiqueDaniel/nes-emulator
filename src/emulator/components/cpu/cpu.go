@@ -99,6 +99,10 @@ func (c *cpu) Reset() {
 	c.stackPointer = 0xFF
 }
 
+func (c *cpu) CallNMI() {
+
+}
+
 func (c *cpu) PushValueToStack(value uint8) {
 	c.memory.Write(STACK_END+uint16(c.stackPointer), value)
 	c.stackPointer--

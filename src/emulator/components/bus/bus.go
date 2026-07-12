@@ -7,9 +7,10 @@ import (
 type bus struct {
 	tickables []application.Tickable
 	tickCount uint
+	nmiMethod func()
 }
 
-func NewBus() application.Bus {
+func NewBus() *bus {
 	return NewBusWithInternalType()
 }
 
@@ -17,6 +18,7 @@ func NewBusWithInternalType() *bus {
 	return &bus{
 		tickables: make([]application.Tickable, 0),
 		tickCount: 0,
+		nmiMethod: func() {},
 	}
 }
 
@@ -29,6 +31,14 @@ func (b *bus) Tick(cycles int) {
 		tickable.Tick()
 	}
 	b.tickCount++
+}
+
+func (b *bus) AttachNMI(cpu application.CPU) {
+	b.nmiMethod = func() { cpu.CallNMI() }
+}
+
+func (b *bus) CallNMIHandler() {
+	b.nmiMethod()
 }
 
 func (b *bus) GetTickCount() uint {
