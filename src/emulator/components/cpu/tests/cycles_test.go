@@ -211,3 +211,95 @@ func TestBreakInstructionCycles(t *testing.T) {
 		t.Errorf("Expected 7 cycles for BRK instruction, got %d", actualCycles)
 	}
 }
+
+func TestBranchInstructionCycles(t *testing.T) {
+	type branchTest struct {
+		opcode         uint8
+		name           string
+		flagCondition  string
+		offset         uint8
+		expectedCycles uint
+	}
+
+	tests := []branchTest{
+		// BCC (0x90)
+		{0x90, "BCC Not Taken", "set_carry", 0x05, 2},
+		{0x90, "BCC Taken Same Page", "clear_carry", 0x05, 3},
+		{0x90, "BCC Taken Page Cross", "clear_carry", 127, 4},
+		// BCS (0xB0)
+		{0xB0, "BCS Not Taken", "clear_carry", 0x05, 2},
+		{0xB0, "BCS Taken Same Page", "set_carry", 0x05, 3},
+		{0xB0, "BCS Taken Page Cross", "set_carry", 127, 4},
+		// BEQ (0xF0)
+		{0xF0, "BEQ Not Taken", "clear_zero", 0x05, 2},
+		{0xF0, "BEQ Taken Same Page", "set_zero", 0x05, 3},
+		{0xF0, "BEQ Taken Page Cross", "set_zero", 127, 4},
+		// BNE (0xD0)
+		{0xD0, "BNE Not Taken", "set_zero", 0x05, 2},
+		{0xD0, "BNE Taken Same Page", "clear_zero", 0x05, 3},
+		{0xD0, "BNE Taken Page Cross", "clear_zero", 127, 4},
+		// BMI (0x30)
+		{0x30, "BMI Not Taken", "clear_negative", 0x05, 2},
+		{0x30, "BMI Taken Same Page", "set_negative", 0x05, 3},
+		{0x30, "BMI Taken Page Cross", "set_negative", 127, 4},
+		// BPL (0x10)
+		{0x10, "BPL Not Taken", "set_negative", 0x05, 2},
+		{0x10, "BPL Taken Same Page", "clear_negative", 0x05, 3},
+		{0x10, "BPL Taken Page Cross", "clear_negative", 127, 4},
+		// BVC (0x50)
+		{0x50, "BVC Not Taken", "set_overflow", 0x05, 2},
+		{0x50, "BVC Taken Same Page", "clear_overflow", 0x05, 3},
+		{0x50, "BVC Taken Page Cross", "clear_overflow", 127, 4},
+		// BVS (0x70)
+		{0x70, "BVS Not Taken", "clear_overflow", 0x05, 2},
+		{0x70, "BVS Taken Same Page", "set_overflow", 0x05, 3},
+		{0x70, "BVS Taken Page Cross", "set_overflow", 127, 4},
+	}
+
+	for _, tt := range tests {
+		mem := memory.NewMemory()
+		b := bus.NewBus(mem)
+
+		mem.Write(0xFFFC, 0x7F)
+		mem.Write(0xFFFD, 0x81) // Start at 0x8100 so -128 page crosses to 0x8080
+
+		pc := uint16(0x817F)
+
+		mem.Write(pc, tt.opcode)
+		pc++
+
+		mem.Write(pc, tt.offset)
+		pc++
+
+		cpu := internal.NewCpuWithStopAt(b, int(pc))
+
+		switch tt.flagCondition {
+		case "set_carry":
+			cpu.SetCarryFlag()
+		case "clear_carry":
+			cpu.ClearCarryFlag()
+		case "set_zero":
+			cpu.LoadValueIntoRegister(0x00, internal.ACCUMULATOR)
+		case "clear_zero":
+			cpu.LoadValueIntoRegister(0x01, internal.ACCUMULATOR)
+		case "set_negative":
+			cpu.LoadValueIntoRegister(0x80, internal.ACCUMULATOR)
+		case "clear_negative":
+			cpu.LoadValueIntoRegister(0x01, internal.ACCUMULATOR)
+		case "set_overflow":
+			cpu.SetOverflowFlag()
+		case "clear_overflow":
+			cpu.ClearOverflowFlag()
+		}
+
+		b.ResetTickCount()
+		cpu.RunProgram()
+
+		// RunProgram reads Reset vector (2 cycles)
+		actualCycles := b.GetTickCount() - 2
+
+		if actualCycles != tt.expectedCycles {
+			t.Errorf("Instruction 0x%02X (%s): expected %d cycles, got %d", tt.opcode, tt.name, tt.expectedCycles, actualCycles)
+		}
+	}
+}
