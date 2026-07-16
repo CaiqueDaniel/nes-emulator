@@ -3,6 +3,7 @@ package cpu
 import (
 	"nes-emu/src/emulator/application"
 	"slices"
+	"time"
 )
 
 const REGISTER_X = "X"
@@ -11,6 +12,7 @@ const ACCUMULATOR = "ACC"
 const STACK_START = 0x01FF
 const STACK_END = 0x0100
 const START_POINTER = 0xFFFC
+const clock_in_mhz = 1.789773
 
 type cpu struct {
 	programCounter                                            uint16
@@ -21,6 +23,8 @@ type cpu struct {
 	bus                                                       application.Bus
 	stopPcAt                                                  int
 	instructionSet                                            instructionSet
+	currentFrameCycles                                        uint16
+	stopProgram                                               bool
 }
 
 func NewCpu(bus application.Bus) application.CPU {
@@ -65,26 +69,8 @@ func NewCpuWithInternal(bus application.Bus) *cpu {
 }
 
 func (c *cpu) RunProgram() {
-	startAddressLow := c.readFromMemory(START_POINTER)
-	startAddressHigh := c.readFromMemory(START_POINTER + 1)
-	startAddress := (uint16(startAddressHigh) << 8) + uint16(startAddressLow)
-	c.programCounter = startAddress
-
-	for {
-		if c.nmi {
-			c.HandleNMI()
-			c.nmi = false
-		}
-
-		opCode := c.readFromMemory(c.programCounter)
-		c.programCounter++
-
-		c.interpretInstruction(opCode)
-
-		if c.stopPcAt != -1 && c.programCounter >= uint16(c.stopPcAt) {
-			break
-		}
-	}
+	c.initProgramCounter()
+	c.runGameLoop()
 }
 
 func (c *cpu) Reset() {
@@ -143,6 +129,55 @@ func (c *cpu) PushFlagsIntoStack() {
 	c.PushValueToStack(valueToPush)
 }
 
+func (c *cpu) initProgramCounter() {
+	startAddressLow := c.readFromMemory(START_POINTER)
+	startAddressHigh := c.readFromMemory(START_POINTER + 1)
+	startAddress := (uint16(startAddressHigh) << 8) + uint16(startAddressLow)
+	c.programCounter = startAddress
+}
+
+func (c *cpu) runGameLoop() {
+	const time_per_frame = time.Second / 60
+	startTime := time.Now()
+
+	for {
+		c.currentFrameCycles = 0
+
+		c.renderFrame()
+
+		timeElapsed := time.Since(startTime)
+
+		if timeElapsed < time_per_frame {
+			time.Sleep(time_per_frame - timeElapsed)
+		}
+
+		if c.stopProgram {
+			break
+		}
+	}
+}
+
+func (c *cpu) renderFrame() {
+	const cycles_per_frame = 29781
+
+	for c.currentFrameCycles < cycles_per_frame {
+		if c.nmi {
+			c.HandleNMI()
+			c.nmi = false
+		}
+
+		opCode := c.readFromMemory(c.programCounter)
+		c.programCounter++
+
+		c.interpretInstruction(opCode)
+
+		if c.stopPcAt != -1 && c.programCounter >= uint16(c.stopPcAt) {
+			c.stopProgram = true
+			break
+		}
+	}
+}
+
 func (c *cpu) interpretInstruction(opCode uint8) {
 	instruction := c.instructionSet[opCode]
 
@@ -167,10 +202,13 @@ func (c *cpu) interpretInstruction(opCode uint8) {
 
 func (c *cpu) writeToMemory(address uint16, value uint8) {
 	c.bus.WriteToMemory(address, value)
+	c.currentFrameCycles += 2
 }
 
 func (c *cpu) readFromMemory(address uint16) uint8 {
-	return c.bus.ReadFromMemory(address)
+	value := c.bus.ReadFromMemory(address)
+	c.currentFrameCycles += 2
+	return value
 }
 
 func (c *cpu) doDummyMemoryRead(address uint16) {
