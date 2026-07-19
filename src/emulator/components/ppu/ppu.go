@@ -20,6 +20,7 @@ const (
 	max_frame_scanline     = 261
 	max_pixel_per_scanline = 255
 	v_blank_scanline_start = 240
+	v_blank_scanline_end   = 260
 	v_blank_pixel_start    = 0
 )
 
@@ -68,6 +69,7 @@ func (p *ppu) Render() {
 
 	p.fetchDots()
 	p.advanceToNextPixel()
+	p.updateStatusRegister()
 
 	if p.checkIfNMIShouldBeCalled() {
 		p.bus.CallNMIHandler()
@@ -95,13 +97,33 @@ func (p *ppu) advanceToNextPixel() {
 	p.pixel++
 }
 
+func (p *ppu) updateStatusRegister() {
+	if p.isOnPreRender() {
+		value := p.bus.ReadFromMemory(ppu_status) & 0b00011111
+		p.bus.WriteToMemory(ppu_status, value)
+	}
+
+	if p.isVBlankStarted() {
+		value := p.bus.ReadFromMemory(ppu_status) ^ 0b10000000
+		p.bus.WriteToMemory(ppu_status, value)
+	}
+}
+
 func (p *ppu) checkIfNMIShouldBeCalled() bool {
-	return p.isNMIFlagEnabled() && p.scanline == v_blank_scanline_start && p.pixel == v_blank_pixel_start
+	return p.isNMIFlagEnabled() && p.isVBlankStarted()
 }
 
 func (p *ppu) isNMIFlagEnabled() bool {
 	const nmiFlagMask = 0b10000000
 	return p.bus.ReadFromMemory(ppu_control)&nmiFlagMask != 0
+}
+
+func (p *ppu) isOnPreRender() bool {
+	return p.scanline == max_frame_scanline && p.pixel == 0
+}
+
+func (p *ppu) isVBlankStarted() bool {
+	return p.scanline == v_blank_scanline_start && p.pixel == v_blank_pixel_start
 }
 
 func (p *ppu) setV(value uint16) {
