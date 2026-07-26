@@ -22,9 +22,11 @@ const (
 	v_blank_scanline_start = 240
 	v_blank_scanline_end   = 260
 	v_blank_pixel_start    = 0
+	max_dots_per_frame     = 336
 )
 
 const frequency_in_mhz = 5.37
+const base_nametable_address = 0x2000
 
 const (
 	max_value_for_15_bits = 32767
@@ -43,14 +45,19 @@ var colorPallet = [64]uint32{
 }
 
 type ppu struct {
-	vMemory      application.Memory
-	scanline     uint16
-	pixel        uint8
-	enableRender bool
-	bus          application.MNIBus
-	v, t         uint16
-	x            uint8
-	w            bool
+	vMemory                    application.Memory
+	scanline                   uint16
+	pixel                      uint8
+	enableRender               bool
+	bus                        application.MNIBus
+	v, t                       uint16
+	x                          uint8
+	w                          bool
+	dots                       uint16
+	lowPatternShiftRegister    uint16
+	highPatternShiftRegister   uint16
+	lowAttributeShiftRegister  uint16
+	highAttributeShiftRegister uint16
 }
 
 func NewPPU(bus application.MNIBus, vMemory application.Memory) *ppu {
@@ -74,6 +81,8 @@ func (p *ppu) Render() {
 	if p.checkIfNMIShouldBeCalled() {
 		p.bus.CallNMIHandler()
 	}
+
+	p.dots = (p.dots + 1) % max_dots_per_frame
 }
 
 func (p *ppu) GetCurrentScanline() uint16 {
@@ -85,7 +94,82 @@ func (p *ppu) GetCurrentScanlinePixel() uint8 {
 }
 
 func (p *ppu) fetchDots() {
+	tileIndex := p.getTileIndex()
+	highPalette, lowPalette := p.extractPaletteBits(p.readVMemory(p.getAttrTableAddress()))
+	lowPatternByte := p.getLowByteFromPatternTable(tileIndex)
+	highPatternByte := p.getHighByteFromPatternTable(tileIndex)
 
+	p.fillPatternShiftRegister(highPatternByte, lowPatternByte)
+	p.fillAttrShiftRegister(highPalette, lowPalette)
+}
+
+func (p *ppu) getTileIndex() uint8 {
+	return p.readVMemory(base_nametable_address | (p.v & 0x0FFF))
+}
+
+func (p *ppu) getAttrTableAddress() uint16 {
+	const fixed_offset = 0x03C0
+	const nametable_address_mask = 0x0C00
+	const coarse_y_mask = 0x03E0
+	const coarse_x_mask = 0xE0
+
+	nametable := p.v & nametable_address_mask
+	offsetX := (p.v & coarse_x_mask) >> 2
+	offsetY := p.v >> 2 & coarse_y_mask
+
+	return base_nametable_address | nametable | fixed_offset | offsetY | offsetX
+}
+
+// Extrai os 2 bits da paleta apropriados a partir do byte lido da Attribute Table
+func (ppu *ppu) extractPaletteBits(attrByte byte) (byte, byte) {
+	coarseY := (ppu.v >> 5) & 0x1F
+	coarseX := ppu.v & 0x1F
+
+	// Determina o shift (0, 2, 4 ou 6) com base no quadrante do tile 2x2
+	shift := ((coarseY & 2) << 1) | (coarseX & 2)
+
+	// Retorna os 2 bits que correspondem à paleta (valores de 0 a 3)
+	palette := (attrByte >> shift) & 0x03
+	highPalette := palette & 0b10
+	lowPalette := palette & 0b1
+
+	if highPalette != 0 {
+		highPalette = 255
+	}
+
+	if lowPalette != 0 {
+		lowPalette = 255
+	}
+
+	return highPalette, lowPalette
+}
+
+func (p *ppu) getLowByteFromPatternTable(tileIndex byte) byte {
+	return p.getByteFromPatternTable(tileIndex, false)
+}
+
+func (p *ppu) getHighByteFromPatternTable(tileIndex byte) byte {
+	return p.getByteFromPatternTable(tileIndex, true)
+}
+
+func (p *ppu) getByteFromPatternTable(tileIndex byte, fetchHighByte bool) byte {
+	const high_byte_offset = 0b1000
+	var address uint16
+
+	patternIndex := uint16(p.getPatternTableTileIndexFromControl()) << 12
+	fineY := p.getFineY()
+
+	if !fetchHighByte {
+		address = patternIndex | (uint16(tileIndex) << 4) | fineY
+	}
+
+	address = patternIndex | (uint16(tileIndex) << 4) | high_byte_offset | fineY
+	return p.vMemory.Read(address)
+}
+
+func (p *ppu) getPatternTableTileIndexFromControl() uint8 {
+	const index_mask = 0b1_0000
+	return (p.bus.ReadFromMemory(ppu_control) & index_mask) >> 4
 }
 
 func (p *ppu) advanceToNextPixel() {
@@ -140,4 +224,27 @@ func (p *ppu) setX(value uint8) {
 
 func (p *ppu) setW(value bool) {
 	p.w = value
+}
+
+func (p *ppu) getFineY() uint16 {
+	const fine_y_mask = 0x7000
+	return (p.v & fine_y_mask) >> 12
+}
+
+func (p *ppu) readVMemory(address uint16) uint8 {
+	return p.vMemory.Read(address)
+}
+
+func (p *ppu) fillPatternShiftRegister(highByte byte, lowByte byte) {
+	p.fillShiftRegister(highByte, &p.highPatternShiftRegister)
+	p.fillShiftRegister(lowByte, &p.lowPatternShiftRegister)
+}
+
+func (p *ppu) fillAttrShiftRegister(highByte byte, lowByte byte) {
+	p.fillShiftRegister(highByte, &p.highAttributeShiftRegister)
+	p.fillShiftRegister(lowByte, &p.lowAttributeShiftRegister)
+}
+
+func (p *ppu) fillShiftRegister(value byte, register *uint16) {
+	*register = *register | uint16(value)
 }
