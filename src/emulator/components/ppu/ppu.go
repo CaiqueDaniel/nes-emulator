@@ -75,10 +75,11 @@ func NewPPU(bus application.MNIBus, vMemory application.Memory) *ppu {
 func (p *ppu) Render() {
 	if p.dots < 255 {
 		//render pixel
+		p.renderPixel()
 		//shift registers
 	}
 
-	p.renderPixel()
+	p.advanceToNextPixel()
 	p.fetchGraphics()
 	p.updateStatusRegister()
 
@@ -99,7 +100,7 @@ func (p *ppu) GetCurrentScanlinePixel() uint8 {
 
 func (p *ppu) renderPixel() {
 	//add render logic
-	p.advanceToNextPixel()
+
 }
 
 func (p *ppu) fetchGraphics() {
