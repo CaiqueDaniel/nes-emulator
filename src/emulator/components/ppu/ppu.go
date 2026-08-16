@@ -61,10 +61,10 @@ type ppu struct {
 	pipeline                   application.PixelPipeline
 }
 
-func NewPPU(bus application.MNIBus, vMemory application.Memory) *ppu {
+func NewPPU(bus application.MNIBus, vMemory application.Memory, pipeline application.PixelPipeline) *ppu {
 	p := &ppu{
 		enableRender: false,
-		pipeline:     NewPipeline(vMemory, bus),
+		pipeline:     pipeline,
 		bus:          bus,
 		vMemory:      vMemory,
 	}
@@ -73,21 +73,20 @@ func NewPPU(bus application.MNIBus, vMemory application.Memory) *ppu {
 }
 
 func (p *ppu) Render() {
-	if p.dots < 255 {
-		//render pixel
+	p.dots = (p.dots + 1) % max_dots_per_frame
+
+	if p.dots <= 255 {
 		p.renderPixel()
-		//shift registers
+		p.shiftRegisters()
+		p.advanceToNextPixel()
 	}
 
-	p.advanceToNextPixel()
 	p.fetchGraphics()
 	p.updateStatusRegister()
 
 	if p.checkIfNMIShouldBeCalled() {
 		p.bus.CallNMIHandler()
 	}
-
-	p.dots = (p.dots + 1) % max_dots_per_frame
 }
 
 func (p *ppu) GetCurrentScanline() uint16 {
@@ -98,9 +97,20 @@ func (p *ppu) GetCurrentScanlinePixel() uint8 {
 	return p.pixel
 }
 
+func (p *ppu) GetShiftRegisters() (uint16, uint16, uint16, uint16) {
+	return p.lowPatternShiftRegister, p.highPatternShiftRegister, p.lowAttributeShiftRegister, p.highAttributeShiftRegister
+}
+
 func (p *ppu) renderPixel() {
 	//add render logic
 
+}
+
+func (p *ppu) shiftRegisters() {
+	p.lowAttributeShiftRegister = p.lowAttributeShiftRegister << 1
+	p.highAttributeShiftRegister = p.highAttributeShiftRegister << 1
+	p.lowPatternShiftRegister = p.lowPatternShiftRegister << 1
+	p.highPatternShiftRegister = p.highPatternShiftRegister << 1
 }
 
 func (p *ppu) fetchGraphics() {
