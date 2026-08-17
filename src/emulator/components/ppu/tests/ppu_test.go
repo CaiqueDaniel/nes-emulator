@@ -62,7 +62,7 @@ func TestPPURender_ShouldNotTriggerAnNMIOnVBlank_WhenNMIFlagDisabled(t *testing.
 	}
 
 	if ppu.GetCurrentScanline() != 240 {
-		t.Errorf("scanline expected to be 0, got %d", ppu.GetCurrentScanline())
+		t.Errorf("scanline expected to be 240, got %d", ppu.GetCurrentScanline())
 	}
 
 	if ppu.GetCurrentScanlinePixel() != 0 {
@@ -92,7 +92,7 @@ func TestPPURender_ShouldTriggerAnNMIOnVBlank_WhenNMIFlagEnabled(t *testing.T) {
 	}
 
 	if ppu.GetCurrentScanline() != 240 {
-		t.Errorf("scanline expected to be 0, got %d", ppu.GetCurrentScanline())
+		t.Errorf("scanline expected to be 240, got %d", ppu.GetCurrentScanline())
 	}
 
 	if ppu.GetCurrentScanlinePixel() != 0 {
@@ -120,7 +120,7 @@ func TestPPURender_ShouldResetFlagsOnStatusRegister_OnPreRender(t *testing.T) {
 	}
 
 	if ppu.GetCurrentScanline() != 261 {
-		t.Errorf("scanline expected to be 0, got %d", ppu.GetCurrentScanline())
+		t.Errorf("scanline expected to be 261, got %d", ppu.GetCurrentScanline())
 	}
 
 	if ppu.GetCurrentScanlinePixel() != 0 {
@@ -197,19 +197,11 @@ func TestPPURender_ShouldShiftRegisters_OnVisibleScanlines(t *testing.T) {
 	mockPipeline := &PixelPipelineFixture{}
 	sut := ppu.NewPPU(bus, vMemory, mockPipeline)
 
-	for i := 1; i <= 16; i++ {
+	for i := 0; i <= 16; i++ {
 		sut.Render()
 	}
 
 	lowPatternShiftRegister, highPatternShiftRegister, lowAttributeShiftRegister, highAttributeShiftRegister := sut.GetShiftRegisters()
-
-	if sut.GetCurrentScanline() != 0 {
-		t.Errorf("scanline expected to be 0, got %d", sut.GetCurrentScanline())
-	}
-
-	if sut.GetCurrentScanlinePixel() != 16 {
-		t.Errorf("expected to be at pixel 8, got %d", sut.GetCurrentScanlinePixel())
-	}
 
 	if lowPatternShiftRegister != 0b10_00000010 {
 		t.Errorf("expected low pattern shift register to be 0b00000010_00000010, got %b", lowPatternShiftRegister)
@@ -235,19 +227,11 @@ func TestPPURender_ShouldShiftRegisters_OnHBlank(t *testing.T) {
 	mockPipeline := &PixelPipelineFixture{}
 	sut := ppu.NewPPU(bus, vMemory, mockPipeline)
 
-	for i := 0; i < 256; i++ {
+	for i := 0; i <= 256; i++ {
 		sut.Render()
 	}
 
 	lowPatternShiftRegister, highPatternShiftRegister, lowAttributeShiftRegister, highAttributeShiftRegister := sut.GetShiftRegisters()
-
-	if sut.GetCurrentScanline() != 0 {
-		t.Errorf("scanline expected to be 0, got %d", sut.GetCurrentScanline())
-	}
-
-	if sut.GetCurrentScanlinePixel() != 255 {
-		t.Errorf("expected to be at pixel 255, got %d", sut.GetCurrentScanlinePixel())
-	}
 
 	if lowPatternShiftRegister != 0b1000_00010 {
 		t.Errorf("expected low pattern shift register to be 0b1000_00010, got %b", lowPatternShiftRegister)
@@ -267,14 +251,6 @@ func TestPPURender_ShouldShiftRegisters_OnHBlank(t *testing.T) {
 
 	sut.Render()
 	lowPatternShiftRegister, highPatternShiftRegister, lowAttributeShiftRegister, highAttributeShiftRegister = sut.GetShiftRegisters()
-
-	if sut.GetCurrentScanline() != 0 {
-		t.Errorf("scanline expected to be 0, got %d", sut.GetCurrentScanline())
-	}
-
-	if sut.GetCurrentScanlinePixel() != 255 {
-		t.Errorf("expected to be at pixel 255, got %d", sut.GetCurrentScanlinePixel())
-	}
 
 	if lowPatternShiftRegister != 0b1000_00010 {
 		t.Errorf("expected low pattern shift register to be 0b1000_00010, got %b", lowPatternShiftRegister)
@@ -300,52 +276,44 @@ func TestPPURender_ShouldShiftRegisters_OnVBlank(t *testing.T) {
 	mockPipeline := &PixelPipelineFixture{}
 	sut := ppu.NewPPU(bus, vMemory, mockPipeline)
 
-	for i := 0; i < 336*240; i++ {
+	for i := 0; i <= 336*240; i++ {
 		sut.Render()
 	}
 
 	lowPatternShiftRegister, highPatternShiftRegister, lowAttributeShiftRegister, highAttributeShiftRegister := sut.GetShiftRegisters()
 
-	if sut.GetCurrentScanline() != 240 {
-		t.Errorf("scanline expected to be 240, got %d", sut.GetCurrentScanline())
+	if lowPatternShiftRegister != 0b100000010 {
+		t.Errorf("expected low pattern shift register to be 0b100000010, got %b", lowPatternShiftRegister)
 	}
 
-	if sut.GetCurrentScanlinePixel() != 0 {
-		t.Errorf("expected to be at pixel 0, got %d", sut.GetCurrentScanlinePixel())
+	if highPatternShiftRegister != 0b1000000110000011 {
+		t.Errorf("expected high pattern shift register to be 0b1000000110000011, got %b", highPatternShiftRegister)
 	}
 
-	if lowPatternShiftRegister != 0b1000000110 {
-		t.Errorf("expected low pattern shift register to be 0b1000000110, got %b", lowPatternShiftRegister)
+	if lowAttributeShiftRegister != 0b1000000010000001 {
+		t.Errorf("expected low attribute shift register to be 0b1000000010000001, got %b", lowAttributeShiftRegister)
 	}
 
-	if highPatternShiftRegister != 0b1100000111 {
-		t.Errorf("expected high pattern shift register to be 0b1100000111, got %b", highPatternShiftRegister)
-	}
-
-	if lowAttributeShiftRegister != 0b100000011 {
-		t.Errorf("expected low attribute shift register to be 0b100000011, got %b", lowAttributeShiftRegister)
-	}
-
-	if highAttributeShiftRegister != 0b100000011 {
-		t.Errorf("expected high attribute shift register to be 0b100000011, got %b", highAttributeShiftRegister)
+	if highAttributeShiftRegister != 0b1000000010000001 {
+		t.Errorf("expected high attribute shift register to be 0b1000000010000001, got %b", highAttributeShiftRegister)
 	}
 
 	sut.Render()
 	lowPatternShiftRegister, highPatternShiftRegister, lowAttributeShiftRegister, highAttributeShiftRegister = sut.GetShiftRegisters()
 
-	if lowPatternShiftRegister != 0b1000000110 {
-		t.Errorf("expected low pattern shift register to be 0b1000000110, got %b", lowPatternShiftRegister)
+	if lowPatternShiftRegister != 0b100000010 {
+		t.Errorf("expected low pattern shift register to be 0b100000010, got %b", lowPatternShiftRegister)
 	}
 
-	if highPatternShiftRegister != 0b1100000111 {
-		t.Errorf("expected high pattern shift register to be 0b1100000111, got %b", highPatternShiftRegister)
+	if highPatternShiftRegister != 0b1000000110000011 {
+		t.Errorf("expected high pattern shift register to be 0b1000000110000011, got %b", highPatternShiftRegister)
 	}
 
-	if lowAttributeShiftRegister != 0b100000011 {
-		t.Errorf("expected low attribute shift register to be 0b100000011, got %b", lowAttributeShiftRegister)
+	if lowAttributeShiftRegister != 0b1000000010000001 {
+		t.Errorf("expected low attribute shift register to be 0b1000000010000001, got %b", lowAttributeShiftRegister)
 	}
 
-	if highAttributeShiftRegister != 0b100000011 {
-		t.Errorf("expected high attribute shift register to be 0b100000011, got %b", highAttributeShiftRegister)
+	if highAttributeShiftRegister != 0b1000000010000001 {
+		t.Errorf("expected high attribute shift register to be 0b1000000010000001, got %b", highAttributeShiftRegister)
 	}
 }

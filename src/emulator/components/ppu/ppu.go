@@ -22,7 +22,7 @@ const (
 	v_blank_scanline_start = 240
 	v_blank_scanline_end   = 260
 	v_blank_pixel_start    = 0
-	max_dots_per_frame     = 336
+	max_dots_per_line      = 336
 )
 
 const frequency_in_mhz = 5.37
@@ -73,20 +73,21 @@ func NewPPU(bus application.MNIBus, vMemory application.Memory, pipeline applica
 }
 
 func (p *ppu) Render() {
-	p.dots = (p.dots + 1) % max_dots_per_frame
-
-	if p.dots <= 255 {
+	if p.dots <= 255 && p.scanline < v_blank_scanline_start {
 		p.renderPixel()
 		p.shiftRegisters()
-		p.advanceToNextPixel()
+		p.advanceToNextScanlinePixel()
 	}
 
+	p.advanceToNextScanline()
 	p.fetchGraphics()
 	p.updateStatusRegister()
 
 	if p.checkIfNMIShouldBeCalled() {
 		p.bus.CallNMIHandler()
 	}
+
+	p.dots = (p.dots + 1) % max_dots_per_line
 }
 
 func (p *ppu) GetCurrentScanline() uint16 {
@@ -124,13 +125,15 @@ func (p *ppu) fetchGraphics() {
 	p.fillAttrShiftRegister(result.HighPalette, result.LowPalette)
 }
 
-func (p *ppu) advanceToNextPixel() {
-	if p.pixel == max_pixel_per_scanline {
+func (p *ppu) advanceToNextScanlinePixel() {
+	p.pixel++
+}
+
+func (p *ppu) advanceToNextScanline() {
+	if p.dots == max_dots_per_line-1 {
 		p.scanline++
 		p.scanline %= (max_frame_scanline + 1)
 	}
-
-	p.pixel++
 }
 
 func (p *ppu) updateStatusRegister() {
