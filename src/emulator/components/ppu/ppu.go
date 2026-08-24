@@ -59,6 +59,7 @@ type ppu struct {
 	lowAttributeShiftRegister  uint16
 	highAttributeShiftRegister uint16
 	pipeline                   application.PixelPipeline
+	buffer                     [][]byte
 }
 
 func NewPPU(bus application.MNIBus, vMemory application.Memory, pipeline application.PixelPipeline) *ppu {
@@ -103,8 +104,21 @@ func (p *ppu) GetShiftRegisters() (uint16, uint16, uint16, uint16) {
 }
 
 func (p *ppu) renderPixel() {
-	//add render logic
+	const highestBit = 15
+	bitPosition := highestBit - p.x
 
+	lowPatternBit := p.getBitFromBitPosition(p.lowPatternShiftRegister, bitPosition)
+	highPatternBit := p.getBitFromBitPosition(p.highPatternShiftRegister, bitPosition) << 1
+	lowAttrBit := p.getBitFromBitPosition(p.lowAttributeShiftRegister, bitPosition) << 2
+	highAttrBit := p.getBitFromBitPosition(p.highAttributeShiftRegister, bitPosition) << 3
+
+	pixelData := lowPatternBit | highPatternBit | lowAttrBit | highAttrBit
+	p.buffer[p.scanline] = append(p.buffer[p.scanline], byte(colorPallet[pixelData]))
+}
+
+func (p *ppu) getBitFromBitPosition(register uint16, bitPosition byte) uint16 {
+	value := register & (1 << bitPosition)
+	return value >> bitPosition
 }
 
 func (p *ppu) shiftRegisters() {
