@@ -75,7 +75,7 @@ func TestAttachNMIAndCallNMIHandler(t *testing.T) {
 func TestReadFromMemory(t *testing.T) {
 	mem := memory.NewMemory()
 	b := bus.NewBus(mem)
-	
+
 	mockTick := &mockTickable{}
 	b.AttachTickable(mockTick)
 
@@ -85,14 +85,6 @@ func TestReadFromMemory(t *testing.T) {
 
 	if result != 0x42 {
 		t.Errorf("Expected to read 0x42 from memory, got %d", result)
-	}
-
-	if b.GetTickCount() != 1 {
-		t.Errorf("Expected tick count to be 1, got %d", b.GetTickCount())
-	}
-
-	if mockTick.tickCalled != 1 {
-		t.Errorf("Expected attached tickable to be ticked 1 time, got %d", mockTick.tickCalled)
 	}
 }
 
@@ -109,13 +101,5 @@ func TestWriteToMemory(t *testing.T) {
 
 	if result != 0x42 {
 		t.Errorf("Expected to write 0x42 to memory, got %d", result)
-	}
-
-	if b.GetTickCount() != 1 {
-		t.Errorf("Expected tick count to be 1, got %d", b.GetTickCount())
-	}
-
-	if mockTick.tickCalled != 1 {
-		t.Errorf("Expected attached tickable to be ticked 1 time, got %d", mockTick.tickCalled)
 	}
 }

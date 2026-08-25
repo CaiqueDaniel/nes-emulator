@@ -40,12 +40,10 @@ func (b *bus) CallNMIHandler() {
 }
 
 func (b *bus) ReadFromMemory(address uint16) uint8 {
-	b.Tick(1)
 	return b.memory.Read(address)
 }
 
 func (b *bus) WriteToMemory(address uint16, value uint8) {
-	b.Tick(1)
 	b.memory.Write(address, value)
 }
 
