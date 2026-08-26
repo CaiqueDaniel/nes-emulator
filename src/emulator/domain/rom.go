@@ -30,6 +30,27 @@ func (r *ROM) GetRaw() []byte {
 	return r.raw
 }
 
+func (r *ROM) HaveTrainer() bool {
+	return r.raw[6]&0b100 != 0
+}
+
+func (r *ROM) GetPRGROMAddressRange() (uint, uint) {
+	const initial_start_index = 0x10
+	const trainer_size = 512
+
+	if r.HaveTrainer() {
+		startAddress := initial_start_index + trainer_size
+		return uint(startAddress), uint(startAddress) + r.prgSize
+	}
+
+	return initial_start_index, initial_start_index + r.prgSize
+}
+
+func (r *ROM) GetPRGROM() []byte {
+	initial_start_index, end_index := r.GetPRGROMAddressRange()
+	return r.raw[initial_start_index:end_index]
+}
+
 func (r *ROM) GetVersion() int8 {
 	return r.version
 }

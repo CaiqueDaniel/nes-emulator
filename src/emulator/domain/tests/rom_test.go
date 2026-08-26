@@ -123,9 +123,74 @@ func TestNewROM_ShouldGetNumberOfPRGBlocksOnNES20File(t *testing.T) {
 	}
 }
 
+func TestNewROM_ShouldGetPRGROMWithoutTrainerData(t *testing.T) {
+	file := getTestFile()
+	rom, _ := domain.NewROM(*file)
+
+	const expected_start_address = 0x10
+	const expected_end_address = 0x10 + 32768
+
+	startAddress, endAddress := rom.GetPRGROMAddressRange()
+	prgBytes := rom.GetPRGROM()
+
+	if rom.HaveTrainer() {
+		t.Errorf("rom should not have a trainer")
+	}
+
+	if startAddress != expected_start_address {
+		t.Errorf("start address should be %d", expected_start_address)
+	}
+
+	if endAddress != expected_end_address {
+		t.Errorf("end address should be %d", expected_end_address)
+	}
+
+	if uint(len(prgBytes)) != rom.GetPRGSize() {
+		t.Errorf("prg bytes should be %d. got %d", rom.GetPRGSize(), len(prgBytes))
+	}
+}
+
+func TestNewROM_ShouldGetPRGROMWithTrainerData(t *testing.T) {
+	file := getTestWithTrainerFile()
+	rom, _ := domain.NewROM(*file)
+
+	const expected_start_address = 0x10 + 512
+	const expected_end_address = expected_start_address + 32768
+
+	startAddress, endAddress := rom.GetPRGROMAddressRange()
+	prgBytes := rom.GetPRGROM()
+
+	if !rom.HaveTrainer() {
+		t.Errorf("rom should have a trainer")
+	}
+
+	if startAddress != expected_start_address {
+		t.Errorf("start address should be %d", expected_start_address)
+	}
+
+	if endAddress != expected_end_address {
+		t.Errorf("end address should be %d", expected_end_address)
+	}
+
+	if uint(len(prgBytes)) != rom.GetPRGSize() {
+		t.Errorf("prg bytes should be %d. got %d", rom.GetPRGSize(), len(prgBytes))
+	}
+}
+
 func getTestFile() *[]byte {
 	fs := shared_services.NewLocalFileSystem()
 	file, err := fs.ReadFile("./../../../../test/resources/PALTEST.NES")
+
+	if err != nil {
+		panic("file not loaded")
+	}
+
+	return &file
+}
+
+func getTestWithTrainerFile() *[]byte {
+	fs := shared_services.NewLocalFileSystem()
+	file, err := fs.ReadFile("./../../../../test/resources/PALTEST_With_Trainer.NES")
 
 	if err != nil {
 		panic("file not loaded")
