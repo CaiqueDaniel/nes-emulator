@@ -8,6 +8,7 @@ import (
 type ROM struct {
 	raw     []byte
 	version int8
+	prgSize uint
 }
 
 func NewROM(raw []byte) (*ROM, error) {
@@ -20,6 +21,7 @@ func NewROM(raw []byte) (*ROM, error) {
 	}
 
 	rom.verifyAndSetFileVersion()
+	rom.setPRGSize()
 
 	return rom, nil
 }
@@ -54,3 +56,17 @@ func (r *ROM) verifyAndSetFileVersion() {
 	r.version = 1
 }
 
+func (r *ROM) setPRGSize() {
+	if r.version == 1 {
+		r.prgSize = uint(r.raw[4]) * 16 * 1024
+		return
+	}
+
+	highByte := uint(r.raw[9]&0xF) << 8
+	lowByte := uint(r.raw[4])
+	r.prgSize = (highByte | lowByte) * 1024 * 16
+}
+
+func (r *ROM) GetPRGSize() uint {
+	return r.prgSize
+}

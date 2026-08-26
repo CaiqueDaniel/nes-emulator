@@ -3,12 +3,13 @@ package tests
 import (
 	"bytes"
 	"nes-emu/src/emulator/domain"
+	shared_services "nes-emu/src/shared/services"
 	"testing"
 )
 
 func TestNewROM_ValidFile_iNESv1(t *testing.T) {
 	rawHeader := []byte{'N', 'E', 'S', 0x1A, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}
-	
+
 	rom, err := domain.NewROM(rawHeader)
 
 	if err != nil {
@@ -31,7 +32,7 @@ func TestNewROM_ValidFile_iNESv1(t *testing.T) {
 func TestNewROM_ValidFile_NES20(t *testing.T) {
 	// NES 2.0 header flag: (header[7] & 0x0C) == 0x08
 	rawHeader := []byte{'N', 'E', 'S', 0x1A, 0x01, 0x01, 0x00, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}
-	
+
 	rom, err := domain.NewROM(rawHeader)
 
 	if err != nil {
@@ -91,4 +92,44 @@ func TestNewROM_ShortRawBuffer(t *testing.T) {
 			t.Errorf("Expected nil ROM for short buffer of length %d, got %v", len(buf), rom)
 		}
 	}
+}
+
+func TestNewROM_ShouldGetNumberOfPRGBlocksOnNES1File(t *testing.T) {
+	file := getTestFile()
+	rom, _ := domain.NewROM(*file)
+
+	if rom.GetVersion() != 1 {
+		t.Errorf("Expected version 1 for standard iNES header, got %d", rom.GetVersion())
+	}
+
+	if rom.GetPRGSize() != 32768 {
+		t.Errorf("Expected 32768 bytes for standard iNES header, got %d", rom.GetPRGSize())
+	}
+}
+
+func TestNewROM_ShouldGetNumberOfPRGBlocksOnNES20File(t *testing.T) {
+	file := []byte{'N', 'E', 'S', 0x1A, 0x01, 0x01, 0x00, 0x08, 0x00, 0xE, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}
+	rom, _ := domain.NewROM(file)
+
+	//byte 4=1; byte 9=0xE; ((0xE<<8)+1) * 1024 * 16
+	const expected_size = 58736640
+
+	if rom.GetVersion() != 2 {
+		t.Errorf("Expected version 2 for standard iNES header, got %d", rom.GetVersion())
+	}
+
+	if rom.GetPRGSize() != expected_size {
+		t.Errorf("Expected %d bytes for standard iNES header, got %d", expected_size, rom.GetPRGSize())
+	}
+}
+
+func getTestFile() *[]byte {
+	fs := shared_services.NewLocalFileSystem()
+	file, err := fs.ReadFile("./../../../../test/resources/PALTEST.NES")
+
+	if err != nil {
+		panic("file not loaded")
+	}
+
+	return &file
 }
