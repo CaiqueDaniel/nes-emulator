@@ -10,6 +10,7 @@ type ROM struct {
 	raw     []byte
 	version int8
 	prgSize uint
+	chrSize uint
 }
 
 func NewROM(raw []byte) (*ROM, error) {
@@ -23,6 +24,7 @@ func NewROM(raw []byte) (*ROM, error) {
 
 	rom.verifyAndSetFileVersion()
 	rom.setPRGSize()
+	rom.setCHRSize()
 
 	return rom, nil
 }
@@ -49,6 +51,16 @@ func (r *ROM) GetPRGROMAddressRange() (uint, uint) {
 
 func (r *ROM) GetPRGROM() []byte {
 	initial_start_index, end_index := r.GetPRGROMAddressRange()
+	return r.raw[initial_start_index:end_index]
+}
+
+func (r *ROM) GetCHRROMAddressRange() (uint, uint) {
+	_, endPgrAddress := r.GetPRGROMAddressRange()
+	return endPgrAddress + 1, endPgrAddress + 1 + r.chrSize
+}
+
+func (r *ROM) GetCHRROM() []byte {
+	initial_start_index, end_index := r.GetCHRROMAddressRange()
 	return r.raw[initial_start_index:end_index]
 }
 
@@ -98,6 +110,14 @@ func (r *ROM) setPRGSize() {
 	r.prgSize = (highByte | lowByte) * 1024 * 16
 }
 
+func (r *ROM) setCHRSize() {
+	r.chrSize = uint(r.raw[5]) * 8 * 1024
+}
+
 func (r *ROM) GetPRGSize() uint {
 	return r.prgSize
+}
+
+func (r *ROM) GetCHRSize() uint {
+	return r.chrSize
 }

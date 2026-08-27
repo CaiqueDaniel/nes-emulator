@@ -195,9 +195,41 @@ func TestNewROM_ShouldGetPRGROMWithTrainerData(t *testing.T) {
 	}
 }
 
+func TestShouldGetCHRROMNumberOfBytes(t *testing.T) {
+	file := getGraphicTestFile()
+	rom, _ := domain.NewROM(*file)
+
+	chrSize := rom.GetCHRSize()
+
+	if chrSize != 8192 {
+		t.Errorf("expected %d bytes for chr, got %d", 8192, chrSize)
+	}
+}
+
+func TestShouldGetCHRROMBytes(t *testing.T) {
+	file := getGraphicTestFile()
+	rom, _ := domain.NewROM(*file)
+	bytes := rom.GetCHRROM()
+
+	if len(bytes) != 8192 {
+		t.Errorf("expected %d bytes for chr, got %d", 8192, len(bytes))
+	}
+}
+
 func getTestFile() *[]byte {
 	fs := shared_services.NewLocalFileSystem()
 	file, err := fs.ReadFile("./../../../../test/resources/PALTEST.NES")
+
+	if err != nil {
+		panic("file not loaded")
+	}
+
+	return &file
+}
+
+func getGraphicTestFile() *[]byte {
+	fs := shared_services.NewLocalFileSystem()
+	file, err := fs.ReadFile("./../../../../test/resources/Zelda.NES")
 
 	if err != nil {
 		panic("file not loaded")
