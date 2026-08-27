@@ -3,6 +3,7 @@ package domain
 import (
 	"bytes"
 	"errors"
+	"math"
 )
 
 type ROM struct {
@@ -83,8 +84,17 @@ func (r *ROM) setPRGSize() {
 		return
 	}
 
-	highByte := uint(r.raw[9]&0xF) << 8
+	highByte := uint(r.raw[9] & 0xF)
 	lowByte := uint(r.raw[4])
+
+	if highByte == 0xF {
+		multiplier := float64((lowByte&0x3)*2 + 1)
+		expoent := float64(lowByte >> 2)
+		r.prgSize = uint(math.Pow(2, expoent)) * uint(multiplier)
+		return
+	}
+
+	highByte <<= 8
 	r.prgSize = (highByte | lowByte) * 1024 * 16
 }
 

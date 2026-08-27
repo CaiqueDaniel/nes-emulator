@@ -2,6 +2,7 @@ package tests
 
 import (
 	"bytes"
+	"math"
 	"nes-emu/src/emulator/domain"
 	shared_services "nes-emu/src/shared/services"
 	"testing"
@@ -113,6 +114,23 @@ func TestNewROM_ShouldGetNumberOfPRGBlocksOnNES20File(t *testing.T) {
 
 	//byte 4=1; byte 9=0xE; ((0xE<<8)+1) * 1024 * 16
 	const expected_size = 58736640
+
+	if rom.GetVersion() != 2 {
+		t.Errorf("Expected version 2 for standard iNES header, got %d", rom.GetVersion())
+	}
+
+	if rom.GetPRGSize() != expected_size {
+		t.Errorf("Expected %d bytes for standard iNES header, got %d", expected_size, rom.GetPRGSize())
+	}
+}
+
+func TestNewROM_ShouldGetNumberOfPRGBlocksOnNES20FileWithPowerOfTwo(t *testing.T) {
+	file := []byte{'N', 'E', 'S', 0x1A, 0xFF, 0x01, 0x00, 0x08, 0x00, 0xF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}
+	rom, _ := domain.NewROM(file)
+
+	multiplier := float64((file[4]&0x3)*2 + 1)
+	expoent := float64(file[4] >> 2)
+	expected_size := uint(math.Pow(2, expoent)) * uint(multiplier)
 
 	if rom.GetVersion() != 2 {
 		t.Errorf("Expected version 2 for standard iNES header, got %d", rom.GetVersion())
