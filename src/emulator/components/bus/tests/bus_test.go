@@ -7,99 +7,163 @@ import (
 	"testing"
 )
 
-type mockTickable struct {
-	tickCalled int
+type mockPPU struct {
+	renderCalled int
 }
 
-func (m *mockTickable) Tick() {
-	m.tickCalled++
+func (m *mockPPU) Render() {
+	m.renderCalled++
 }
 
 func TestNewBus(t *testing.T) {
-	mem := memory.NewMemory()
-	b := bus.NewBus(mem)
+	b := bus.NewBus()
 	if b == nil {
-		t.Errorf("Expected NewBus to return a non-nil object")
+		t.Fatalf("Expected NewBus to return a non-nil object")
+	}
+
+	if b.GetTickCount() != 0 {
+		t.Errorf("Expected initial tickCount to be 0, got %d", b.GetTickCount())
 	}
 }
 
-func TestAttachTickableAndTick(t *testing.T) {
+func TestNewBusWithWorkMemory(t *testing.T) {
 	mem := memory.NewMemory()
-	b := bus.NewBus(mem)
-	mock1 := &mockTickable{}
-	mock2 := &mockTickable{}
-
-	b.AttachTickable(mock1)
-	b.AttachTickable(mock2)
-
-	b.Tick(1)
-
-	if mock1.tickCalled != 1 {
-		t.Errorf("Expected mock1.Tick to be called 1 time, got %d", mock1.tickCalled)
+	b := bus.NewBusWithWorkMemory(mem)
+	if b == nil {
+		t.Fatalf("Expected NewBusWithWorkMemory to return a non-nil object")
 	}
 
-	if mock2.tickCalled != 1 {
-		t.Errorf("Expected mock2.Tick to be called 1 time, got %d", mock2.tickCalled)
+	b.WriteToMemory(0x1234, 0x42)
+	if b.ReadFromMemory(0x1234) != 0x42 {
+		t.Errorf("Expected work memory to be initialized and accessible")
+	}
+}
+
+func TestAttachWorkMemory(t *testing.T) {
+	b := bus.NewBus()
+	mem := memory.NewMemory()
+	b.AtatchWorkMemory(mem)
+
+	b.WriteToMemory(0x0100, 0xAB)
+	result := b.ReadFromMemory(0x0100)
+	if result != 0xAB {
+		t.Errorf("Expected to read 0xAB from attached work memory, got 0x%X", result)
+	}
+}
+
+func TestAttachVideoMemory(t *testing.T) {
+	b := bus.NewBus()
+	vmem := memory.NewMemory()
+	b.AtatchVideoMemory(vmem)
+
+	b.WriteToVideoMemory(0x2000, 0xCD)
+	result := b.ReadFromVideoMemory(0x2000)
+	if result != 0xCD {
+		t.Errorf("Expected to read 0xCD from attached video memory, got 0x%X", result)
+	}
+}
+
+func TestAttachPictureProcessingUnitAndTick(t *testing.T) {
+	b := bus.NewBus()
+	ppu := &mockPPU{}
+	b.AttachPictureProcessingUnit(ppu)
+
+	b.Tick()
+
+	if ppu.renderCalled != 3 {
+		t.Errorf("Expected ppu.Render to be called 3 times after 1 tick, got %d", ppu.renderCalled)
 	}
 
-	b.Tick(5)
-
-	if mock1.tickCalled != 2 {
-		t.Errorf("Expected mock1.Tick to be called 2 times, got %d", mock1.tickCalled)
+	if b.GetTickCount() != 1 {
+		t.Errorf("Expected tickCount to be 1, got %d", b.GetTickCount())
 	}
 
-	if mock2.tickCalled != 2 {
-		t.Errorf("Expected mock2.Tick to be called 2 times, got %d", mock2.tickCalled)
+	b.Tick()
+
+	if ppu.renderCalled != 6 {
+		t.Errorf("Expected ppu.Render to be called 6 times after 2 ticks, got %d", ppu.renderCalled)
+	}
+
+	if b.GetTickCount() != 2 {
+		t.Errorf("Expected tickCount to be 2, got %d", b.GetTickCount())
+	}
+}
+
+func TestResetTickCount(t *testing.T) {
+	b := bus.NewBus()
+	ppu := &mockPPU{}
+	b.AttachPictureProcessingUnit(ppu)
+
+	b.Tick()
+	b.Tick()
+	if b.GetTickCount() != 2 {
+		t.Errorf("Expected tickCount to be 2, got %d", b.GetTickCount())
+	}
+
+	b.ResetTickCount()
+	if b.GetTickCount() != 0 {
+		t.Errorf("Expected tickCount to be reset to 0, got %d", b.GetTickCount())
 	}
 }
 
 func TestAttachNMIAndCallNMIHandler(t *testing.T) {
-	mem := memory.NewMemory()
-	b := bus.NewBus(mem)
+	b := bus.NewBus()
 	cpu := &fixtures.MockCPU{}
 
 	b.AttachNMI(cpu)
 	b.CallNMIHandler()
 
 	if cpu.NmiCalled != 1 {
-		t.Errorf("Expected cpu.CallNMI to be called 1 time, got %d", cpu.NmiCalled)
+		t.Errorf("Expected cpu.SetNMI to be called 1 time, got %d", cpu.NmiCalled)
 	}
 
 	b.CallNMIHandler()
 
 	if cpu.NmiCalled != 2 {
-		t.Errorf("Expected cpu.CallNMI to be called 2 times, got %d", cpu.NmiCalled)
+		t.Errorf("Expected cpu.SetNMI to be called 2 times, got %d", cpu.NmiCalled)
 	}
 }
 
-func TestReadFromMemory(t *testing.T) {
-	mem := memory.NewMemory()
-	b := bus.NewBus(mem)
+func TestReadWorkMemory_PanicsWhenUnattached(t *testing.T) {
+	b := bus.NewBus()
 
-	mockTick := &mockTickable{}
-	b.AttachTickable(mockTick)
-
-	mem.Write(0x1234, 0x42)
-
-	result := b.ReadFromMemory(0x1234)
-
-	if result != 0x42 {
-		t.Errorf("Expected to read 0x42 from memory, got %d", result)
-	}
+	defer func() {
+		if r := recover(); r == nil {
+			t.Errorf("Expected ReadFromMemory to panic when work memory is nil")
+		}
+	}()
+	b.ReadFromMemory(0x0000)
 }
 
-func TestWriteToMemory(t *testing.T) {
-	mem := memory.NewMemory()
-	b := bus.NewBus(mem)
+func TestWriteWorkMemory_PanicsWhenUnattached(t *testing.T) {
+	b := bus.NewBus()
 
-	mockTick := &mockTickable{}
-	b.AttachTickable(mockTick)
+	defer func() {
+		if r := recover(); r == nil {
+			t.Errorf("Expected WriteToMemory to panic when work memory is nil")
+		}
+	}()
+	b.WriteToMemory(0x0000, 0xFF)
+}
 
-	b.WriteToMemory(0x1234, 0x42)
+func TestReadVideoMemory_PanicsWhenUnattached(t *testing.T) {
+	b := bus.NewBus()
 
-	result := mem.Read(0x1234)
+	defer func() {
+		if r := recover(); r == nil {
+			t.Errorf("Expected ReadFromVideoMemory to panic when video memory is nil")
+		}
+	}()
+	b.ReadFromVideoMemory(0x0000)
+}
 
-	if result != 0x42 {
-		t.Errorf("Expected to write 0x42 to memory, got %d", result)
-	}
+func TestWriteVideoMemory_PanicsWhenUnattached(t *testing.T) {
+	b := bus.NewBus()
+
+	defer func() {
+		if r := recover(); r == nil {
+			t.Errorf("Expected WriteToVideoMemory to panic when video memory is nil")
+		}
+	}()
+	b.WriteToVideoMemory(0x0000, 0xFF)
 }

@@ -61,7 +61,7 @@ func TestAnd(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			mem := memory.NewMemory()
-			b := bus.NewBus(mem)
+			b := bus.NewBusWithWorkMemory(mem)
 			cpu := internal.NewCpuWithInternal(b)
 
 			cpu.LoadValueIntoRegister(tt.initialAcc, internal.ACCUMULATOR)
@@ -135,7 +135,7 @@ func TestOr(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			mem := memory.NewMemory()
-			b := bus.NewBus(mem)
+			b := bus.NewBusWithWorkMemory(mem)
 			cpu := internal.NewCpuWithInternal(b)
 
 			cpu.LoadValueIntoRegister(tt.initialAcc, internal.ACCUMULATOR)
@@ -209,7 +209,7 @@ func TestXor(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			mem := memory.NewMemory()
-			b := bus.NewBus(mem)
+			b := bus.NewBusWithWorkMemory(mem)
 			cpu := internal.NewCpuWithInternal(b)
 
 			cpu.LoadValueIntoRegister(tt.initialAcc, internal.ACCUMULATOR)
@@ -291,7 +291,7 @@ func TestBit(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			mem := memory.NewMemory()
-			b := bus.NewBus(mem)
+			b := bus.NewBusWithWorkMemory(mem)
 			cpu := internal.NewCpuWithInternal(b)
 
 			cpu.LoadValueIntoRegister(tt.initialAcc, internal.ACCUMULATOR)

@@ -59,7 +59,7 @@ func TestInstructionCycles(t *testing.T) {
 
 	for opcode, expected := range expectedCycles {
 		mem := memory.NewMemory()
-		b := bus.NewBus(mem)
+		b := bus.NewBusWithWorkMemory(mem)
 
 		// Set the Reset vector to 0x8000
 		mem.Write(0xFFFC, 0x00)
@@ -143,7 +143,7 @@ func TestInstructionCyclesPageCross(t *testing.T) {
 
 	for _, tt := range tests {
 		mem := memory.NewMemory()
-		b := bus.NewBus(mem)
+		b := bus.NewBusWithWorkMemory(mem)
 
 		// Set the Reset vector to 0x8000
 		mem.Write(0xFFFC, 0x00)
@@ -181,7 +181,7 @@ func TestInstructionCyclesPageCross(t *testing.T) {
 
 func TestBreakInstructionCycles(t *testing.T) {
 	mem := memory.NewMemory()
-	b := bus.NewBus(mem)
+	b := bus.NewBusWithWorkMemory(mem)
 
 	// Set Reset vector to 0x8000
 	mem.Write(0xFFFC, 0x00)
@@ -258,7 +258,7 @@ func TestBranchInstructionCycles(t *testing.T) {
 
 	for _, tt := range tests {
 		mem := memory.NewMemory()
-		b := bus.NewBus(mem)
+		b := bus.NewBusWithWorkMemory(mem)
 
 		mem.Write(0xFFFC, 0x7F)
 		mem.Write(0xFFFD, 0x81) // Start at 0x8100 so -128 page crosses to 0x8080

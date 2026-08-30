@@ -12,7 +12,7 @@ const clock_in_mhz = 1.789773
 
 func TestClockTime(t *testing.T) {
 	ram := memory.NewMemory()
-	board := bus.NewBus(ram)
+	board := bus.NewBusWithWorkMemory(ram)
 	sut := cpu.NewCpuWithStopAt(board, 16)
 	expectedCycles := uint(92)
 	expectedTimeElapsed := time.Second / 60

@@ -13,7 +13,7 @@ func createSut() (application.StartGame, application.Bus, application.Memory, *f
 	fs := shared_services.NewLocalFileSystem()
 	mem := memory.NewMemory()
 	videoMemory := memory.NewMemory()
-	bus := bus.NewBus(mem)
+	bus := bus.NewBusWithWorkMemory(mem)
 	cpu := &fixtures.MockCPU{}
 
 	return application.NewStartGame(fs, bus, cpu, videoMemory), bus, videoMemory, cpu

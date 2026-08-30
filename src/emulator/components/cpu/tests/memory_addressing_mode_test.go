@@ -10,7 +10,7 @@ import (
 
 func TestGetValueByAbsoluteMode(t *testing.T) {
 	memory := memory.NewMemory()
-	b := bus.NewBus(memory)
+	b := bus.NewBusWithWorkMemory(memory)
 	cpu := internal.NewCpuWithInternal(b)
 
 	memory.Write(0x1000, 0xFF)
@@ -24,7 +24,7 @@ func TestGetValueByAbsoluteMode(t *testing.T) {
 
 func TestGetValueByZeroPageMode(t *testing.T) {
 	memory := memory.NewMemory()
-	b := bus.NewBus(memory)
+	b := bus.NewBusWithWorkMemory(memory)
 	cpu := internal.NewCpuWithInternal(b)
 
 	memory.Write(0x0010, 0xFF)
@@ -38,7 +38,7 @@ func TestGetValueByZeroPageMode(t *testing.T) {
 
 func TestGetValueByIndexedAbsoluteMode(t *testing.T) {
 	memory := memory.NewMemory()
-	b := bus.NewBus(memory)
+	b := bus.NewBusWithWorkMemory(memory)
 	cpu := internal.NewCpuWithInternal(b)
 
 	memory.Write(0x1010, 0xFF)
@@ -52,7 +52,7 @@ func TestGetValueByIndexedAbsoluteMode(t *testing.T) {
 
 func TestGetValueByZeroPageIndexedMode(t *testing.T) {
 	memory := memory.NewMemory()
-	b := bus.NewBus(memory)
+	b := bus.NewBusWithWorkMemory(memory)
 	cpu := internal.NewCpuWithInternal(b)
 
 	memory.Write(0x000F, 0xFF)
@@ -66,7 +66,7 @@ func TestGetValueByZeroPageIndexedMode(t *testing.T) {
 
 func TestGetValueByIndirectAbsoluteMode(t *testing.T) {
 	memory := memory.NewMemory()
-	b := bus.NewBus(memory)
+	b := bus.NewBusWithWorkMemory(memory)
 	cpu := internal.NewCpuWithInternal(b)
 
 	memory.Write(0xFAFF, 0x80)
@@ -82,7 +82,7 @@ func TestGetValueByIndirectAbsoluteMode(t *testing.T) {
 
 func TestGetValueByIndexedIndirectXMode(t *testing.T) {
 	memory := memory.NewMemory()
-	b := bus.NewBus(memory)
+	b := bus.NewBusWithWorkMemory(memory)
 	cpu := internal.NewCpuWithInternal(b)
 
 	memory.Write(0xFAFF, 0x80)
@@ -99,7 +99,7 @@ func TestGetValueByIndexedIndirectXMode(t *testing.T) {
 
 func TestGetValueByIndirectIndexedYMode(t *testing.T) {
 	memory := memory.NewMemory()
-	b := bus.NewBus(memory)
+	b := bus.NewBusWithWorkMemory(memory)
 	cpu := internal.NewCpuWithInternal(b)
 
 	memory.Write(0xFAFF, 0x80)
@@ -116,7 +116,7 @@ func TestGetValueByIndirectIndexedYMode(t *testing.T) {
 
 func TestGetAddressByIndexedIndirectXMode(t *testing.T) {
 	memory := memory.NewMemory()
-	b := bus.NewBus(memory)
+	b := bus.NewBusWithWorkMemory(memory)
 	cpu := internal.NewCpuWithInternal(b)
 
 	memory.Write(0x01, 0xFF)
@@ -132,7 +132,7 @@ func TestGetAddressByIndexedIndirectXMode(t *testing.T) {
 
 func TestGetAddressByIndirectIndexedYMode(t *testing.T) {
 	memory := memory.NewMemory()
-	b := bus.NewBus(memory)
+	b := bus.NewBusWithWorkMemory(memory)
 	cpu := internal.NewCpuWithInternal(b)
 
 	memory.Write(0x01, 0xFE)

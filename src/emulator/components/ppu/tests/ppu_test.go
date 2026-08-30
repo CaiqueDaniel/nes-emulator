@@ -11,7 +11,7 @@ import (
 func TestPPURender_ShouldDrawAPixel(t *testing.T) {
 	mem := memory.NewMemory()
 	vMemory := memory.NewMemory()
-	bus := bus.NewBus(mem)
+	bus := bus.NewBusWithWorkMemory(mem)
 	mockPipeline := &PixelPipelineFixture{}
 	ppu := ppu.NewPPU(bus, vMemory, mockPipeline)
 
@@ -29,7 +29,7 @@ func TestPPURender_ShouldDrawAPixel(t *testing.T) {
 func TestPPURender_ShouldWrapScanlineToStart(t *testing.T) {
 	mem := memory.NewMemory()
 	vMemory := memory.NewMemory()
-	bus := bus.NewBus(mem)
+	bus := bus.NewBusWithWorkMemory(mem)
 	mockPipeline := &PixelPipelineFixture{}
 	ppu := ppu.NewPPU(bus, vMemory, mockPipeline)
 
@@ -49,7 +49,7 @@ func TestPPURender_ShouldWrapScanlineToStart(t *testing.T) {
 func TestPPURender_ShouldNotTriggerAnNMIOnVBlank_WhenNMIFlagDisabled(t *testing.T) {
 	mem := memory.NewMemory()
 	vMemory := memory.NewMemory()
-	bus := bus.NewBus(mem)
+	bus := bus.NewBusWithWorkMemory(mem)
 	mockCpu := &fixtures.MockCPU{}
 	mockPipeline := &PixelPipelineFixture{}
 
@@ -77,7 +77,7 @@ func TestPPURender_ShouldNotTriggerAnNMIOnVBlank_WhenNMIFlagDisabled(t *testing.
 func TestPPURender_ShouldTriggerAnNMIOnVBlank_WhenNMIFlagEnabled(t *testing.T) {
 	mem := memory.NewMemory()
 	vMemory := memory.NewMemory()
-	bus := bus.NewBus(mem)
+	bus := bus.NewBusWithWorkMemory(mem)
 	mockCpu := &fixtures.MockCPU{}
 	mockPipeline := &PixelPipelineFixture{}
 
@@ -107,7 +107,7 @@ func TestPPURender_ShouldTriggerAnNMIOnVBlank_WhenNMIFlagEnabled(t *testing.T) {
 func TestPPURender_ShouldResetFlagsOnStatusRegister_OnPreRender(t *testing.T) {
 	mem := memory.NewMemory()
 	vMemory := memory.NewMemory()
-	bus := bus.NewBus(mem)
+	bus := bus.NewBusWithWorkMemory(mem)
 	mockCpu := &fixtures.MockCPU{}
 	mockPipeline := &PixelPipelineFixture{}
 
@@ -135,7 +135,7 @@ func TestPPURender_ShouldResetFlagsOnStatusRegister_OnPreRender(t *testing.T) {
 func TestPPURender_ShouldResetFlagsOnStatusRegister_WithoutChangingOtherBits_OnPreRender(t *testing.T) {
 	mem := memory.NewMemory()
 	vMemory := memory.NewMemory()
-	bus := bus.NewBus(mem)
+	bus := bus.NewBusWithWorkMemory(mem)
 	mockCpu := &fixtures.MockCPU{}
 
 	bus.AttachNMI(mockCpu)
@@ -165,7 +165,7 @@ func TestPPURender_ShouldResetFlagsOnStatusRegister_WithoutChangingOtherBits_OnP
 func TestPPURender_ShouldSetVBlankFlagOnStatusRegister_OnVBlank(t *testing.T) {
 	mem := memory.NewMemory()
 	vMemory := memory.NewMemory()
-	bus := bus.NewBus(mem)
+	bus := bus.NewBusWithWorkMemory(mem)
 	mockCpu := &fixtures.MockCPU{}
 	mockPipeline := &PixelPipelineFixture{}
 
@@ -193,7 +193,7 @@ func TestPPURender_ShouldSetVBlankFlagOnStatusRegister_OnVBlank(t *testing.T) {
 func TestPPURender_ShouldShiftRegisters_OnVisibleScanlines(t *testing.T) {
 	mem := memory.NewMemory()
 	vMemory := memory.NewMemory()
-	bus := bus.NewBus(mem)
+	bus := bus.NewBusWithWorkMemory(mem)
 	mockPipeline := &PixelPipelineFixture{}
 	sut := ppu.NewPPU(bus, vMemory, mockPipeline)
 
@@ -223,7 +223,7 @@ func TestPPURender_ShouldShiftRegisters_OnVisibleScanlines(t *testing.T) {
 func TestPPURender_ShouldShiftRegisters_OnHBlank(t *testing.T) {
 	mem := memory.NewMemory()
 	vMemory := memory.NewMemory()
-	bus := bus.NewBus(mem)
+	bus := bus.NewBusWithWorkMemory(mem)
 	mockPipeline := &PixelPipelineFixture{}
 	sut := ppu.NewPPU(bus, vMemory, mockPipeline)
 
@@ -272,7 +272,7 @@ func TestPPURender_ShouldShiftRegisters_OnHBlank(t *testing.T) {
 func TestPPURender_ShouldShiftRegisters_OnVBlank(t *testing.T) {
 	mem := memory.NewMemory()
 	vMemory := memory.NewMemory()
-	bus := bus.NewBus(mem)
+	bus := bus.NewBusWithWorkMemory(mem)
 	mockPipeline := &PixelPipelineFixture{}
 	sut := ppu.NewPPU(bus, vMemory, mockPipeline)
 

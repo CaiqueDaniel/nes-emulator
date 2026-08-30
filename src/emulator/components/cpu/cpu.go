@@ -201,13 +201,13 @@ func (c *cpu) interpretInstruction(opCode uint8) {
 }
 
 func (c *cpu) writeToMemory(address uint16, value uint8) {
-	c.bus.Tick(1)
+	c.bus.Tick()
 	c.bus.WriteToMemory(address, value)
 	c.currentFrameCycles += 2
 }
 
 func (c *cpu) readFromMemory(address uint16) uint8 {
-	c.bus.Tick(1)
+	c.bus.Tick()
 	value := c.bus.ReadFromMemory(address)
 	c.currentFrameCycles += 2
 	return value

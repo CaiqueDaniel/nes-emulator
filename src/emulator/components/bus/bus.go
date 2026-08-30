@@ -5,29 +5,47 @@ import (
 )
 
 type bus struct {
-	memory    application.Memory
-	tickables []application.Tickable
-	tickCount uint
-	nmiMethod func()
+	workMemory  application.Memory
+	videoMemory application.Memory
+	ppu         application.PPU
+	tickCount   uint
+	nmiMethod   func()
 }
 
-func NewBus(memory application.Memory) *bus {
+func NewBus() *bus {
 	return &bus{
-		tickables: make([]application.Tickable, 0),
 		tickCount: 0,
 		nmiMethod: func() {},
-		memory:    memory,
 	}
 }
 
-func (b *bus) AttachTickable(tickable application.Tickable) {
-	b.tickables = append(b.tickables, tickable)
+func NewBusWithWorkMemory(memory application.Memory) *bus {
+	return &bus{
+		tickCount:  0,
+		nmiMethod:  func() {},
+		workMemory: memory,
+	}
 }
 
-func (b *bus) Tick(cycles int) {
-	for _, tickable := range b.tickables {
-		tickable.Tick()
+func (b *bus) AtatchWorkMemory(memory application.Memory) {
+	b.workMemory = memory
+}
+
+func (b *bus) AtatchVideoMemory(memory application.Memory) {
+	b.videoMemory = memory
+}
+
+func (b *bus) AttachPictureProcessingUnit(ppu application.PPU) {
+	b.ppu = ppu
+}
+
+func (b *bus) Tick() {
+	if b.ppu != nil {
+		for range 3 {
+			b.ppu.Render()
+		}
 	}
+
 	b.tickCount++
 }
 
@@ -40,11 +58,35 @@ func (b *bus) CallNMIHandler() {
 }
 
 func (b *bus) ReadFromMemory(address uint16) uint8 {
-	return b.memory.Read(address)
+	if b.workMemory == nil {
+		panic("read operation on unattached work memory!")
+	}
+
+	return b.workMemory.Read(address)
 }
 
 func (b *bus) WriteToMemory(address uint16, value uint8) {
-	b.memory.Write(address, value)
+	if b.workMemory == nil {
+		panic("write operation on unattached work memory!")
+	}
+
+	b.workMemory.Write(address, value)
+}
+
+func (b *bus) ReadFromVideoMemory(address uint16) uint8 {
+	if b.videoMemory == nil {
+		panic("read operation on unattached video memory!")
+	}
+
+	return b.videoMemory.Read(address)
+}
+
+func (b *bus) WriteToVideoMemory(address uint16, value uint8) {
+	if b.videoMemory == nil {
+		panic("write operation on unattached video memory!")
+	}
+
+	b.videoMemory.Write(address, value)
 }
 
 func (b *bus) GetTickCount() uint {

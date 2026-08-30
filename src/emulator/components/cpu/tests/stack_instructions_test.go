@@ -9,7 +9,7 @@ import (
 
 func TestPushAccToStack(t *testing.T) {
 	mem := memory.NewMemory()
-	b := bus.NewBus(mem)
+	b := bus.NewBusWithWorkMemory(mem)
 	cpu := internal.NewCpuWithInternal(b)
 
 	cpu.LoadValueIntoRegister(0x12, internal.ACCUMULATOR)
@@ -22,7 +22,7 @@ func TestPushAccToStack(t *testing.T) {
 
 func TestPullAccFromStack(t *testing.T) {
 	mem := memory.NewMemory()
-	b := bus.NewBus(mem)
+	b := bus.NewBusWithWorkMemory(mem)
 	cpu := internal.NewCpuWithInternal(b)
 
 	cpu.LoadValueIntoRegister(0x12, internal.ACCUMULATOR)
@@ -44,7 +44,7 @@ func TestPullAccFromStack(t *testing.T) {
 
 func TestTransferXToStack(t *testing.T) {
 	mem := memory.NewMemory()
-	b := bus.NewBus(mem)
+	b := bus.NewBusWithWorkMemory(mem)
 	cpu := internal.NewCpuWithInternal(b)
 
 	cpu.LoadValueIntoRegister(0x12, internal.REGISTER_X)
@@ -57,7 +57,7 @@ func TestTransferXToStack(t *testing.T) {
 
 func TestTransferStackToX(t *testing.T) {
 	mem := memory.NewMemory()
-	b := bus.NewBus(mem)
+	b := bus.NewBusWithWorkMemory(mem)
 	cpu := internal.NewCpuWithInternal(b)
 
 	cpu.LoadValueIntoRegister(0x12, internal.REGISTER_X)
@@ -81,7 +81,7 @@ func TestTransferStackToX(t *testing.T) {
 
 func TestPushStatusIntoStack_DefaultStateHasBits4And5Set(t *testing.T) {
 	mem := memory.NewMemory()
-	b := bus.NewBus(mem)
+	b := bus.NewBusWithWorkMemory(mem)
 	cpu := internal.NewCpuWithInternal(b)
 
 	cpu.SetInterruptFlag()
@@ -95,7 +95,7 @@ func TestPushStatusIntoStack_DefaultStateHasBits4And5Set(t *testing.T) {
 
 func TestPushStatusIntoStack_CarryFlagSetsBit0(t *testing.T) {
 	mem := memory.NewMemory()
-	b := bus.NewBus(mem)
+	b := bus.NewBusWithWorkMemory(mem)
 	cpu := internal.NewCpuWithInternal(b)
 
 	cpu.SetCarryFlag()
@@ -109,7 +109,7 @@ func TestPushStatusIntoStack_CarryFlagSetsBit0(t *testing.T) {
 
 func TestPushStatusIntoStack_ZeroFlagSetsBit1(t *testing.T) {
 	mem := memory.NewMemory()
-	b := bus.NewBus(mem)
+	b := bus.NewBusWithWorkMemory(mem)
 	cpu := internal.NewCpuWithInternal(b)
 
 	// Load 0 into acc to trigger the zero flag
@@ -125,7 +125,7 @@ func TestPushStatusIntoStack_ZeroFlagSetsBit1(t *testing.T) {
 
 func TestPushStatusIntoStack_IRQFlagSetsBit2(t *testing.T) {
 	mem := memory.NewMemory()
-	b := bus.NewBus(mem)
+	b := bus.NewBusWithWorkMemory(mem)
 	cpu := internal.NewCpuWithInternal(b)
 
 	cpu.Break() // sets irq = true
@@ -139,7 +139,7 @@ func TestPushStatusIntoStack_IRQFlagSetsBit2(t *testing.T) {
 
 func TestPushStatusIntoStack_DecimalFlagSetsBit3(t *testing.T) {
 	mem := memory.NewMemory()
-	b := bus.NewBus(mem)
+	b := bus.NewBusWithWorkMemory(mem)
 	cpu := internal.NewCpuWithInternal(b)
 
 	cpu.SetDecimalFlag()
@@ -153,7 +153,7 @@ func TestPushStatusIntoStack_DecimalFlagSetsBit3(t *testing.T) {
 
 func TestPushStatusIntoStack_OverflowFlagSetsBit6(t *testing.T) {
 	mem := memory.NewMemory()
-	b := bus.NewBus(mem)
+	b := bus.NewBusWithWorkMemory(mem)
 	cpu := internal.NewCpuWithInternal(b)
 
 	cpu.SetOverflowFlag()
@@ -167,7 +167,7 @@ func TestPushStatusIntoStack_OverflowFlagSetsBit6(t *testing.T) {
 
 func TestPushStatusIntoStack_NegativeFlagSetsBit7(t *testing.T) {
 	mem := memory.NewMemory()
-	b := bus.NewBus(mem)
+	b := bus.NewBusWithWorkMemory(mem)
 	cpu := internal.NewCpuWithInternal(b)
 
 	// Load 0x80 (bit 7 set) and pull acc so negative is set
@@ -184,7 +184,7 @@ func TestPushStatusIntoStack_NegativeFlagSetsBit7(t *testing.T) {
 
 func TestPushStatusIntoStack_AllFlagsSet(t *testing.T) {
 	mem := memory.NewMemory()
-	b := bus.NewBus(mem)
+	b := bus.NewBusWithWorkMemory(mem)
 	cpu := internal.NewCpuWithInternal(b)
 
 	cpu.SetCarryFlag()
@@ -212,7 +212,7 @@ func TestPushStatusIntoStack_AllFlagsSet(t *testing.T) {
 
 func TestPullStatusFromStack_RestoresCarryFlag(t *testing.T) {
 	mem := memory.NewMemory()
-	b := bus.NewBus(mem)
+	b := bus.NewBusWithWorkMemory(mem)
 	cpu := internal.NewCpuWithInternal(b)
 
 	cpu.PushValueToStack(0b00000001) // only carry bit set
@@ -225,7 +225,7 @@ func TestPullStatusFromStack_RestoresCarryFlag(t *testing.T) {
 
 func TestPullStatusFromStack_RestoresZeroFlag(t *testing.T) {
 	mem := memory.NewMemory()
-	b := bus.NewBus(mem)
+	b := bus.NewBusWithWorkMemory(mem)
 	cpu := internal.NewCpuWithInternal(b)
 
 	cpu.PushValueToStack(0b00000010) // only zero bit set
@@ -238,7 +238,7 @@ func TestPullStatusFromStack_RestoresZeroFlag(t *testing.T) {
 
 func TestPullStatusFromStack_RestoresIRQFlag(t *testing.T) {
 	mem := memory.NewMemory()
-	b := bus.NewBus(mem)
+	b := bus.NewBusWithWorkMemory(mem)
 	cpu := internal.NewCpuWithInternal(b)
 
 	cpu.PushValueToStack(0b00000100) // only IRQ bit set
@@ -251,7 +251,7 @@ func TestPullStatusFromStack_RestoresIRQFlag(t *testing.T) {
 
 func TestPullStatusFromStack_RestoresDecimalFlag(t *testing.T) {
 	mem := memory.NewMemory()
-	b := bus.NewBus(mem)
+	b := bus.NewBusWithWorkMemory(mem)
 	cpu := internal.NewCpuWithInternal(b)
 
 	cpu.PushValueToStack(0b00001000) // only decimal bit set
@@ -264,7 +264,7 @@ func TestPullStatusFromStack_RestoresDecimalFlag(t *testing.T) {
 
 func TestPullStatusFromStack_RestoresOverflowFlag(t *testing.T) {
 	mem := memory.NewMemory()
-	b := bus.NewBus(mem)
+	b := bus.NewBusWithWorkMemory(mem)
 	cpu := internal.NewCpuWithInternal(b)
 
 	cpu.PushValueToStack(0b01000000) // only overflow bit set
@@ -277,7 +277,7 @@ func TestPullStatusFromStack_RestoresOverflowFlag(t *testing.T) {
 
 func TestPullStatusFromStack_RestoresNegativeFlag(t *testing.T) {
 	mem := memory.NewMemory()
-	b := bus.NewBus(mem)
+	b := bus.NewBusWithWorkMemory(mem)
 	cpu := internal.NewCpuWithInternal(b)
 
 	cpu.PushValueToStack(0b10000000) // only negative bit set
@@ -290,7 +290,7 @@ func TestPullStatusFromStack_RestoresNegativeFlag(t *testing.T) {
 
 func TestPullStatusFromStack_Bits4And5AreIgnored(t *testing.T) {
 	mem := memory.NewMemory()
-	b := bus.NewBus(mem)
+	b := bus.NewBusWithWorkMemory(mem)
 	cpu := internal.NewCpuWithInternal(b)
 
 	// bits 4 and 5 set but no flag bits set
@@ -305,7 +305,7 @@ func TestPullStatusFromStack_Bits4And5AreIgnored(t *testing.T) {
 
 func TestPushAndPullStatusFromStack_Roundtrip(t *testing.T) {
 	mem := memory.NewMemory()
-	b := bus.NewBus(mem)
+	b := bus.NewBusWithWorkMemory(mem)
 	cpu := internal.NewCpuWithInternal(b)
 
 	// Set a mix of flags

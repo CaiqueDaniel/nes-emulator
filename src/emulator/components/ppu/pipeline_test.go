@@ -32,7 +32,7 @@ func newMockBus() *mockBus {
 	return &mockBus{memory: make(map[uint16]byte)}
 }
 
-func (b *mockBus) Tick(cycles int)                              {}
+func (b *mockBus) Tick()                                        {}
 func (b *mockBus) AttachTickable(tickable application.Tickable) {}
 func (b *mockBus) ReadFromMemory(address uint16) uint8 {
 	if v, ok := b.memory[address]; ok {
@@ -42,6 +42,18 @@ func (b *mockBus) ReadFromMemory(address uint16) uint8 {
 }
 func (b *mockBus) WriteToMemory(address uint16, value uint8) { b.memory[address] = value }
 func (b *mockBus) CallNMIHandler()                           {}
+func (b *mockBus) ReadFromVideoMemory(address uint16) uint8 {
+	if v, ok := b.memory[address]; ok {
+		return v
+	}
+	return 0
+}
+func (b *mockBus) WriteToVideoMemory(address uint16, value uint8) {
+	b.memory[address] = value
+}
+
+func (b *mockBus) AtatchWorkMemory(memory application.Memory)  {}
+func (b *mockBus) AtatchVideoMemory(memory application.Memory) {}
 
 // Test that when the pipeline is advanced to the tile index fetch dot it reads
 // the correct tile index from nametable memory.
