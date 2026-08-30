@@ -1,7 +1,6 @@
 package application
 
 import (
-	"fmt"
 	"nes-emu/src/emulator/domain"
 	shared_application "nes-emu/src/shared/application"
 )
@@ -41,8 +40,9 @@ func (f *startGame) Execute(input StartGameInput) error {
 
 	f.loadPRGROMDataIntoMemory(rom)
 	f.loadCHRROMDataIntoMemory(rom)
+	f.cpu.RunProgram()
 
-	return fmt.Errorf("invalid file: %s", input.Path)
+	return nil
 }
 
 func (f *startGame) loadPRGROMDataIntoMemory(rom *domain.ROM) {
