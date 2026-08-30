@@ -11,16 +11,18 @@ type StartGame interface {
 }
 
 type startGame struct {
-	fs  shared_application.FileSystem
-	bus Bus
-	cpu CPU
+	fs   shared_application.FileSystem
+	bus  Bus
+	cpu  CPU
+	vRam Memory
 }
 
-func NewStartGame(fs shared_application.FileSystem, bus Bus, cpu CPU) StartGame {
+func NewStartGame(fs shared_application.FileSystem, bus Bus, cpu CPU, vRam Memory) StartGame {
 	return &startGame{
-		fs:  fs,
-		cpu: cpu,
-		bus: bus,
+		fs:   fs,
+		cpu:  cpu,
+		bus:  bus,
+		vRam: vRam,
 	}
 }
 
@@ -38,6 +40,7 @@ func (f *startGame) Execute(input StartGameInput) error {
 	}
 
 	f.loadPRGROMDataIntoMemory(rom)
+	f.loadCHRROMDataIntoMemory(rom)
 
 	return fmt.Errorf("invalid file: %s", input.Path)
 }
@@ -47,6 +50,12 @@ func (f *startGame) loadPRGROMDataIntoMemory(rom *domain.ROM) {
 
 	for index, pgrByte := range rom.GetPRGROM() {
 		f.bus.WriteToMemory(initial_pgr_rom_address+uint16(index), pgrByte)
+	}
+}
+
+func (f *startGame) loadCHRROMDataIntoMemory(rom *domain.ROM) {
+	for index, chrByte := range rom.GetCHRROM() {
+		f.vRam.Write(uint16(index), chrByte)
 	}
 }
 
