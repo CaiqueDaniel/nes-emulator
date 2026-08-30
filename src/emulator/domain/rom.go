@@ -111,7 +111,22 @@ func (r *ROM) setPRGSize() {
 }
 
 func (r *ROM) setCHRSize() {
-	r.chrSize = uint(r.raw[5]) * 8 * 1024
+	if r.version == 1 {
+		r.chrSize = uint(r.raw[5]) * 8 * 1024
+		return
+	}
+
+	highByte := uint(r.raw[9] & 0xF0)
+	lowByte := uint(r.raw[4])
+
+	if highByte == 0xF0 {
+		multiplier := float64((lowByte&0x3)*2 + 1)
+		expoent := float64(lowByte >> 2)
+		r.chrSize = uint(math.Pow(2, expoent)) * uint(multiplier)
+		return
+	}
+
+	r.chrSize = (highByte | lowByte) * 1024 * 8
 }
 
 func (r *ROM) GetPRGSize() uint {

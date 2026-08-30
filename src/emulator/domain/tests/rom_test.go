@@ -216,6 +216,39 @@ func TestShouldGetCHRROMBytes(t *testing.T) {
 	}
 }
 
+func TestShouldGetCHRROMSizeOnNES20File(t *testing.T) {
+	file := []byte{'N', 'E', 'S', 0x1A, 0x01, 0x01, 0x00, 0x08, 0x00, 0xE0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}
+	rom, _ := domain.NewROM(file)
+
+	//byte 4=1; byte 9=0xE0; ((0xE0)+1) * 1024 * 8
+	const expected_size = (0xE0 + 1) * 1024 * 8
+
+	if rom.GetVersion() != 2 {
+		t.Errorf("Expected version 2 for standard iNES header, got %d", rom.GetVersion())
+	}
+
+	if rom.GetCHRSize() != expected_size {
+		t.Errorf("Expected %d bytes for standard iNES header, got %d", expected_size, rom.GetCHRSize())
+	}
+}
+
+func TestShouldGetCHRROMSizeOnNES20FileWithPowerOfTwo(t *testing.T) {
+	file := []byte{'N', 'E', 'S', 0x1A, 0xFF, 0x01, 0x00, 0x08, 0x00, 0xF0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}
+	rom, _ := domain.NewROM(file)
+
+	multiplier := float64((file[4]&0x3)*2 + 1)
+	expoent := float64(file[4] >> 2)
+	expected_size := uint(math.Pow(2, expoent)) * uint(multiplier)
+
+	if rom.GetVersion() != 2 {
+		t.Errorf("Expected version 2 for standard iNES header, got %d", rom.GetVersion())
+	}
+
+	if rom.GetCHRSize() != expected_size {
+		t.Errorf("Expected %d bytes for standard iNES header, got %d", expected_size, rom.GetCHRSize())
+	}
+}
+
 func getTestFile() *[]byte {
 	fs := shared_services.NewLocalFileSystem()
 	file, err := fs.ReadFile("./../../../../test/resources/PALTEST.NES")
