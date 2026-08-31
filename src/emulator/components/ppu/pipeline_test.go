@@ -5,51 +5,37 @@ import (
 	"testing"
 )
 
-type mockMemory struct {
-	data map[uint16]byte
-}
-
-func newMockMemory() *mockMemory {
-	return &mockMemory{data: make(map[uint16]byte)}
-}
-
-func (m *mockMemory) Read(address uint16) uint8 {
-	if v, ok := m.data[address]; ok {
-		return v
-	}
-	return 0
-}
-
-func (m *mockMemory) Write(address uint16, value uint8) {
-	m.data[address] = value
-}
-
 type mockBus struct {
-	memory map[uint16]byte
+	workMemory  map[uint16]byte
+	videoMemory map[uint16]byte
 }
 
 func newMockBus() *mockBus {
-	return &mockBus{memory: make(map[uint16]byte)}
+	return &mockBus{
+		workMemory:  make(map[uint16]byte),
+		videoMemory: make(map[uint16]byte),
+	}
 }
 
-func (b *mockBus) Tick()                                        {}
-func (b *mockBus) AttachTickable(tickable application.Tickable) {}
+func (b *mockBus) Tick() {}
 func (b *mockBus) ReadFromMemory(address uint16) uint8 {
-	if v, ok := b.memory[address]; ok {
+	if v, ok := b.workMemory[address]; ok {
 		return v
 	}
 	return 0
 }
-func (b *mockBus) WriteToMemory(address uint16, value uint8) { b.memory[address] = value }
-func (b *mockBus) CallNMIHandler()                           {}
+func (b *mockBus) WriteToMemory(address uint16, value uint8) {
+	b.workMemory[address] = value
+}
+func (b *mockBus) CallNMIHandler() {}
 func (b *mockBus) ReadFromVideoMemory(address uint16) uint8 {
-	if v, ok := b.memory[address]; ok {
+	if v, ok := b.videoMemory[address]; ok {
 		return v
 	}
 	return 0
 }
 func (b *mockBus) WriteToVideoMemory(address uint16, value uint8) {
-	b.memory[address] = value
+	b.videoMemory[address] = value
 }
 
 func (b *mockBus) AtatchWorkMemory(memory application.Memory)  {}
@@ -58,14 +44,13 @@ func (b *mockBus) AtatchVideoMemory(memory application.Memory) {}
 // Test that when the pipeline is advanced to the tile index fetch dot it reads
 // the correct tile index from nametable memory.
 func TestStepUpPipelineSetsTileIndex(t *testing.T) {
-	mem := newMockMemory()
 	bus := newMockBus()
-	p := NewPipeline(mem, bus).(*pipeline)
+	p := NewPipeline(bus).(*pipeline)
 
 	vValue := uint16(0x0005)
 	expectedTile := byte(0xAA)
 	addr := base_nametable_address | (vValue & 0x0FFF)
-	mem.Write(addr, expectedTile)
+	bus.WriteToVideoMemory(addr, expectedTile)
 
 	// dot 2 is fetch_tile_index_dot
 	p.StepUpPipeline(2, vValue, 0)
@@ -76,17 +61,15 @@ func TestStepUpPipelineSetsTileIndex(t *testing.T) {
 }
 
 func TestStepUpPipelineExtractPaletteBits(t *testing.T) {
-	mem := newMockMemory()
 	bus := newMockBus()
-
-	p := NewPipeline(mem, bus).(*pipeline)
+	p := NewPipeline(bus).(*pipeline)
 
 	vValue := uint16(0x0005)
 	// Attribute table for nametable 0 is at base_nametable_address + 0x03C0 when vValue small
 	attrAddr := uint16(base_nametable_address | 0x03C0)
 	// choose an attribute byte with known low two bits
 	attrByte := byte(0b10)
-	mem.Write(attrAddr, attrByte)
+	bus.WriteToVideoMemory(attrAddr, attrByte)
 
 	p.StepUpPipeline(4, vValue, 0)
 
@@ -103,21 +86,19 @@ func TestStepUpPipelineExtractPaletteBits(t *testing.T) {
 }
 
 func TestStepUpPipelineReturnsPipelineResult(t *testing.T) {
-	mem := newMockMemory()
 	bus := newMockBus()
-
-	p := NewPipeline(mem, bus)
+	p := NewPipeline(bus)
 
 	vValue := uint16(0x0005)
 	// set tile index at nametable
 	tile := byte(0x10)
-	mem.Write(base_nametable_address|(vValue&0x0FFF), tile)
+	bus.WriteToVideoMemory(base_nametable_address|(vValue&0x0FFF), tile)
 
 	// set attribute table (palette) at default location
-	mem.Write(base_nametable_address|0x03C0, 0b01)
+	bus.WriteToVideoMemory(base_nametable_address|0x03C0, 0b01)
 
 	// set control register so pattern table index bit is 1
-	bus.memory[ppu_control] = 0x10
+	bus.WriteToMemory(ppu_control, 0x10)
 
 	fineY := uint16(3)
 
@@ -127,7 +108,7 @@ func TestStepUpPipelineReturnsPipelineResult(t *testing.T) {
 	address := patternIndex | (uint16(tile) << 4) | highByteOffset | fineY
 	lowVal := byte(0x12)
 	// because of an implementation detail both low and high read the same address
-	mem.Write(address, lowVal)
+	bus.WriteToVideoMemory(address, lowVal)
 
 	// advance pipeline in order: 2 -> 4 -> 6 -> 0
 	p.StepUpPipeline(2, vValue, fineY)

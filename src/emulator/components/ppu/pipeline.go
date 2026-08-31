@@ -8,14 +8,12 @@ type pipeline struct {
 	lowPallette     byte
 	lowPatternByte  byte
 	highPatternByte byte
-	vMemory         application.Memory
 	bus             application.MNIBus
 }
 
-func NewPipeline(vMemory application.Memory, bus application.MNIBus) application.PixelPipeline {
+func NewPipeline(bus application.MNIBus) application.PixelPipeline {
 	return &pipeline{
-		vMemory: vMemory,
-		bus:     bus,
+		bus: bus,
 	}
 }
 
@@ -109,7 +107,7 @@ func (p *pipeline) getByteFromPatternTable(tileIndex byte, fineY uint16, fetchHi
 	}
 
 	address = patternIndex | (uint16(tileIndex) << 4) | high_byte_offset | fineY
-	return p.vMemory.Read(address)
+	return p.readVMemory(address)
 }
 
 func (p *pipeline) getPatternTableTileIndexFromControl() uint8 {
@@ -118,5 +116,5 @@ func (p *pipeline) getPatternTableTileIndexFromControl() uint8 {
 }
 
 func (p *pipeline) readVMemory(address uint16) uint8 {
-	return p.vMemory.Read(address)
+	return p.bus.ReadFromVideoMemory(address)
 }

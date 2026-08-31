@@ -45,7 +45,6 @@ var colorPallet = [64]uint32{
 }
 
 type ppu struct {
-	vMemory                    application.Memory
 	scanline                   uint16
 	pixel                      uint8
 	enableRender               bool
@@ -62,12 +61,12 @@ type ppu struct {
 	buffer                     [][]byte
 }
 
-func NewPPU(bus application.MNIBus, vMemory application.Memory, pipeline application.PixelPipeline) *ppu {
+func NewPPU(bus application.MNIBus, pipeline application.PixelPipeline) *ppu {
 	p := &ppu{
 		enableRender: false,
 		pipeline:     pipeline,
 		bus:          bus,
-		vMemory:      vMemory,
+		buffer:       make([][]byte, max_frame_scanline+1),
 	}
 
 	return p
@@ -201,7 +200,7 @@ func (p *ppu) getFineY() uint16 {
 }
 
 func (p *ppu) readVMemory(address uint16) uint8 {
-	return p.vMemory.Read(address)
+	return p.bus.ReadFromVideoMemory(address)
 }
 
 func (p *ppu) fillPatternShiftRegister(highByte byte, lowByte byte) {
