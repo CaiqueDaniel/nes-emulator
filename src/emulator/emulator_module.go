@@ -37,3 +37,7 @@ func (e *emulatorModule) init() {
 
 	e.startGameController = delivery.NewEmulatorController(application.NewStartGame(fs, bus, cpu))
 }
+
+func (e *emulatorModule) GetStartGameController() delivery.EmulatorController {
+	return e.startGameController
+}

@@ -1,7 +1,10 @@
 package main
 
-import "fmt"
+import (
+	"nes-emu/src/emulator"
+)
 
 func main() {
-	fmt.Println("Hello, World!")
+	em := emulator.NewEmulatorModule()
+	em.GetStartGameController().StartGame("./../../../test/resources/PALTEST.NES")
 }
