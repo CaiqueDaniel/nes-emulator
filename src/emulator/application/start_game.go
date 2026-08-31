@@ -10,18 +10,16 @@ type StartGame interface {
 }
 
 type startGame struct {
-	fs   shared_application.FileSystem
-	bus  Bus
-	cpu  CPU
-	vRam Memory
+	fs  shared_application.FileSystem
+	bus Bus
+	cpu CPU
 }
 
-func NewStartGame(fs shared_application.FileSystem, bus Bus, cpu CPU, vRam Memory) StartGame {
+func NewStartGame(fs shared_application.FileSystem, bus Bus, cpu CPU) StartGame {
 	return &startGame{
-		fs:   fs,
-		cpu:  cpu,
-		bus:  bus,
-		vRam: vRam,
+		fs:  fs,
+		cpu: cpu,
+		bus: bus,
 	}
 }
 
@@ -55,7 +53,7 @@ func (f *startGame) loadPRGROMDataIntoMemory(rom *domain.ROM) {
 
 func (f *startGame) loadCHRROMDataIntoMemory(rom *domain.ROM) {
 	for index, chrByte := range rom.GetCHRROM() {
-		f.vRam.Write(uint16(index), chrByte)
+		f.bus.WriteToVideoMemory(uint16(index), chrByte)
 	}
 }
 

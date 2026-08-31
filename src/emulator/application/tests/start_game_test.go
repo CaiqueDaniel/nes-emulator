@@ -13,10 +13,13 @@ func createSut() (application.StartGame, application.Bus, application.Memory, *f
 	fs := shared_services.NewLocalFileSystem()
 	mem := memory.NewMemory()
 	videoMemory := memory.NewMemory()
-	bus := bus.NewBusWithWorkMemory(mem)
+	bus := bus.NewBus()
 	cpu := &fixtures.MockCPU{}
 
-	return application.NewStartGame(fs, bus, cpu, videoMemory), bus, videoMemory, cpu
+	bus.AtatchWorkMemory(mem)
+	bus.AtatchVideoMemory(videoMemory)
+
+	return application.NewStartGame(fs, bus, cpu), bus, videoMemory, cpu
 }
 
 func TestItShouldValidateNesFile(t *testing.T) {
