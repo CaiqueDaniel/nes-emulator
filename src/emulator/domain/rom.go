@@ -51,6 +51,11 @@ func (r *ROM) GetPRGROMAddressRange() (uint, uint) {
 
 func (r *ROM) GetPRGROM() []byte {
 	initial_start_index, end_index := r.GetPRGROMAddressRange()
+
+	if r.prgSize <= 16*1024 {
+		return append(r.raw[initial_start_index:end_index], r.raw[initial_start_index:end_index]...)
+	}
+
 	return r.raw[initial_start_index:end_index]
 }
 
