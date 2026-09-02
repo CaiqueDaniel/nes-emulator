@@ -167,3 +167,59 @@ func TestWriteVideoMemory_PanicsWhenUnattached(t *testing.T) {
 	}()
 	b.WriteToVideoMemory(0x0000, 0xFF)
 }
+
+func TestReadAndWriteToMemory_MemoryMirroing_RAM(t *testing.T) {
+	b := bus.NewBus()
+	b.AtatchWorkMemory(memory.NewMemory())
+
+	b.WriteToMemory(0x0000, 0x12)
+	b.WriteToMemory(0x7FF, 0x34)
+
+	if b.ReadFromMemory(0x0000) != 0x12 || b.ReadFromMemory(0x800) != 0x12 || b.ReadFromMemory(0x1000) != 0x12 || b.ReadFromMemory(0x1800) != 0x12 {
+		t.Errorf("Expected to read 0x12 from memory")
+	}
+
+	if b.ReadFromMemory(0x7FF) != 0x34 && b.ReadFromMemory(0x1FF) != 0x34 && b.ReadFromMemory(0x9FF) != 0x34 && b.ReadFromMemory(0x1FFF) != 0x34 {
+		t.Errorf("Expected to read 0x34 from memory")
+	}
+
+	b.WriteToMemory(0x800, 0xAB)
+
+	if b.ReadFromMemory(0x0000) != 0xAB {
+		t.Errorf("Expected to read 0xAB from memory at address 0x0000, got 0x%X", b.ReadFromMemory(0x0000))
+	}
+}
+
+func TestReadAndWriteToMemory_MemoryMirroing_PPULatches(t *testing.T) {
+	b := bus.NewBus()
+	b.AtatchWorkMemory(memory.NewMemory())
+
+	b.WriteToMemory(0x2000, 0x12)
+	b.WriteToMemory(0x2007, 0x34)
+
+	if b.ReadFromMemory(0x2000) != 0x12 {
+		t.Errorf("Expected to read 0x12 from memory")
+	}
+
+	if b.ReadFromMemory(0x2008) != 0x12 {
+		t.Errorf("Expected to read 0x12 from memory")
+	}
+
+	if b.ReadFromMemory(0x2010) != 0x12 {
+		t.Errorf("Expected to read 0x12 from memory")
+	}
+
+	if b.ReadFromMemory(0x2018) != 0x12 {
+		t.Errorf("Expected to read 0x12 from memory")
+	}
+
+	if b.ReadFromMemory(0x2007) != 0x34 && b.ReadFromMemory(0x3FFF) != 0x34 {
+		t.Errorf("Expected to read 0x34 from memory")
+	}
+
+	b.WriteToMemory(0x2008, 0xAB)
+
+	if b.ReadFromMemory(0x2000) != 0xAB {
+		t.Errorf("Expected to read 0xAB from memory at address 0x2000, got 0x%X", b.ReadFromMemory(0x2000))
+	}
+}

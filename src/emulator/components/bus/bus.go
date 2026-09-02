@@ -4,6 +4,20 @@ import (
 	"nes-emu/src/emulator/application"
 )
 
+const (
+	initial_work_memory_address = 0x0
+	initial_ppu_memory_address  = 0x2000
+	initial_apu_memory_address  = 0x4000
+	initial_io_memory_address   = 0x4018
+	initial_rom_memory_address  = 0x8000
+)
+
+const (
+	max_work_memory_size = 2048
+	max_ppu_latches_size = 8
+	max_rom_memory_size  = 16 * 1024 // 16KB
+)
+
 type bus struct {
 	workMemory  application.Memory
 	videoMemory application.Memory
@@ -62,7 +76,7 @@ func (b *bus) ReadFromMemory(address uint16) uint8 {
 		panic("read operation on unattached work memory!")
 	}
 
-	return b.workMemory.Read(address)
+	return b.workMemory.Read(translateMemoryAddress(address))
 }
 
 func (b *bus) WriteToMemory(address uint16, value uint8) {
@@ -70,7 +84,7 @@ func (b *bus) WriteToMemory(address uint16, value uint8) {
 		panic("write operation on unattached work memory!")
 	}
 
-	b.workMemory.Write(address, value)
+	b.workMemory.Write(translateMemoryAddress(address), value)
 }
 
 func (b *bus) ReadFromVideoMemory(address uint16) uint8 {
@@ -95,4 +109,18 @@ func (b *bus) GetTickCount() uint {
 
 func (b *bus) ResetTickCount() {
 	b.tickCount = 0
+}
+
+func translateMemoryAddress(address uint16) uint16 {
+	if address < initial_apu_memory_address {
+		index := (address - initial_ppu_memory_address) % max_ppu_latches_size
+		address = initial_ppu_memory_address + index
+	}
+
+	if address < initial_ppu_memory_address {
+		index := (address - initial_work_memory_address) % max_work_memory_size
+		address = initial_work_memory_address + index
+	}
+
+	return address
 }
