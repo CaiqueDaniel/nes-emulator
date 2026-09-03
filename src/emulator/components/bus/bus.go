@@ -112,7 +112,7 @@ func (b *bus) ResetTickCount() {
 }
 
 func translateMemoryAddress(address uint16) uint16 {
-	if address < initial_apu_memory_address {
+	if address >= initial_ppu_memory_address && address < initial_apu_memory_address {
 		index := (address - initial_ppu_memory_address) % max_ppu_latches_size
 		address = initial_ppu_memory_address + index
 	}

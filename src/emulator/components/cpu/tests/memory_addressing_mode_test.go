@@ -13,7 +13,7 @@ func TestGetValueByAbsoluteMode(t *testing.T) {
 	b := bus.NewBusWithWorkMemory(memory)
 	cpu := internal.NewCpuWithInternal(b)
 
-	memory.Write(0x1000, 0xFF)
+	b.WriteToMemory(0x1000, 0xFF)
 
 	value := cpu.GetValueByAbsoluteMode(0x1000)
 
@@ -41,7 +41,7 @@ func TestGetValueByIndexedAbsoluteMode(t *testing.T) {
 	b := bus.NewBusWithWorkMemory(memory)
 	cpu := internal.NewCpuWithInternal(b)
 
-	memory.Write(0x1010, 0xFF)
+	b.WriteToMemory(0x1010, 0xFF)
 
 	value := cpu.GetValueByIndexedAbsoluteMode(0x1000, 0x10)
 
@@ -69,9 +69,9 @@ func TestGetValueByIndirectAbsoluteMode(t *testing.T) {
 	b := bus.NewBusWithWorkMemory(memory)
 	cpu := internal.NewCpuWithInternal(b)
 
-	memory.Write(0xFAFF, 0x80)
-	memory.Write(0x1000, 0xFF)
-	memory.Write(0x1001, 0xFA)
+	b.WriteToMemory(0xFAFF, 0x80)
+	b.WriteToMemory(0x1000, 0xFF)
+	b.WriteToMemory(0x1001, 0xFA)
 
 	value := cpu.GetValueByIndirectAbsoluteMode(0x1000)
 

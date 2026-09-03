@@ -39,8 +39,8 @@ func TestShouldStoreRegisterIntoAbsoluteMemory(t *testing.T) {
 			cpu.LoadValueIntoRegister(tt.value, tt.register)
 			cpu.StoreRegisterIntoAbsoluteMemory(0x1234, tt.register)
 
-			if mem.Read(0x1234) != tt.value {
-				t.Errorf("Expected memory at 0x1234 to be 0x%02X, got 0x%02X", tt.value, mem.Read(0x1234))
+			if b.ReadFromMemory(0x1234) != tt.value {
+				t.Errorf("Expected memory at 0x1234 to be 0x%02X, got 0x%02X", tt.value, b.ReadFromMemory(0x1234))
 			}
 		})
 	}
