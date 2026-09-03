@@ -58,7 +58,7 @@ type ppu struct {
 	lowAttributeShiftRegister  uint16
 	highAttributeShiftRegister uint16
 	pipeline                   application.PixelPipeline
-	buffer                     [][]byte
+	buffer                     [][]uint32
 }
 
 func NewPPU(bus application.MNIBus, pipeline application.PixelPipeline) *ppu {
@@ -66,7 +66,7 @@ func NewPPU(bus application.MNIBus, pipeline application.PixelPipeline) *ppu {
 		enableRender: false,
 		pipeline:     pipeline,
 		bus:          bus,
-		buffer:       make([][]byte, max_frame_scanline+1),
+		buffer:       make([][]uint32, max_frame_scanline+1),
 	}
 
 	return p
@@ -112,7 +112,7 @@ func (p *ppu) renderPixel() {
 	highAttrBit := p.getBitFromBitPosition(p.highAttributeShiftRegister, bitPosition) << 3
 
 	pixelData := lowPatternBit | highPatternBit | lowAttrBit | highAttrBit
-	p.buffer[p.scanline] = append(p.buffer[p.scanline], byte(colorPallet[pixelData]))
+	p.buffer[p.scanline] = append(p.buffer[p.scanline], colorPallet[pixelData])
 }
 
 func (p *ppu) getBitFromBitPosition(register uint16, bitPosition byte) uint16 {
