@@ -32,7 +32,7 @@ func (e *emulatorModule) init(window *screen.Window, buffer *screen.Buffer) {
 	screen := screen_driver.NewShinyScreen(window, buffer)
 	bus := bus.NewBus()
 	cpu := cpu.NewCpu(bus)
-	ppu := rp2C02.NewPPU(bus, rp2C02.NewPipeline(bus), screen)
+	ppu := rp2C02.NewRp2C02(bus, rp2C02.NewPipeline(bus), screen)
 
 	bus.AtatchWorkMemory(memory.NewMemory())
 	bus.AtatchVideoMemory(memory.NewMemory())

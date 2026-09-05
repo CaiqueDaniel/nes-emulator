@@ -63,7 +63,7 @@ type ppu struct {
 	screen                     application.Screen
 }
 
-func NewPPU(bus application.MNIBus, pipeline application.PixelPipeline, screen application.Screen) *ppu {
+func NewRp2C02(bus application.MNIBus, pipeline application.PixelPipeline, screen application.Screen) *ppu {
 	p := &ppu{
 		enableRender: false,
 		pipeline:     pipeline,

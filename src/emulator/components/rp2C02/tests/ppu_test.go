@@ -3,7 +3,7 @@ package tests
 import (
 	"nes-emu/src/emulator/components/bus"
 	"nes-emu/src/emulator/components/memory"
-	"nes-emu/src/emulator/components/ppu"
+	ppu "nes-emu/src/emulator/components/rp2C02"
 	"nes-emu/test/fixtures"
 	"testing"
 )
@@ -15,7 +15,7 @@ func TestPPURender_ShouldDrawAPixel(t *testing.T) {
 	bus.AtatchVideoMemory(vMemory)
 	mockPipeline := &PixelPipelineFixture{}
 	screenFixture := NewScreenFixture()
-	ppu := ppu.NewPPU(bus, mockPipeline, screenFixture)
+	ppu := ppu.NewRp2C02(bus, mockPipeline, screenFixture)
 
 	ppu.Render()
 
@@ -35,7 +35,7 @@ func TestPPURender_ShouldWrapScanlineToStart(t *testing.T) {
 	bus.AtatchVideoMemory(vMemory)
 	mockPipeline := &PixelPipelineFixture{}
 	screenFixture := NewScreenFixture()
-	ppu := ppu.NewPPU(bus, mockPipeline, screenFixture)
+	ppu := ppu.NewRp2C02(bus, mockPipeline, screenFixture)
 
 	for i := 0; i < 336*262; i++ {
 		ppu.Render()
@@ -61,7 +61,7 @@ func TestPPURender_ShouldNotTriggerAnNMIOnVBlank_WhenNMIFlagDisabled(t *testing.
 	bus.AttachNMI(mockCpu)
 
 	screenFixture := NewScreenFixture()
-	ppu := ppu.NewPPU(bus, mockPipeline, screenFixture)
+	ppu := ppu.NewRp2C02(bus, mockPipeline, screenFixture)
 
 	for i := 0; i < 336*240; i++ {
 		ppu.Render()
@@ -91,7 +91,7 @@ func TestPPURender_ShouldTriggerAnNMIOnVBlank_WhenNMIFlagEnabled(t *testing.T) {
 	bus.AttachNMI(mockCpu)
 
 	screenFixture := NewScreenFixture()
-	ppu := ppu.NewPPU(bus, mockPipeline, screenFixture)
+	ppu := ppu.NewRp2C02(bus, mockPipeline, screenFixture)
 
 	mem.Write(0x2000, 0b10000000)
 
@@ -123,7 +123,7 @@ func TestPPURender_ShouldResetFlagsOnStatusRegister_OnPreRender(t *testing.T) {
 	bus.AttachNMI(mockCpu)
 
 	screenFixture := NewScreenFixture()
-	ppu := ppu.NewPPU(bus, mockPipeline, screenFixture)
+	ppu := ppu.NewRp2C02(bus, mockPipeline, screenFixture)
 
 	for i := 0; i < 336*261; i++ {
 		ppu.Render()
@@ -153,7 +153,7 @@ func TestPPURender_ShouldResetFlagsOnStatusRegister_WithoutChangingOtherBits_OnP
 
 	mockPipeline := &PixelPipelineFixture{}
 	screenFixture := NewScreenFixture()
-	ppu := ppu.NewPPU(bus, mockPipeline, screenFixture)
+	ppu := ppu.NewRp2C02(bus, mockPipeline, screenFixture)
 
 	mem.Write(0x2002, 0b1111_1111)
 
@@ -185,7 +185,7 @@ func TestPPURender_ShouldSetVBlankFlagOnStatusRegister_OnVBlank(t *testing.T) {
 	bus.AttachNMI(mockCpu)
 
 	screenFixture := NewScreenFixture()
-	ppu := ppu.NewPPU(bus, mockPipeline, screenFixture)
+	ppu := ppu.NewRp2C02(bus, mockPipeline, screenFixture)
 
 	for i := 0; i < 336*240; i++ {
 		ppu.Render()
@@ -211,7 +211,7 @@ func TestPPURender_ShouldShiftRegisters_OnVisibleScanlines(t *testing.T) {
 	bus.AtatchVideoMemory(vMemory)
 	mockPipeline := &PixelPipelineFixture{}
 	screenFixture := NewScreenFixture()
-	sut := ppu.NewPPU(bus, mockPipeline, screenFixture)
+	sut := ppu.NewRp2C02(bus, mockPipeline, screenFixture)
 
 	for i := 0; i <= 16; i++ {
 		sut.Render()
@@ -243,7 +243,7 @@ func TestPPURender_ShouldShiftRegisters_OnHBlank(t *testing.T) {
 	bus.AtatchVideoMemory(vMemory)
 	mockPipeline := &PixelPipelineFixture{}
 	screenFixture := NewScreenFixture()
-	sut := ppu.NewPPU(bus, mockPipeline, screenFixture)
+	sut := ppu.NewRp2C02(bus, mockPipeline, screenFixture)
 
 	for i := 0; i <= 256; i++ {
 		sut.Render()
@@ -294,7 +294,7 @@ func TestPPURender_ShouldShiftRegisters_OnVBlank(t *testing.T) {
 	bus.AtatchVideoMemory(vMemory)
 	mockPipeline := &PixelPipelineFixture{}
 	screen := NewScreenFixture()
-	sut := ppu.NewPPU(bus, mockPipeline, screen)
+	sut := ppu.NewRp2C02(bus, mockPipeline, screen)
 
 	for i := 0; i <= 336*240; i++ {
 		sut.Render()
