@@ -6,8 +6,11 @@ import (
 	"nes-emu/src/emulator/components/cpu"
 	"nes-emu/src/emulator/components/memory"
 	"nes-emu/src/emulator/components/ppu"
+	screen_driver "nes-emu/src/emulator/components/screen"
 	"nes-emu/src/emulator/delivery"
 	shared_services "nes-emu/src/shared/services"
+
+	"golang.org/x/exp/shiny/screen"
 )
 
 type EmulatorModule interface {
@@ -18,17 +21,18 @@ type emulatorModule struct {
 	startGameController delivery.EmulatorController
 }
 
-func NewEmulatorModule() *emulatorModule {
+func NewEmulatorModule(window *screen.Window, buffer *screen.Buffer) *emulatorModule {
 	module := &emulatorModule{}
-	module.init()
+	module.init(window, buffer)
 	return module
 }
 
-func (e *emulatorModule) init() {
+func (e *emulatorModule) init(window *screen.Window, buffer *screen.Buffer) {
 	fs := shared_services.NewLocalFileSystem()
+	screen := screen_driver.NewShinyScreen(window, buffer)
 	bus := bus.NewBus()
 	cpu := cpu.NewCpu(bus)
-	ppu := ppu.NewPPU(bus, ppu.NewPipeline(bus))
+	ppu := ppu.NewPPU(bus, ppu.NewPipeline(bus), screen)
 
 	bus.AtatchWorkMemory(memory.NewMemory())
 	bus.AtatchVideoMemory(memory.NewMemory())
