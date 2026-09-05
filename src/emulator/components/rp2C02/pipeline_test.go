@@ -1,4 +1,4 @@
-package ppu
+package rp2C02
 
 import (
 	"nes-emu/src/emulator/application"

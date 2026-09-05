@@ -5,7 +5,7 @@ import (
 	"nes-emu/src/emulator/components/bus"
 	"nes-emu/src/emulator/components/cpu"
 	"nes-emu/src/emulator/components/memory"
-	"nes-emu/src/emulator/components/ppu"
+	"nes-emu/src/emulator/components/rp2C02"
 	screen_driver "nes-emu/src/emulator/components/screen"
 	"nes-emu/src/emulator/delivery"
 	shared_services "nes-emu/src/shared/services"
@@ -32,7 +32,7 @@ func (e *emulatorModule) init(window *screen.Window, buffer *screen.Buffer) {
 	screen := screen_driver.NewShinyScreen(window, buffer)
 	bus := bus.NewBus()
 	cpu := cpu.NewCpu(bus)
-	ppu := ppu.NewPPU(bus, ppu.NewPipeline(bus), screen)
+	ppu := rp2C02.NewPPU(bus, rp2C02.NewPipeline(bus), screen)
 
 	bus.AtatchWorkMemory(memory.NewMemory())
 	bus.AtatchVideoMemory(memory.NewMemory())
