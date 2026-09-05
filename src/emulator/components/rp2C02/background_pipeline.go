@@ -3,12 +3,16 @@ package rp2C02
 import "nes-emu/src/emulator/application"
 
 type pipeline struct {
-	tileIndex       byte
-	highPallette    byte
-	lowPallette     byte
-	lowPatternByte  byte
-	highPatternByte byte
-	bus             application.MNIBus
+	tileIndex                  byte
+	highPallette               byte
+	lowPallette                byte
+	lowPatternByte             byte
+	highPatternByte            byte
+	lowPatternShiftRegister    uint16
+	highPatternShiftRegister   uint16
+	lowAttributeShiftRegister  uint16
+	highAttributeShiftRegister uint16
+	bus                        application.MNIBus
 }
 
 func NewPipeline(bus application.MNIBus) application.PixelPipeline {
@@ -17,7 +21,7 @@ func NewPipeline(bus application.MNIBus) application.PixelPipeline {
 	}
 }
 
-func (p *pipeline) StepUpPipeline(currentDot uint, vValue uint16, fineY uint16) *application.PipelineResult {
+func (p *pipeline) StepUpPipeline(currentDot uint, vValue uint16, fineY uint16) bool {
 	const total_dots_per_tile = 8
 	const (
 		fetch_tile_index_dot           = 2
@@ -36,15 +40,32 @@ func (p *pipeline) StepUpPipeline(currentDot uint, vValue uint16, fineY uint16) 
 	case fetch_higher_pattern_table_dot:
 		p.highPatternByte = p.getHighByteFromPatternTable(p.tileIndex, fineY)
 
-		return &application.PipelineResult{
-			HighPalette:     p.highPallette,
-			LowPalette:      p.lowPallette,
-			LowPatternByte:  p.lowPatternByte,
-			HighPatternByte: p.highPatternByte,
-		}
+		p.fillPatternShiftRegister(p.highPatternByte, p.lowPatternByte)
+		p.fillAttrShiftRegister(p.highPallette, p.lowPallette)
+
+		return true
 	}
 
-	return nil
+	return false
+}
+
+func (p *pipeline) RenderPixel(fineX byte) uint32 {
+	const highestBit = 15
+	bitPosition := highestBit - fineX
+
+	lowPatternBit := p.getBitFromBitPosition(p.lowPatternShiftRegister, bitPosition)
+	highPatternBit := p.getBitFromBitPosition(p.highPatternShiftRegister, bitPosition) << 1
+	lowAttrBit := p.getBitFromBitPosition(p.lowAttributeShiftRegister, bitPosition) << 2
+	highAttrBit := p.getBitFromBitPosition(p.highAttributeShiftRegister, bitPosition) << 3
+
+	p.shiftRegisters()
+
+	pixelData := lowPatternBit | highPatternBit | lowAttrBit | highAttrBit
+	return colorPallet[pixelData]
+}
+
+func (p *pipeline) GetShiftRegisters() (uint16, uint16, uint16, uint16) {
+	return p.lowPatternShiftRegister, p.highPatternShiftRegister, p.lowAttributeShiftRegister, p.highAttributeShiftRegister
 }
 
 func (p *pipeline) getTileIndex(vValue uint16) uint8 {
@@ -113,6 +134,32 @@ func (p *pipeline) getByteFromPatternTable(tileIndex byte, fineY uint16, fetchHi
 func (p *pipeline) getPatternTableTileIndexFromControl() uint8 {
 	const index_mask = 0b1_0000
 	return (p.bus.ReadFromMemory(ppu_control) & index_mask) >> 4
+}
+
+func (p *pipeline) getBitFromBitPosition(register uint16, bitPosition byte) uint16 {
+	value := register & (1 << bitPosition)
+	return value >> bitPosition
+}
+
+func (p *pipeline) fillPatternShiftRegister(highByte byte, lowByte byte) {
+	p.fillShiftRegister(highByte, &p.highPatternShiftRegister)
+	p.fillShiftRegister(lowByte, &p.lowPatternShiftRegister)
+}
+
+func (p *pipeline) fillAttrShiftRegister(highByte byte, lowByte byte) {
+	p.fillShiftRegister(highByte, &p.highAttributeShiftRegister)
+	p.fillShiftRegister(lowByte, &p.lowAttributeShiftRegister)
+}
+
+func (p *pipeline) fillShiftRegister(value byte, register *uint16) {
+	*register = *register | uint16(value)
+}
+
+func (p *pipeline) shiftRegisters() {
+	p.lowAttributeShiftRegister = p.lowAttributeShiftRegister << 1
+	p.highAttributeShiftRegister = p.highAttributeShiftRegister << 1
+	p.lowPatternShiftRegister = p.lowPatternShiftRegister << 1
+	p.highPatternShiftRegister = p.highPatternShiftRegister << 1
 }
 
 func (p *pipeline) readVMemory(address uint16) uint8 {

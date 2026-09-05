@@ -1,7 +1,6 @@
 package rp2C02
 
 import (
-	"fmt"
 	"nes-emu/src/emulator/application"
 )
 
@@ -26,7 +25,6 @@ const (
 	max_dots_per_line      = 336
 )
 
-const frequency_in_mhz = 5.37
 const base_nametable_address = 0x2000
 
 const (
@@ -46,21 +44,17 @@ var colorPallet = [64]uint32{
 }
 
 type ppu struct {
-	scanline                   uint16
-	pixel                      uint8
-	enableRender               bool
-	bus                        application.MNIBus
-	v, t                       uint16
-	x                          uint8
-	w                          bool
-	dots                       uint16
-	lowPatternShiftRegister    uint16
-	highPatternShiftRegister   uint16
-	lowAttributeShiftRegister  uint16
-	highAttributeShiftRegister uint16
-	pipeline                   application.PixelPipeline
-	buffer                     [][]uint32
-	screen                     application.Screen
+	scanline     uint16
+	pixel        uint8
+	enableRender bool
+	bus          application.MNIBus
+	v, t         uint16
+	x            uint8
+	w            bool
+	dots         uint16
+	pipeline     application.PixelPipeline
+	buffer       [][]uint32
+	screen       application.Screen
 }
 
 func NewRp2C02(bus application.MNIBus, pipeline application.PixelPipeline, screen application.Screen) *ppu {
@@ -78,15 +72,12 @@ func NewRp2C02(bus application.MNIBus, pipeline application.PixelPipeline, scree
 func (p *ppu) Render() {
 	if p.dots <= max_pixel_per_scanline && p.scanline < v_blank_scanline_start {
 		p.renderPixel()
-		p.shiftRegisters()
 		p.advanceToNextScanlinePixel()
 	}
 
 	p.advanceToNextScanline()
 	p.fetchGraphics()
 	p.updateStatusRegister()
-
-	fmt.Println(p.isVBlankStarted())
 
 	if p.isVBlankStarted() {
 		p.screen.ShowImage(&p.buffer)
@@ -107,44 +98,12 @@ func (p *ppu) GetCurrentScanlinePixel() uint8 {
 	return p.pixel
 }
 
-func (p *ppu) GetShiftRegisters() (uint16, uint16, uint16, uint16) {
-	return p.lowPatternShiftRegister, p.highPatternShiftRegister, p.lowAttributeShiftRegister, p.highAttributeShiftRegister
-}
-
 func (p *ppu) renderPixel() {
-	const highestBit = 15
-	bitPosition := highestBit - p.x
-
-	lowPatternBit := p.getBitFromBitPosition(p.lowPatternShiftRegister, bitPosition)
-	highPatternBit := p.getBitFromBitPosition(p.highPatternShiftRegister, bitPosition) << 1
-	lowAttrBit := p.getBitFromBitPosition(p.lowAttributeShiftRegister, bitPosition) << 2
-	highAttrBit := p.getBitFromBitPosition(p.highAttributeShiftRegister, bitPosition) << 3
-
-	pixelData := lowPatternBit | highPatternBit | lowAttrBit | highAttrBit
-	p.buffer[p.scanline] = append(p.buffer[p.scanline], colorPallet[pixelData])
-}
-
-func (p *ppu) getBitFromBitPosition(register uint16, bitPosition byte) uint16 {
-	value := register & (1 << bitPosition)
-	return value >> bitPosition
-}
-
-func (p *ppu) shiftRegisters() {
-	p.lowAttributeShiftRegister = p.lowAttributeShiftRegister << 1
-	p.highAttributeShiftRegister = p.highAttributeShiftRegister << 1
-	p.lowPatternShiftRegister = p.lowPatternShiftRegister << 1
-	p.highPatternShiftRegister = p.highPatternShiftRegister << 1
+	p.buffer[p.scanline] = append(p.buffer[p.scanline], p.pipeline.RenderPixel(p.x))
 }
 
 func (p *ppu) fetchGraphics() {
-	result := p.pipeline.StepUpPipeline(uint(p.dots), p.v, p.getFineY())
-
-	if result == nil {
-		return
-	}
-
-	p.fillPatternShiftRegister(result.HighPatternByte, result.LowPatternByte)
-	p.fillAttrShiftRegister(result.HighPalette, result.LowPalette)
+	p.pipeline.StepUpPipeline(uint(p.dots), p.v, p.getFineY())
 }
 
 func (p *ppu) advanceToNextScanlinePixel() {
@@ -210,18 +169,4 @@ func (p *ppu) getFineY() uint16 {
 
 func (p *ppu) readVMemory(address uint16) uint8 {
 	return p.bus.ReadFromVideoMemory(address)
-}
-
-func (p *ppu) fillPatternShiftRegister(highByte byte, lowByte byte) {
-	p.fillShiftRegister(highByte, &p.highPatternShiftRegister)
-	p.fillShiftRegister(lowByte, &p.lowPatternShiftRegister)
-}
-
-func (p *ppu) fillAttrShiftRegister(highByte byte, lowByte byte) {
-	p.fillShiftRegister(highByte, &p.highAttributeShiftRegister)
-	p.fillShiftRegister(lowByte, &p.lowAttributeShiftRegister)
-}
-
-func (p *ppu) fillShiftRegister(value byte, register *uint16) {
-	*register = *register | uint16(value)
 }

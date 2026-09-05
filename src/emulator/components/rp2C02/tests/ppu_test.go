@@ -217,7 +217,7 @@ func TestPPURender_ShouldShiftRegisters_OnVisibleScanlines(t *testing.T) {
 		sut.Render()
 	}
 
-	lowPatternShiftRegister, highPatternShiftRegister, lowAttributeShiftRegister, highAttributeShiftRegister := sut.GetShiftRegisters()
+	lowPatternShiftRegister, highPatternShiftRegister, lowAttributeShiftRegister, highAttributeShiftRegister := mockPipeline.GetShiftRegisters()
 
 	if lowPatternShiftRegister != 0b10_00000010 {
 		t.Errorf("expected low pattern shift register to be 0b00000010_00000010, got %b", lowPatternShiftRegister)
@@ -249,7 +249,7 @@ func TestPPURender_ShouldShiftRegisters_OnHBlank(t *testing.T) {
 		sut.Render()
 	}
 
-	lowPatternShiftRegister, highPatternShiftRegister, lowAttributeShiftRegister, highAttributeShiftRegister := sut.GetShiftRegisters()
+	lowPatternShiftRegister, highPatternShiftRegister, lowAttributeShiftRegister, highAttributeShiftRegister := mockPipeline.GetShiftRegisters()
 
 	if lowPatternShiftRegister != 0b1000_00010 {
 		t.Errorf("expected low pattern shift register to be 0b1000_00010, got %b", lowPatternShiftRegister)
@@ -268,7 +268,7 @@ func TestPPURender_ShouldShiftRegisters_OnHBlank(t *testing.T) {
 	}
 
 	sut.Render()
-	lowPatternShiftRegister, highPatternShiftRegister, lowAttributeShiftRegister, highAttributeShiftRegister = sut.GetShiftRegisters()
+	lowPatternShiftRegister, highPatternShiftRegister, lowAttributeShiftRegister, highAttributeShiftRegister = mockPipeline.GetShiftRegisters()
 
 	if lowPatternShiftRegister != 0b1000_00010 {
 		t.Errorf("expected low pattern shift register to be 0b1000_00010, got %b", lowPatternShiftRegister)
@@ -300,7 +300,7 @@ func TestPPURender_ShouldShiftRegisters_OnVBlank(t *testing.T) {
 		sut.Render()
 	}
 
-	lowPatternShiftRegister, highPatternShiftRegister, lowAttributeShiftRegister, highAttributeShiftRegister := sut.GetShiftRegisters()
+	lowPatternShiftRegister, highPatternShiftRegister, lowAttributeShiftRegister, highAttributeShiftRegister := mockPipeline.GetShiftRegisters()
 
 	if lowPatternShiftRegister != 0b100000010 {
 		t.Errorf("expected low pattern shift register to be 0b100000010, got %b", lowPatternShiftRegister)
@@ -319,7 +319,7 @@ func TestPPURender_ShouldShiftRegisters_OnVBlank(t *testing.T) {
 	}
 
 	sut.Render()
-	lowPatternShiftRegister, highPatternShiftRegister, lowAttributeShiftRegister, highAttributeShiftRegister = sut.GetShiftRegisters()
+	lowPatternShiftRegister, highPatternShiftRegister, lowAttributeShiftRegister, highAttributeShiftRegister = mockPipeline.GetShiftRegisters()
 
 	if lowPatternShiftRegister != 0b100000010 {
 		t.Errorf("expected low pattern shift register to be 0b100000010, got %b", lowPatternShiftRegister)

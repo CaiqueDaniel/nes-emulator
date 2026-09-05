@@ -5,7 +5,8 @@ type PPU interface {
 }
 
 type PixelPipeline interface {
-	StepUpPipeline(currentDot uint, vValue uint16, fineY uint16) *PipelineResult
+	StepUpPipeline(currentDot uint, vValue uint16, fineY uint16) bool
+	RenderPixel(fineX byte) uint32
 }
 
 type PipelineResult struct {

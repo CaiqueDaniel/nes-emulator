@@ -1,4 +1,4 @@
 tests:
-	go test ./.../tests
+	go test ./...
 verbose-tests:
-	go test -v ./.../tests
+	go test -v ./...
