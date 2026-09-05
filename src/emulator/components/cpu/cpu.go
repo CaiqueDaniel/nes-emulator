@@ -149,6 +149,7 @@ func (c *cpu) runGameLoop() {
 
 		if timeElapsed < time_per_frame {
 			time.Sleep(time_per_frame - timeElapsed)
+			startTime = time.Now()
 		}
 
 		if c.stopProgram {
