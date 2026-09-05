@@ -1,6 +1,7 @@
 package ppu
 
 import (
+	"fmt"
 	"nes-emu/src/emulator/application"
 )
 
@@ -59,13 +60,15 @@ type ppu struct {
 	highAttributeShiftRegister uint16
 	pipeline                   application.PixelPipeline
 	buffer                     [][]uint32
+	screen                     application.Screen
 }
 
-func NewPPU(bus application.MNIBus, pipeline application.PixelPipeline) *ppu {
+func NewPPU(bus application.MNIBus, pipeline application.PixelPipeline, screen application.Screen) *ppu {
 	p := &ppu{
 		enableRender: false,
 		pipeline:     pipeline,
 		bus:          bus,
+		screen:       screen,
 		buffer:       make([][]uint32, max_frame_scanline+1),
 	}
 
@@ -73,7 +76,7 @@ func NewPPU(bus application.MNIBus, pipeline application.PixelPipeline) *ppu {
 }
 
 func (p *ppu) Render() {
-	if p.dots <= 255 && p.scanline < v_blank_scanline_start {
+	if p.dots <= max_pixel_per_scanline && p.scanline < v_blank_scanline_start {
 		p.renderPixel()
 		p.shiftRegisters()
 		p.advanceToNextScanlinePixel()
@@ -82,6 +85,12 @@ func (p *ppu) Render() {
 	p.advanceToNextScanline()
 	p.fetchGraphics()
 	p.updateStatusRegister()
+
+	fmt.Println(p.isVBlankStarted())
+
+	if p.isVBlankStarted() {
+		p.screen.ShowImage(&p.buffer)
+	}
 
 	if p.checkIfNMIShouldBeCalled() {
 		p.bus.CallNMIHandler()

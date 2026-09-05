@@ -14,7 +14,8 @@ func TestPPURender_ShouldDrawAPixel(t *testing.T) {
 	bus := bus.NewBusWithWorkMemory(mem)
 	bus.AtatchVideoMemory(vMemory)
 	mockPipeline := &PixelPipelineFixture{}
-	ppu := ppu.NewPPU(bus, mockPipeline)
+	screenFixture := NewScreenFixture()
+	ppu := ppu.NewPPU(bus, mockPipeline, screenFixture)
 
 	ppu.Render()
 
@@ -33,7 +34,8 @@ func TestPPURender_ShouldWrapScanlineToStart(t *testing.T) {
 	bus := bus.NewBusWithWorkMemory(mem)
 	bus.AtatchVideoMemory(vMemory)
 	mockPipeline := &PixelPipelineFixture{}
-	ppu := ppu.NewPPU(bus, mockPipeline)
+	screenFixture := NewScreenFixture()
+	ppu := ppu.NewPPU(bus, mockPipeline, screenFixture)
 
 	for i := 0; i < 336*262; i++ {
 		ppu.Render()
@@ -58,7 +60,8 @@ func TestPPURender_ShouldNotTriggerAnNMIOnVBlank_WhenNMIFlagDisabled(t *testing.
 
 	bus.AttachNMI(mockCpu)
 
-	ppu := ppu.NewPPU(bus, mockPipeline)
+	screenFixture := NewScreenFixture()
+	ppu := ppu.NewPPU(bus, mockPipeline, screenFixture)
 
 	for i := 0; i < 336*240; i++ {
 		ppu.Render()
@@ -87,7 +90,8 @@ func TestPPURender_ShouldTriggerAnNMIOnVBlank_WhenNMIFlagEnabled(t *testing.T) {
 
 	bus.AttachNMI(mockCpu)
 
-	ppu := ppu.NewPPU(bus, mockPipeline)
+	screenFixture := NewScreenFixture()
+	ppu := ppu.NewPPU(bus, mockPipeline, screenFixture)
 
 	mem.Write(0x2000, 0b10000000)
 
@@ -118,7 +122,8 @@ func TestPPURender_ShouldResetFlagsOnStatusRegister_OnPreRender(t *testing.T) {
 
 	bus.AttachNMI(mockCpu)
 
-	ppu := ppu.NewPPU(bus, mockPipeline)
+	screenFixture := NewScreenFixture()
+	ppu := ppu.NewPPU(bus, mockPipeline, screenFixture)
 
 	for i := 0; i < 336*261; i++ {
 		ppu.Render()
@@ -147,7 +152,8 @@ func TestPPURender_ShouldResetFlagsOnStatusRegister_WithoutChangingOtherBits_OnP
 	bus.AttachNMI(mockCpu)
 
 	mockPipeline := &PixelPipelineFixture{}
-	ppu := ppu.NewPPU(bus, mockPipeline)
+	screenFixture := NewScreenFixture()
+	ppu := ppu.NewPPU(bus, mockPipeline, screenFixture)
 
 	mem.Write(0x2002, 0b1111_1111)
 
@@ -178,7 +184,8 @@ func TestPPURender_ShouldSetVBlankFlagOnStatusRegister_OnVBlank(t *testing.T) {
 
 	bus.AttachNMI(mockCpu)
 
-	ppu := ppu.NewPPU(bus, mockPipeline)
+	screenFixture := NewScreenFixture()
+	ppu := ppu.NewPPU(bus, mockPipeline, screenFixture)
 
 	for i := 0; i < 336*240; i++ {
 		ppu.Render()
@@ -203,7 +210,8 @@ func TestPPURender_ShouldShiftRegisters_OnVisibleScanlines(t *testing.T) {
 	bus := bus.NewBusWithWorkMemory(mem)
 	bus.AtatchVideoMemory(vMemory)
 	mockPipeline := &PixelPipelineFixture{}
-	sut := ppu.NewPPU(bus, mockPipeline)
+	screenFixture := NewScreenFixture()
+	sut := ppu.NewPPU(bus, mockPipeline, screenFixture)
 
 	for i := 0; i <= 16; i++ {
 		sut.Render()
@@ -234,7 +242,8 @@ func TestPPURender_ShouldShiftRegisters_OnHBlank(t *testing.T) {
 	bus := bus.NewBusWithWorkMemory(mem)
 	bus.AtatchVideoMemory(vMemory)
 	mockPipeline := &PixelPipelineFixture{}
-	sut := ppu.NewPPU(bus, mockPipeline)
+	screenFixture := NewScreenFixture()
+	sut := ppu.NewPPU(bus, mockPipeline, screenFixture)
 
 	for i := 0; i <= 256; i++ {
 		sut.Render()
@@ -284,7 +293,8 @@ func TestPPURender_ShouldShiftRegisters_OnVBlank(t *testing.T) {
 	bus := bus.NewBusWithWorkMemory(mem)
 	bus.AtatchVideoMemory(vMemory)
 	mockPipeline := &PixelPipelineFixture{}
-	sut := ppu.NewPPU(bus, mockPipeline)
+	screen := NewScreenFixture()
+	sut := ppu.NewPPU(bus, mockPipeline, screen)
 
 	for i := 0; i <= 336*240; i++ {
 		sut.Render()
