@@ -90,6 +90,23 @@ func (p *ppu) Render() {
 	p.dots = (p.dots + 1) % max_dots_per_line
 }
 
+func (p *ppu) TriggerLatchWithWriteSignal(address uint16) {
+	switch address {
+	case ppu_address:
+		p.updateVRAMAddress()
+
+	case ppu_data:
+		p.updateVRAMData()
+	}
+}
+
+func (p *ppu) TriggerLatchWithReadSignal(address uint16) {
+	switch address {
+	case ppu_status:
+		p.resetWAndVBlankFlagOnRead()
+	}
+}
+
 func (p *ppu) GetCurrentScanline() uint16 {
 	return p.scanline
 }
@@ -146,6 +163,54 @@ func (p *ppu) isVBlankStarted() bool {
 	return p.scanline == v_blank_scanline_start && p.pixel == v_blank_pixel_start
 }
 
+// TODO 1: separate this logic into independent component
+func (p *ppu) updateVRAMAddress() {
+	const high_byte_mask = 0x3F00
+
+	if !p.w {
+		value := p.bus.ReadFromMemory(ppu_address)
+		p.t = (uint16(value) << 8) & high_byte_mask
+	} else {
+		p.t |= uint16(p.bus.ReadFromMemory(ppu_address))
+		p.v = p.t
+	}
+
+	p.toggleW()
+}
+
+//TODO 1
+
+// TODO 2: separate this logic into independent component
+func (p *ppu) updateVRAMData() {
+	value := p.bus.ReadFromMemory(ppu_data)
+	p.writeToVMemory(p.v, value)
+	p.increaseVByOffset()
+}
+
+func (p *ppu) increaseVByOffset() {
+	if p.isOffsetIncrementBy32() {
+		p.setV(p.v + 32)
+	} else {
+		p.setV(p.v + 1)
+	}
+}
+
+func (p *ppu) isOffsetIncrementBy32() bool {
+	return p.bus.ReadFromMemory(ppu_control)&0b100 != 0
+}
+
+//TODO 2
+
+//TODO 3separate this logic into independent component
+
+func (p *ppu) resetWAndVBlankFlagOnRead() {
+	status := p.bus.ReadFromMemory(ppu_status)
+	p.bus.WriteToMemory(ppu_status, status&0x7F)
+	p.w = false
+}
+
+//TODO 3
+
 func (p *ppu) setV(value uint16) {
 	p.v = value % max_value_for_15_bits
 }
@@ -158,8 +223,8 @@ func (p *ppu) setX(value uint8) {
 	p.x = value % max_value_for_3_bits
 }
 
-func (p *ppu) setW(value bool) {
-	p.w = value
+func (p *ppu) toggleW() {
+	p.w = !p.w
 }
 
 func (p *ppu) getFineY() uint16 {
@@ -169,4 +234,8 @@ func (p *ppu) getFineY() uint16 {
 
 func (p *ppu) readVMemory(address uint16) uint8 {
 	return p.bus.ReadFromVideoMemory(address)
+}
+
+func (p *ppu) writeToVMemory(address uint16, value byte) {
+	p.bus.WriteToVideoMemory(address, value)
 }

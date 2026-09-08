@@ -5,7 +5,9 @@ import (
 )
 
 type screenFixture struct {
-	image *image.RGBA
+	image           *image.RGBA
+	ShowImageCalls int
+	LastBuffer      *[][]uint32
 }
 
 func NewScreenFixture() *screenFixture {
@@ -15,4 +17,6 @@ func NewScreenFixture() *screenFixture {
 }
 
 func (s *screenFixture) ShowImage(buffer *[][]uint32) {
+	s.ShowImageCalls++
+	s.LastBuffer = buffer
 }

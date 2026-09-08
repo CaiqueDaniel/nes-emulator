@@ -5,9 +5,16 @@ type PixelPipelineFixture struct {
 	highPatternShiftRegister   uint16
 	lowAttributeShiftRegister  uint16
 	highAttributeShiftRegister uint16
+	LastDot                    uint
+	LastVValue                 uint16
+	LastFineY                  uint16
 }
 
 func (p *PixelPipelineFixture) StepUpPipeline(currentDot uint, vValue uint16, fineY uint16) bool {
+	p.LastDot = currentDot
+	p.LastVValue = vValue
+	p.LastFineY = fineY
+
 	if currentDot%8 == 0 {
 		p.fillPatternShiftRegister(0b00000011, 0b00000010)
 		p.fillAttrShiftRegister(0b00000001, 0b00000001)

@@ -15,6 +15,10 @@ func (m *mockPPU) Render() {
 	m.renderCalled++
 }
 
+func (m *mockPPU) TriggerLatchWithWriteSignal(address uint16) {}
+
+func (m *mockPPU) TriggerLatchWithReadSignal(address uint16) {}
+
 func TestNewBus(t *testing.T) {
 	b := bus.NewBus()
 	if b == nil {
