@@ -1,31 +1,31 @@
 package application
 
-func (c *cpu) PushAccToStack() {
+func (c *CPU) PushAccToStack() {
 	c.PushValueToStack(c.acc)
 }
 
-func (c *cpu) PullAccFromStack() {
+func (c *CPU) PullAccFromStack() {
 	c.acc = c.PullValueFromStack()
 	c.zero = c.isValueZero(c.acc)
 	c.negative = c.isValueNegative(c.acc)
 }
 
-func (c *cpu) TransferXToStack() {
+func (c *CPU) TransferXToStack() {
 	c.stackPointer = c.x
 }
 
-func (c *cpu) TransferStackToX() {
+func (c *CPU) TransferStackToX() {
 	c.x = c.stackPointer
 	c.zero = c.isValueZero(c.x)
 	c.negative = c.isValueNegative(c.x)
 }
 
-func (c *cpu) PushStatusIntoStack() {
+func (c *CPU) PushStatusIntoStack() {
 	c.bFlag = true
 	c.PushFlagsIntoStack()
 }
 
-func (c *cpu) PullStatusFromStack() {
+func (c *CPU) PullStatusFromStack() {
 	value := c.PullValueFromStack()
 
 	c.carry = value&0b00000001 != 0

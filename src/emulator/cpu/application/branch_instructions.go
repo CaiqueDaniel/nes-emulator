@@ -1,6 +1,6 @@
 package application
 
-func (c *cpu) BranchIfCarryIsClear(value uint8) {
+func (c *CPU) BranchIfCarryIsClear(value uint8) {
 	if c.carry {
 		return
 	}
@@ -8,7 +8,7 @@ func (c *cpu) BranchIfCarryIsClear(value uint8) {
 	c.branchByValue(value)
 }
 
-func (c *cpu) BranchIfCarryIsSet(value uint8) {
+func (c *CPU) BranchIfCarryIsSet(value uint8) {
 	if !c.carry {
 		return
 	}
@@ -16,7 +16,7 @@ func (c *cpu) BranchIfCarryIsSet(value uint8) {
 	c.branchByValue(value)
 }
 
-func (c *cpu) BranchIfEqual(value uint8) {
+func (c *CPU) BranchIfEqual(value uint8) {
 	if !c.zero {
 		return
 	}
@@ -24,7 +24,7 @@ func (c *cpu) BranchIfEqual(value uint8) {
 	c.branchByValue(value)
 }
 
-func (c *cpu) BranchIfNotEqual(value uint8) {
+func (c *CPU) BranchIfNotEqual(value uint8) {
 	if c.zero {
 		return
 	}
@@ -32,7 +32,7 @@ func (c *cpu) BranchIfNotEqual(value uint8) {
 	c.branchByValue(value)
 }
 
-func (c *cpu) BranchIfNegative(value uint8) {
+func (c *CPU) BranchIfNegative(value uint8) {
 	if !c.negative {
 		return
 	}
@@ -40,7 +40,7 @@ func (c *cpu) BranchIfNegative(value uint8) {
 	c.branchByValue(value)
 }
 
-func (c *cpu) BranchIfPositive(value uint8) {
+func (c *CPU) BranchIfPositive(value uint8) {
 	if c.negative {
 		return
 	}
@@ -48,7 +48,7 @@ func (c *cpu) BranchIfPositive(value uint8) {
 	c.branchByValue(value)
 }
 
-func (c *cpu) BranchIfOverflowClear(value uint8) {
+func (c *CPU) BranchIfOverflowClear(value uint8) {
 	if c.overflow {
 		return
 	}
@@ -56,7 +56,7 @@ func (c *cpu) BranchIfOverflowClear(value uint8) {
 	c.branchByValue(value)
 }
 
-func (c *cpu) BranchIfOverflowSet(value uint8) {
+func (c *CPU) BranchIfOverflowSet(value uint8) {
 	if !c.overflow {
 		return
 	}
@@ -64,7 +64,7 @@ func (c *cpu) BranchIfOverflowSet(value uint8) {
 	c.branchByValue(value)
 }
 
-func (c *cpu) branchByValue(value uint8) {
+func (c *CPU) branchByValue(value uint8) {
 	c.doDummyMemoryRead(c.programCounter)
 
 	prevPCHighByte := c.programCounter & 0xFF00

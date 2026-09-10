@@ -7,7 +7,7 @@ type instruction struct {
 	ArgsBytes int
 }
 
-func (c *cpu) initInstructions() instructionSet {
+func (c *CPU) initInstructions() instructionSet {
 	var instructionSet instructionSet
 
 	instructionSet[0xEA] = &instruction{
@@ -43,7 +43,7 @@ func (c *cpu) initInstructions() instructionSet {
 	return instructionSet
 }
 
-func (c *cpu) appendLDAInstructions(instructionSet *instructionSet) {
+func (c *CPU) appendLDAInstructions(instructionSet *instructionSet) {
 	instructionSet[0xA9] = &instruction{
 		Method:    func(u []uint8) { c.LoadValueIntoRegister(u[0], ACCUMULATOR) },
 		ArgsBytes: 1,
@@ -84,7 +84,7 @@ func (c *cpu) appendLDAInstructions(instructionSet *instructionSet) {
 	}
 }
 
-func (c *cpu) appendLDXInstructions(instructionSet *instructionSet) {
+func (c *CPU) appendLDXInstructions(instructionSet *instructionSet) {
 	instructionSet[0xA2] = &instruction{
 		Method:    func(u []uint8) { c.LoadValueIntoRegister(u[0], REGISTER_X) },
 		ArgsBytes: 1,
@@ -111,7 +111,7 @@ func (c *cpu) appendLDXInstructions(instructionSet *instructionSet) {
 	}
 }
 
-func (c *cpu) appendLDYInstructions(instructionSet *instructionSet) {
+func (c *CPU) appendLDYInstructions(instructionSet *instructionSet) {
 	instructionSet[0xA0] = &instruction{
 		Method:    func(u []uint8) { c.LoadValueIntoRegister(u[0], REGISTER_Y) },
 		ArgsBytes: 1,
@@ -138,7 +138,7 @@ func (c *cpu) appendLDYInstructions(instructionSet *instructionSet) {
 	}
 }
 
-func (c *cpu) appendSTAInstructions(instructionSet *instructionSet) {
+func (c *CPU) appendSTAInstructions(instructionSet *instructionSet) {
 	instructionSet[0x85] = &instruction{
 		Method:    func(u []uint8) { c.StoreRegisterIntoAbsoluteMemory(uint16(u[0]), ACCUMULATOR) },
 		ArgsBytes: 1,
@@ -186,7 +186,7 @@ func (c *cpu) appendSTAInstructions(instructionSet *instructionSet) {
 
 }
 
-func (c *cpu) appendSTXInstructions(instructionSet *instructionSet) {
+func (c *CPU) appendSTXInstructions(instructionSet *instructionSet) {
 	instructionSet[0x86] = &instruction{
 		Method:    func(u []uint8) { c.StoreRegisterIntoAbsoluteMemory(uint16(u[0]), REGISTER_X) },
 		ArgsBytes: 1,
@@ -205,7 +205,7 @@ func (c *cpu) appendSTXInstructions(instructionSet *instructionSet) {
 	}
 }
 
-func (c *cpu) appendSTYInstructions(instructionSet *instructionSet) {
+func (c *CPU) appendSTYInstructions(instructionSet *instructionSet) {
 	instructionSet[0x84] = &instruction{
 		Method:    func(u []uint8) { c.StoreRegisterIntoAbsoluteMemory(uint16(u[0]), REGISTER_Y) },
 		ArgsBytes: 1,
@@ -224,7 +224,7 @@ func (c *cpu) appendSTYInstructions(instructionSet *instructionSet) {
 	}
 }
 
-func (c *cpu) appendTransferInstructions(instructionSet *instructionSet) {
+func (c *CPU) appendTransferInstructions(instructionSet *instructionSet) {
 	instructionSet[0xAA] = &instruction{
 		Method:    func(u []uint8) { c.TransferFromAccumulatorToRegister(REGISTER_X) },
 		ArgsBytes: 1,
@@ -256,7 +256,7 @@ func (c *cpu) appendTransferInstructions(instructionSet *instructionSet) {
 	}
 }
 
-func (c *cpu) appendADCInstructions(instructionSet *instructionSet) {
+func (c *CPU) appendADCInstructions(instructionSet *instructionSet) {
 	instructionSet[0x69] = &instruction{
 		Method:    func(u []uint8) { c.AddWithCarry(u[0]) },
 		ArgsBytes: 1,
@@ -299,7 +299,7 @@ func (c *cpu) appendADCInstructions(instructionSet *instructionSet) {
 
 }
 
-func (c *cpu) appendSBCInstructions(instructionSet *instructionSet) {
+func (c *CPU) appendSBCInstructions(instructionSet *instructionSet) {
 	instructionSet[0xE9] = &instruction{
 		Method:    func(u []uint8) { c.SubtractWithCarry(u[0]) },
 		ArgsBytes: 1,
@@ -342,7 +342,7 @@ func (c *cpu) appendSBCInstructions(instructionSet *instructionSet) {
 
 }
 
-func (c *cpu) appendIncrementInstructions(instructionSet *instructionSet) {
+func (c *CPU) appendIncrementInstructions(instructionSet *instructionSet) {
 	instructionSet[0xE6] = &instruction{
 		Method:    func(u []uint8) { c.IncrementMemory(uint16(u[0])) },
 		ArgsBytes: 1,
@@ -376,7 +376,7 @@ func (c *cpu) appendIncrementInstructions(instructionSet *instructionSet) {
 	}
 }
 
-func (c *cpu) appendDecrementInstructions(instructionSet *instructionSet) {
+func (c *CPU) appendDecrementInstructions(instructionSet *instructionSet) {
 	instructionSet[0xC6] = &instruction{
 		Method:    func(u []uint8) { c.DecrementMemory(uint16(u[0])) },
 		ArgsBytes: 1,
@@ -410,7 +410,7 @@ func (c *cpu) appendDecrementInstructions(instructionSet *instructionSet) {
 	}
 }
 
-func (c *cpu) appendShiftInstructions(instructionSet *instructionSet) {
+func (c *CPU) appendShiftInstructions(instructionSet *instructionSet) {
 	// ASL
 	instructionSet[0x0A] = &instruction{Method: func(u []uint8) { c.ArithmeticShiftLeft() }, ArgsBytes: 0}
 	instructionSet[0x06] = &instruction{Method: func(u []uint8) { c.ArithmeticShiftLeftZeroPage(u[0], false) }, ArgsBytes: 1}
@@ -440,7 +440,7 @@ func (c *cpu) appendShiftInstructions(instructionSet *instructionSet) {
 	instructionSet[0x7E] = &instruction{Method: func(u []uint8) { c.RotateRightAbsolute(parseAddress(u), true) }, ArgsBytes: 2}
 }
 
-func (c *cpu) appendBitwiseInstructions(instructionSet *instructionSet) {
+func (c *CPU) appendBitwiseInstructions(instructionSet *instructionSet) {
 	// AND
 	instructionSet[0x29] = &instruction{Method: func(u []uint8) { c.And(u[0]) }, ArgsBytes: 1}
 	instructionSet[0x25] = &instruction{Method: func(u []uint8) { c.And(c.GetValueByZeroPageMode(u[0])) }, ArgsBytes: 1}
@@ -476,7 +476,7 @@ func (c *cpu) appendBitwiseInstructions(instructionSet *instructionSet) {
 	instructionSet[0x2C] = &instruction{Method: func(u []uint8) { c.Bit(c.GetValueByAbsoluteMode(parseAddress(u))) }, ArgsBytes: 2}
 }
 
-func (c *cpu) appendCompareInstructions(instructionSet *instructionSet) {
+func (c *CPU) appendCompareInstructions(instructionSet *instructionSet) {
 	// CMP
 	instructionSet[0xC9] = &instruction{Method: func(u []uint8) { c.CompareWithRegister(u[0], ACCUMULATOR) }, ArgsBytes: 1}
 	instructionSet[0xC5] = &instruction{Method: func(u []uint8) { c.CompareWithRegister(c.GetValueByZeroPageMode(u[0]), ACCUMULATOR) }, ArgsBytes: 1}
@@ -504,7 +504,7 @@ func (c *cpu) appendCompareInstructions(instructionSet *instructionSet) {
 	instructionSet[0xCC] = &instruction{Method: func(u []uint8) { c.CompareWithRegister(c.GetValueByAbsoluteMode(parseAddress(u)), REGISTER_Y) }, ArgsBytes: 2}
 }
 
-func (c *cpu) appendBranchInstructions(instructionSet *instructionSet) {
+func (c *CPU) appendBranchInstructions(instructionSet *instructionSet) {
 	instructionSet[0x90] = &instruction{Method: func(u []uint8) { c.BranchIfCarryIsClear(u[0]) }, ArgsBytes: 1}
 	instructionSet[0xB0] = &instruction{Method: func(u []uint8) { c.BranchIfCarryIsSet(u[0]) }, ArgsBytes: 1}
 	instructionSet[0xF0] = &instruction{Method: func(u []uint8) { c.BranchIfEqual(u[0]) }, ArgsBytes: 1}
@@ -515,7 +515,7 @@ func (c *cpu) appendBranchInstructions(instructionSet *instructionSet) {
 	instructionSet[0x70] = &instruction{Method: func(u []uint8) { c.BranchIfOverflowSet(u[0]) }, ArgsBytes: 1}
 }
 
-func (c *cpu) appendJumpInstructions(instructionSet *instructionSet) {
+func (c *CPU) appendJumpInstructions(instructionSet *instructionSet) {
 	instructionSet[0x4C] = &instruction{Method: func(u []uint8) { c.JumpProgramCounterToValue(parseAddress(u)) }, ArgsBytes: 2}
 	instructionSet[0x6C] = &instruction{Method: func(u []uint8) { c.JumpProgramCounterByIndirectValue(parseAddress(u)) }, ArgsBytes: 2}
 	instructionSet[0x20] = &instruction{Method: func(u []uint8) { c.JumpProgramCounterToSubRoutine(parseAddress(u)) }, ArgsBytes: 2}
@@ -523,14 +523,14 @@ func (c *cpu) appendJumpInstructions(instructionSet *instructionSet) {
 	instructionSet[0x40] = &instruction{Method: func(u []uint8) { c.ReturnFromInterrupt() }, ArgsBytes: 0}
 }
 
-func (c *cpu) appendStackInstructions(instructionSet *instructionSet) {
+func (c *CPU) appendStackInstructions(instructionSet *instructionSet) {
 	instructionSet[0x48] = &instruction{Method: func(u []uint8) { c.PushAccToStack() }, ArgsBytes: 0}
 	instructionSet[0x68] = &instruction{Method: func(u []uint8) { c.PullAccFromStack() }, ArgsBytes: 0}
 	instructionSet[0x08] = &instruction{Method: func(u []uint8) { c.PushStatusIntoStack() }, ArgsBytes: 0}
 	instructionSet[0x28] = &instruction{Method: func(u []uint8) { c.PullStatusFromStack() }, ArgsBytes: 0}
 }
 
-func (c *cpu) appendFlagsInstructions(instructionSet *instructionSet) {
+func (c *CPU) appendFlagsInstructions(instructionSet *instructionSet) {
 	instructionSet[0x18] = &instruction{Method: func(u []uint8) { c.ClearCarryFlag() }, ArgsBytes: 0}
 	instructionSet[0x38] = &instruction{Method: func(u []uint8) { c.SetCarryFlag() }, ArgsBytes: 0}
 	instructionSet[0x58] = &instruction{Method: func(u []uint8) { c.ClearInterruptFlag() }, ArgsBytes: 0}

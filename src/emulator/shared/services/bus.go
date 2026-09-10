@@ -1,7 +1,8 @@
-package bus
+package services
 
 import (
 	"nes-emu/src/emulator/application"
+	shared "nes-emu/src/emulator/shared/application"
 )
 
 const (
@@ -19,8 +20,8 @@ const (
 )
 
 type bus struct {
-	workMemory  application.Memory
-	videoMemory application.Memory
+	workMemory  shared.Memory
+	videoMemory shared.Memory
 	ppu         application.PPU
 	tickCount   uint
 	nmiMethod   func()
@@ -33,7 +34,7 @@ func NewBus() *bus {
 	}
 }
 
-func NewBusWithWorkMemory(memory application.Memory) *bus {
+func NewBusWithWorkMemory(memory shared.Memory) *bus {
 	return &bus{
 		tickCount:  0,
 		nmiMethod:  func() {},
@@ -41,11 +42,11 @@ func NewBusWithWorkMemory(memory application.Memory) *bus {
 	}
 }
 
-func (b *bus) AtatchWorkMemory(memory application.Memory) {
+func (b *bus) AtatchWorkMemory(memory shared.Memory) {
 	b.workMemory = memory
 }
 
-func (b *bus) AtatchVideoMemory(memory application.Memory) {
+func (b *bus) AtatchVideoMemory(memory shared.Memory) {
 	b.videoMemory = memory
 }
 

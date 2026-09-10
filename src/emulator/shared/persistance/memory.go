@@ -1,7 +1,7 @@
-package memory
+package persistance
 
 import (
-	"nes-emu/src/emulator/application"
+	"nes-emu/src/emulator/shared/application"
 )
 
 type memory struct {

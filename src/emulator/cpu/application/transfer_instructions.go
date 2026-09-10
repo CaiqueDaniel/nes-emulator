@@ -1,6 +1,6 @@
 package application
 
-func (c *cpu) TransferFromAccumulatorToRegister(register string) {
+func (c *CPU) TransferFromAccumulatorToRegister(register string) {
 	switch register {
 	case REGISTER_X:
 		c.x = c.acc
@@ -12,7 +12,7 @@ func (c *cpu) TransferFromAccumulatorToRegister(register string) {
 	c.zero = c.isValueZero(c.acc)
 }
 
-func (c *cpu) TransferFromRegisterToAccumulator(register string) {
+func (c *CPU) TransferFromRegisterToAccumulator(register string) {
 	switch register {
 	case REGISTER_X:
 		c.acc = c.x

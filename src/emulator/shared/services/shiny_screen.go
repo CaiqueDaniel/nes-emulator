@@ -1,4 +1,4 @@
-package screen
+package services
 
 import (
 	"image/color"

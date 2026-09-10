@@ -3,17 +3,18 @@ package application
 import (
 	"nes-emu/src/emulator/application"
 	"nes-emu/src/emulator/ppu/domain"
+	shared "nes-emu/src/emulator/shared/application"
 )
 
 type ppu struct {
-	bus      application.MNIBus
+	bus      shared.MNIBus
 	pipeline application.PixelPipeline
 	screen   application.Screen
 	state    *domain.PPU
 	buffer   [][]uint32
 }
 
-func NewRp2C02(bus application.MNIBus, pipeline application.PixelPipeline, screen application.Screen) *ppu {
+func NewRp2C02(bus shared.MNIBus, pipeline application.PixelPipeline, screen application.Screen) *ppu {
 	p := &ppu{
 		pipeline: pipeline,
 		bus:      bus,

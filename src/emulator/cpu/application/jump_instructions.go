@@ -1,10 +1,10 @@
 package application
 
-func (c *cpu) JumpProgramCounterToValue(value uint16) {
+func (c *CPU) JumpProgramCounterToValue(value uint16) {
 	c.programCounter = value
 }
 
-func (c *cpu) JumpProgramCounterByIndirectValue(address uint16) {
+func (c *CPU) JumpProgramCounterByIndirectValue(address uint16) {
 	ptrValue := c.readFromMemory(address)
 	lowAddress := uint8(address) + ptrValue
 	highAddress := address & 0xFF00
@@ -12,7 +12,7 @@ func (c *cpu) JumpProgramCounterByIndirectValue(address uint16) {
 	c.JumpProgramCounterToValue(highAddress + uint16(lowAddress))
 }
 
-func (c *cpu) JumpProgramCounterToSubRoutine(value uint16) {
+func (c *CPU) JumpProgramCounterToSubRoutine(value uint16) {
 	lowAddress := uint8(c.programCounter)
 	highAddress := uint8(c.programCounter & 0xFF00 >> 8)
 
@@ -22,7 +22,7 @@ func (c *cpu) JumpProgramCounterToSubRoutine(value uint16) {
 	c.programCounter = value
 }
 
-func (c *cpu) ReturnFromSubRoutine() {
+func (c *CPU) ReturnFromSubRoutine() {
 	lowAddress := c.PullValueFromStack()
 	highAddress := c.PullValueFromStack()
 
@@ -30,7 +30,7 @@ func (c *cpu) ReturnFromSubRoutine() {
 	c.programCounter++
 }
 
-func (c *cpu) ReturnFromInterrupt() {
+func (c *CPU) ReturnFromInterrupt() {
 	flags := c.PullValueFromStack()
 	lowAddress := c.PullValueFromStack()
 	highAddress := c.PullValueFromStack()
@@ -44,7 +44,7 @@ func (c *cpu) ReturnFromInterrupt() {
 	c.programCounter = uint16(lowAddress) + uint16(highAddress)<<8
 }
 
-func (c *cpu) Break() {
+func (c *CPU) Break() {
 	pcHighAddress := uint8(c.programCounter >> 8)
 	pcLowAddress := uint8(c.programCounter)
 

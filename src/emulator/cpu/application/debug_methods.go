@@ -1,6 +1,6 @@
 package application
 
-func (c *cpu) GetDebugData() map[string]uint8 {
+func (c *CPU) GetDebugData() map[string]uint8 {
 	return map[string]uint8{
 		"acc": c.acc,
 		"x":   c.x,
@@ -8,39 +8,39 @@ func (c *cpu) GetDebugData() map[string]uint8 {
 	}
 }
 
-func (c *cpu) GetCarryFlag() bool {
+func (c *CPU) GetCarryFlag() bool {
 	return c.carry
 }
 
-func (c *cpu) GetOverflowFlag() bool {
+func (c *CPU) GetOverflowFlag() bool {
 	return c.overflow
 }
 
-func (c *cpu) GetIRQFlag() bool {
+func (c *CPU) GetIRQFlag() bool {
 	return c.irq
 }
 
-func (c *cpu) GetZeroFlag() bool {
+func (c *CPU) GetZeroFlag() bool {
 	return c.zero
 }
 
-func (c *cpu) GetNegativeFlag() bool {
+func (c *CPU) GetNegativeFlag() bool {
 	return c.negative
 }
 
-func (c *cpu) GetProgramCounter() uint16 {
+func (c *CPU) GetProgramCounter() uint16 {
 	return c.programCounter
 }
 
-func (c *cpu) GetDecimalFlag() bool {
+func (c *CPU) GetDecimalFlag() bool {
 	return c.decimal
 }
 
-func (c *cpu) GetStackPointer() uint8 {
+func (c *CPU) GetStackPointer() uint8 {
 	return c.stackPointer
 }
 
-func (c *cpu) GetNumberOfInstructions() int {
+func (c *CPU) GetNumberOfInstructions() int {
 	count := 0
 
 	for _, instruction := range c.instructionSet {
@@ -54,6 +54,6 @@ func (c *cpu) GetNumberOfInstructions() int {
 	return count
 }
 
-func (c *cpu) GetNMIFlag() bool {
+func (c *CPU) GetNMIFlag() bool {
 	return c.nmi
 }

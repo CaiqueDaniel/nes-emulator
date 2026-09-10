@@ -1,6 +1,6 @@
 package application
 
-func (c *cpu) StoreRegisterIntoAbsoluteMemory(value uint16, register string) {
+func (c *CPU) StoreRegisterIntoAbsoluteMemory(value uint16, register string) {
 	switch register {
 	case REGISTER_X:
 		c.writeToMemory(value, c.x)
@@ -11,7 +11,7 @@ func (c *cpu) StoreRegisterIntoAbsoluteMemory(value uint16, register string) {
 	}
 }
 
-func (c *cpu) LoadValueIntoRegister(value uint8, register string) {
+func (c *CPU) LoadValueIntoRegister(value uint8, register string) {
 	switch register {
 	case REGISTER_X:
 		c.x = value

@@ -1,24 +1,24 @@
 package application
 
-func (c *cpu) And(value uint8) {
+func (c *CPU) And(value uint8) {
 	c.acc = c.acc & value
 	c.zero = c.isValueZero(c.acc)
 	c.negative = c.isValueNegative(c.acc)
 }
 
-func (c *cpu) Or(value uint8) {
+func (c *CPU) Or(value uint8) {
 	c.acc = c.acc | value
 	c.zero = c.isValueZero(c.acc)
 	c.negative = c.isValueNegative(c.acc)
 }
 
-func (c *cpu) Xor(value uint8) {
+func (c *CPU) Xor(value uint8) {
 	c.acc = c.acc ^ value
 	c.zero = c.isValueZero(c.acc)
 	c.negative = c.isValueNegative(c.acc)
 }
 
-func (c *cpu) Bit(value uint8) {
+func (c *CPU) Bit(value uint8) {
 	result := c.acc & value
 
 	c.zero = c.isValueZero(result)

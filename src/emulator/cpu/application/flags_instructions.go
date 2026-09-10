@@ -1,35 +1,35 @@
 package application
 
-func (c *cpu) ClearCarryFlag() {
+func (c *CPU) ClearCarryFlag() {
 	c.carry = false
 }
 
-func (c *cpu) SetCarryFlag() {
+func (c *CPU) SetCarryFlag() {
 	c.carry = true
 }
 
-func (c *cpu) ClearInterruptFlag() {
+func (c *CPU) ClearInterruptFlag() {
 	c.irq = true
 }
 
-func (c *cpu) SetInterruptFlag() {
+func (c *CPU) SetInterruptFlag() {
 	c.irq = false
 }
 
-func (c *cpu) ClearOverflowFlag() {
+func (c *CPU) ClearOverflowFlag() {
 	c.overflow = false
 }
 
-func (c *cpu) SetOverflowFlag() {
+func (c *CPU) SetOverflowFlag() {
 	c.overflow = true
 }
 
-func (c *cpu) NoOp() {}
+func (c *CPU) NoOp() {}
 
-func (c *cpu) ClearDecimalFlag() {
+func (c *CPU) ClearDecimalFlag() {
 	c.decimal = false
 }
 
-func (c *cpu) SetDecimalFlag() {
+func (c *CPU) SetDecimalFlag() {
 	c.decimal = true
 }

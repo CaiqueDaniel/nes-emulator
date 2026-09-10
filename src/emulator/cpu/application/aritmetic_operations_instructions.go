@@ -2,7 +2,7 @@ package application
 
 const signalBitMask = 0b10000000
 
-func (c *cpu) AddWithCarry(value uint8) {
+func (c *CPU) AddWithCarry(value uint8) {
 	accSign := c.acc&signalBitMask != 0
 	valSign := value&signalBitMask != 0
 
@@ -20,11 +20,11 @@ func (c *cpu) AddWithCarry(value uint8) {
 	c.overflow = (accSign == valSign) && (resultSign != accSign)
 }
 
-func (c *cpu) SubtractWithCarry(value uint8) {
+func (c *CPU) SubtractWithCarry(value uint8) {
 	c.AddWithCarry(^value)
 }
 
-func (c *cpu) CompareWithRegister(value uint8, register string) {
+func (c *CPU) CompareWithRegister(value uint8, register string) {
 	var registerValue uint8
 
 	switch register {
@@ -41,7 +41,7 @@ func (c *cpu) CompareWithRegister(value uint8, register string) {
 	c.negative = c.isValueNegative(registerValue & value)
 }
 
-func (c *cpu) IncrementMemory(address uint16) {
+func (c *CPU) IncrementMemory(address uint16) {
 	oldValue := c.readFromMemory(address)
 	newValue := oldValue + 1
 
@@ -52,7 +52,7 @@ func (c *cpu) IncrementMemory(address uint16) {
 	c.negative = c.isValueNegative(newValue)
 }
 
-func (c *cpu) IncrementRegister(register string) {
+func (c *CPU) IncrementRegister(register string) {
 	var registerValue uint8
 
 	switch register {
@@ -68,7 +68,7 @@ func (c *cpu) IncrementRegister(register string) {
 	c.negative = c.isValueNegative(registerValue)
 }
 
-func (c *cpu) DecrementMemory(address uint16) {
+func (c *CPU) DecrementMemory(address uint16) {
 	oldValue := c.readFromMemory(address)
 	newValue := oldValue - 1
 
@@ -79,7 +79,7 @@ func (c *cpu) DecrementMemory(address uint16) {
 	c.negative = c.isValueNegative(newValue)
 }
 
-func (c *cpu) DecrementRegister(register string) {
+func (c *CPU) DecrementRegister(register string) {
 	var registerValue uint8
 
 	switch register {
@@ -95,10 +95,10 @@ func (c *cpu) DecrementRegister(register string) {
 	c.negative = c.isValueNegative(registerValue)
 }
 
-func (c *cpu) isValueNegative(value uint8) bool {
+func (c *CPU) isValueNegative(value uint8) bool {
 	return value&signalBitMask != 0
 }
 
-func (c *cpu) isValueZero(value uint8) bool {
+func (c *CPU) isValueZero(value uint8) bool {
 	return value == 0
 }

@@ -3,6 +3,7 @@ package application
 import (
 	"nes-emu/src/emulator/application"
 	"nes-emu/src/emulator/ppu/domain"
+	shared "nes-emu/src/emulator/shared/application"
 )
 
 type pipeline struct {
@@ -15,10 +16,10 @@ type pipeline struct {
 	highPatternShiftRegister   uint16
 	lowAttributeShiftRegister  uint16
 	highAttributeShiftRegister uint16
-	bus                        application.MNIBus
+	bus                        shared.MNIBus
 }
 
-func NewPipeline(bus application.MNIBus) application.PixelPipeline {
+func NewPipeline(bus shared.MNIBus) application.PixelPipeline {
 	return &pipeline{
 		bus: bus,
 	}

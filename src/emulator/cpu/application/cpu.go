@@ -1,7 +1,7 @@
 package application
 
 import (
-	"nes-emu/src/emulator/application"
+	"nes-emu/src/emulator/shared/application"
 	"slices"
 	"time"
 )
@@ -14,7 +14,7 @@ const STACK_END = 0x0100
 const START_POINTER = 0xFFFC
 const clock_in_mhz = 1.789773
 
-type cpu struct {
+type CPU struct {
 	programCounter                                            uint16
 	acc, x, y                                                 uint8
 	carry, zero, overflow, negative, irq, decimal, bFlag, nmi bool
@@ -27,8 +27,8 @@ type cpu struct {
 	stopProgram                                               bool
 }
 
-func NewCpu(bus application.Bus) application.CPU {
-	c := &cpu{
+func NewCpu(bus application.Bus) *CPU {
+	c := &CPU{
 		bus:      bus,
 		stopPcAt: -1,
 	}
@@ -37,8 +37,8 @@ func NewCpu(bus application.Bus) application.CPU {
 	return c
 }
 
-func NewCpuWithStopAt(bus application.Bus, stopPcAt int) *cpu {
-	c := &cpu{
+func NewCpuWithStopAt(bus application.Bus, stopPcAt int) *CPU {
+	c := &CPU{
 		bus:      bus,
 		stopPcAt: stopPcAt,
 	}
@@ -47,8 +47,8 @@ func NewCpuWithStopAt(bus application.Bus, stopPcAt int) *cpu {
 	return c
 }
 
-func NewCpuWithProgramCounter(programCounter uint16, bus application.Bus) *cpu {
-	c := &cpu{
+func NewCpuWithProgramCounter(programCounter uint16, bus application.Bus) *CPU {
+	c := &CPU{
 		programCounter: programCounter,
 		stackPointer:   0xFF,
 		bus:            bus,
@@ -58,8 +58,8 @@ func NewCpuWithProgramCounter(programCounter uint16, bus application.Bus) *cpu {
 	return c
 }
 
-func NewCpuWithInternal(bus application.Bus) *cpu {
-	c := &cpu{
+func NewCpuWithInternal(bus application.Bus) *CPU {
+	c := &CPU{
 		bus:      bus,
 		stopPcAt: -1,
 	}
@@ -68,12 +68,12 @@ func NewCpuWithInternal(bus application.Bus) *cpu {
 	return c
 }
 
-func (c *cpu) RunProgram() {
+func (c *CPU) RunProgram() {
 	c.initProgramCounter()
 	c.runGameLoop()
 }
 
-func (c *cpu) Reset() {
+func (c *CPU) Reset() {
 	c.programCounter = 0
 	c.acc = 0
 	c.x = 0
@@ -87,11 +87,11 @@ func (c *cpu) Reset() {
 	c.nmi = false
 }
 
-func (c *cpu) SetNMI() {
+func (c *CPU) SetNMI() {
 	c.nmi = true
 }
 
-func (c *cpu) HandleNMI() {
+func (c *CPU) HandleNMI() {
 	const nmi_handler_byte_ptr = 0xFFFA
 
 	c.PushStatusIntoStack()
@@ -102,12 +102,12 @@ func (c *cpu) HandleNMI() {
 	c.programCounter = uint16(highByte)<<8 | uint16(lowByte)
 }
 
-func (c *cpu) PushValueToStack(value uint8) {
+func (c *CPU) PushValueToStack(value uint8) {
 	c.writeToMemory(STACK_END+uint16(c.stackPointer), value)
 	c.stackPointer--
 }
 
-func (c *cpu) PullValueFromStack() uint8 {
+func (c *CPU) PullValueFromStack() uint8 {
 	c.stackPointer++
 	value := c.readFromMemory(STACK_END + uint16(c.stackPointer))
 
@@ -116,7 +116,7 @@ func (c *cpu) PullValueFromStack() uint8 {
 	return value
 }
 
-func (c *cpu) PushFlagsIntoStack() {
+func (c *CPU) PushFlagsIntoStack() {
 	carry := transformFlagIntoUint8(c.carry)
 	zero := transformFlagIntoUint8(c.zero) << 1
 	irq := transformFlagIntoUint8(c.irq) << 2
@@ -129,14 +129,14 @@ func (c *cpu) PushFlagsIntoStack() {
 	c.PushValueToStack(valueToPush)
 }
 
-func (c *cpu) initProgramCounter() {
+func (c *CPU) initProgramCounter() {
 	startAddressLow := c.readFromMemory(START_POINTER)
 	startAddressHigh := c.readFromMemory(START_POINTER + 1)
 	startAddress := (uint16(startAddressHigh) << 8) + uint16(startAddressLow)
 	c.programCounter = startAddress
 }
 
-func (c *cpu) runGameLoop() {
+func (c *CPU) runGameLoop() {
 	const time_per_frame = time.Second / 60
 	startTime := time.Now()
 
@@ -158,7 +158,7 @@ func (c *cpu) runGameLoop() {
 	}
 }
 
-func (c *cpu) renderFrame() {
+func (c *CPU) renderFrame() {
 	const cycles_per_frame = 29781
 
 	for c.currentFrameCycles < cycles_per_frame {
@@ -179,7 +179,7 @@ func (c *cpu) renderFrame() {
 	}
 }
 
-func (c *cpu) interpretInstruction(opCode uint8) {
+func (c *CPU) interpretInstruction(opCode uint8) {
 	instruction := c.instructionSet[opCode]
 
 	if instruction == nil {
@@ -201,20 +201,20 @@ func (c *cpu) interpretInstruction(opCode uint8) {
 	instruction.Method(bytes)
 }
 
-func (c *cpu) writeToMemory(address uint16, value uint8) {
+func (c *CPU) writeToMemory(address uint16, value uint8) {
 	c.bus.Tick()
 	c.bus.WriteToMemory(address, value)
 	c.currentFrameCycles += 2
 }
 
-func (c *cpu) readFromMemory(address uint16) uint8 {
+func (c *CPU) readFromMemory(address uint16) uint8 {
 	c.bus.Tick()
 	value := c.bus.ReadFromMemory(address)
 	c.currentFrameCycles += 2
 	return value
 }
 
-func (c *cpu) doDummyMemoryRead(address uint16) {
+func (c *CPU) doDummyMemoryRead(address uint16) {
 	c.readFromMemory(address)
 }
 

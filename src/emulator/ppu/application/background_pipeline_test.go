@@ -1,8 +1,8 @@
 package application
 
 import (
-	"nes-emu/src/emulator/application"
 	"nes-emu/src/emulator/ppu/domain"
+	shared "nes-emu/src/emulator/shared/application"
 	"testing"
 )
 
@@ -39,8 +39,8 @@ func (b *mockBus) WriteToVideoMemory(address uint16, value uint8) {
 	b.videoMemory[address] = value
 }
 
-func (b *mockBus) AtatchWorkMemory(memory application.Memory)  {}
-func (b *mockBus) AtatchVideoMemory(memory application.Memory) {}
+func (b *mockBus) AtatchWorkMemory(memory shared.Memory)  {}
+func (b *mockBus) AtatchVideoMemory(memory shared.Memory) {}
 
 func TestNewPipeline(t *testing.T) {
 	bus := newMockBus()
