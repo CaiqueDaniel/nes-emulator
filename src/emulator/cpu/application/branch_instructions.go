@@ -1,4 +1,4 @@
-package cpu
+package application
 
 func (c *cpu) BranchIfCarryIsClear(value uint8) {
 	if c.carry {

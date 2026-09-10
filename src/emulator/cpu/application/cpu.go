@@ -1,4 +1,4 @@
-package cpu
+package application
 
 import (
 	"nes-emu/src/emulator/application"

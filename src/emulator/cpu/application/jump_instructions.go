@@ -1,4 +1,4 @@
-package cpu
+package application
 
 func (c *cpu) JumpProgramCounterToValue(value uint16) {
 	c.programCounter = value

@@ -1,4 +1,4 @@
-package cpu
+package application
 
 func (c *cpu) GetValueByAbsoluteMode(address uint16) uint8 {
 	return c.readFromMemory(address)

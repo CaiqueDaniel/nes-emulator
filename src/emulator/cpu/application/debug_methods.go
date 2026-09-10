@@ -1,4 +1,4 @@
-package cpu
+package application
 
 func (c *cpu) GetDebugData() map[string]uint8 {
 	return map[string]uint8{

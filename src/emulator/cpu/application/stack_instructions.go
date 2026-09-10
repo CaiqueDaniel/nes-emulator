@@ -1,4 +1,4 @@
-package cpu
+package application
 
 func (c *cpu) PushAccToStack() {
 	c.PushValueToStack(c.acc)

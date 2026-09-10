@@ -1,4 +1,4 @@
-package cpu
+package application
 
 type instructionSet [256]*instruction
 
