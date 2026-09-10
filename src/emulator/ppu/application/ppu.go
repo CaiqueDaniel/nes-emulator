@@ -19,6 +19,7 @@ func NewRp2C02(bus application.MNIBus, pipeline application.PixelPipeline, scree
 		bus:      bus,
 		screen:   screen,
 		buffer:   make([][]uint32, domain.MAX_FRAME_SCANLINE+1),
+		state:    domain.NewPPU(),
 	}
 
 	return p

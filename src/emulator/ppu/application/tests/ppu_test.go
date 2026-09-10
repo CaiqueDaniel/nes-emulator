@@ -3,7 +3,7 @@ package tests
 import (
 	"nes-emu/src/emulator/components/bus"
 	"nes-emu/src/emulator/components/memory"
-	ppu "nes-emu/src/emulator/components/rp2C02"
+	ppu "nes-emu/src/emulator/ppu/application"
 	"nes-emu/test/fixtures"
 	"testing"
 )
@@ -688,4 +688,3 @@ func TestPPURender_ShouldShowImageOnScreen_OnVBlankStart(t *testing.T) {
 		t.Error("expected LastBuffer to not be nil")
 	}
 }
-

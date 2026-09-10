@@ -5,9 +5,9 @@ import (
 	"nes-emu/src/emulator/components/bus"
 	"nes-emu/src/emulator/components/cpu"
 	"nes-emu/src/emulator/components/memory"
-	"nes-emu/src/emulator/components/rp2C02"
 	screen_driver "nes-emu/src/emulator/components/screen"
 	"nes-emu/src/emulator/delivery"
+	ppu "nes-emu/src/emulator/ppu/application"
 	shared_services "nes-emu/src/shared/services"
 
 	"golang.org/x/exp/shiny/screen"
@@ -32,7 +32,7 @@ func (e *emulatorModule) init(window *screen.Window, buffer *screen.Buffer) {
 	screen := screen_driver.NewShinyScreen(window, buffer)
 	bus := bus.NewBus()
 	cpu := cpu.NewCpu(bus)
-	ppu := rp2C02.NewRp2C02(bus, rp2C02.NewPipeline(bus), screen)
+	ppu := ppu.NewRp2C02(bus, ppu.NewPipeline(bus), screen)
 
 	bus.AtatchWorkMemory(memory.NewMemory())
 	bus.AtatchVideoMemory(memory.NewMemory())
