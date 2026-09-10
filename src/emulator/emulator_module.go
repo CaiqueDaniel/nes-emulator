@@ -3,9 +3,9 @@ package emulator
 import (
 	"nes-emu/src/emulator/application"
 	"nes-emu/src/emulator/components/bus"
-	"nes-emu/src/emulator/components/cpu"
 	"nes-emu/src/emulator/components/memory"
 	screen_driver "nes-emu/src/emulator/components/screen"
+	cpu "nes-emu/src/emulator/cpu/application"
 	"nes-emu/src/emulator/delivery"
 	ppu "nes-emu/src/emulator/ppu/application"
 	shared_services "nes-emu/src/shared/services"
