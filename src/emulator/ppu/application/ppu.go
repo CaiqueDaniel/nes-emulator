@@ -2,84 +2,39 @@ package application
 
 import (
 	"nes-emu/src/emulator/application"
+	"nes-emu/src/emulator/ppu/domain"
 )
-
-const (
-	ppu_control = 0x2000
-	ppu_mask    = 0x2001
-	ppu_status  = 0x2002
-	oam_address = 0x2003
-	oam_data    = 0x2004
-	ppu_scroll  = 0x2005
-	ppu_address = 0x2006
-	ppu_data    = 0x2007
-	oam_dma     = 0x4014
-)
-
-const (
-	max_frame_scanline     = 261
-	max_pixel_per_scanline = 255
-	v_blank_scanline_start = 240
-	v_blank_scanline_end   = 260
-	v_blank_pixel_start    = 0
-	max_dots_per_line      = 336
-)
-
-const base_nametable_address = 0x2000
-
-const (
-	max_value_for_15_bits = 32767
-	max_value_for_3_bits  = 7
-)
-
-var colorPallet = [64]uint32{
-	0x7C7C7C, 0x0000FC, 0x0000BC, 0x4428BC, 0x940084, 0xA80020, 0xA81000, 0x881400,
-	0x503000, 0x007800, 0x006800, 0x005800, 0x004058, 0x000000, 0x000000, 0x000000,
-	0xBCBCBC, 0x0070EC, 0x3C40FC, 0x7C00FA, 0xA800B4, 0xC43800, 0xE04000, 0xE86814,
-	0x9C9400, 0x44B400, 0x34C400, 0x00D840, 0x00BCBC, 0x000000, 0x000000, 0x000000,
-	0x3CBCFC, 0x0078F8, 0x0058F8, 0x6844FC, 0xD800CC, 0xE40058, 0xF83800, 0xE45C10,
-	0xAC7C00, 0x00B800, 0x00A800, 0x00A844, 0x008888, 0x000000, 0x000000, 0x000000,
-	0xF8F8F8, 0xA4E4FC, 0xB8B8F8, 0xD8B8F8, 0xF8B8F8, 0xF8A4C0, 0xF0D0B0, 0xFCE0A8,
-	0xE8D878, 0xD8F878, 0xB8F8B8, 0xB8F8D8, 0x00FCFC, 0xD8D8D8, 0x000000, 0x000000,
-}
 
 type ppu struct {
-	scanline     uint16
-	pixel        uint8
-	enableRender bool
-	bus          application.MNIBus
-	v, t         uint16
-	x            uint8
-	w            bool
-	dots         uint16
-	pipeline     application.PixelPipeline
-	buffer       [][]uint32
-	screen       application.Screen
+	bus      application.MNIBus
+	pipeline application.PixelPipeline
+	screen   application.Screen
+	state    *domain.PPU
+	buffer   [][]uint32
 }
 
 func NewRp2C02(bus application.MNIBus, pipeline application.PixelPipeline, screen application.Screen) *ppu {
 	p := &ppu{
-		enableRender: false,
-		pipeline:     pipeline,
-		bus:          bus,
-		screen:       screen,
-		buffer:       make([][]uint32, max_frame_scanline+1),
+		pipeline: pipeline,
+		bus:      bus,
+		screen:   screen,
+		buffer:   make([][]uint32, domain.MAX_FRAME_SCANLINE+1),
 	}
 
 	return p
 }
 
 func (p *ppu) Render() {
-	if p.dots <= max_pixel_per_scanline && p.scanline < v_blank_scanline_start {
+	if p.state.ShouldRenderScanlinePixel() {
 		p.renderPixel()
-		p.advanceToNextScanlinePixel()
+		p.state.AdvanceToNextScanlinePixel()
 	}
 
-	p.advanceToNextScanline()
+	p.state.AdvanceToNextScanline()
 	p.fetchGraphics()
 	p.updateStatusRegister()
 
-	if p.isVBlankStarted() {
+	if p.state.IsVBlankStarted() {
 		p.screen.ShowImage(&p.buffer)
 	}
 
@@ -87,116 +42,97 @@ func (p *ppu) Render() {
 		p.bus.CallNMIHandler()
 	}
 
-	p.dots = (p.dots + 1) % max_dots_per_line
+	p.state.IncreaseDots()
 }
 
 func (p *ppu) TriggerLatchWithWriteSignal(address uint16) {
 	switch address {
-	case ppu_address:
+	case domain.PPU_ADDRESS:
 		p.updateVRAMAddress()
 
-	case ppu_data:
+	case domain.PPU_DATA:
 		p.updateVRAMData()
 	}
 }
 
 func (p *ppu) TriggerLatchWithReadSignal(address uint16) {
 	switch address {
-	case ppu_status:
+	case domain.PPU_STATUS:
 		p.resetWAndVBlankFlagOnRead()
 	}
 }
 
 func (p *ppu) GetCurrentScanline() uint16 {
-	return p.scanline
+	return p.state.GetCurrentScanline()
 }
 
 func (p *ppu) GetCurrentScanlinePixel() uint8 {
-	return p.pixel
+	return p.state.GetCurrentScanlinePixel()
 }
 
 func (p *ppu) renderPixel() {
-	p.buffer[p.scanline] = append(p.buffer[p.scanline], p.pipeline.RenderPixel(p.x))
+	p.buffer[p.state.GetCurrentScanline()] = append(p.buffer[p.state.GetCurrentScanline()], p.pipeline.RenderPixel(p.state.GetX()))
 }
 
 func (p *ppu) fetchGraphics() {
-	p.pipeline.StepUpPipeline(uint(p.dots), p.v, p.getFineY())
-}
-
-func (p *ppu) advanceToNextScanlinePixel() {
-	p.pixel++
-}
-
-func (p *ppu) advanceToNextScanline() {
-	if p.dots == max_dots_per_line-1 {
-		p.scanline++
-		p.scanline %= (max_frame_scanline + 1)
-	}
+	p.pipeline.StepUpPipeline(uint(p.state.GetCurrentDots()), p.state.GetV(), p.state.GetFineY())
 }
 
 func (p *ppu) updateStatusRegister() {
-	if p.isOnPreRender() {
-		value := p.bus.ReadFromMemory(ppu_status) & 0b00011111
-		p.bus.WriteToMemory(ppu_status, value)
+	if p.state.IsOnPreRender() {
+		value := p.bus.ReadFromMemory(domain.PPU_STATUS) & 0b00011111
+		p.bus.WriteToMemory(domain.PPU_STATUS, value)
 	}
 
-	if p.isVBlankStarted() {
-		value := p.bus.ReadFromMemory(ppu_status) ^ 0b10000000
-		p.bus.WriteToMemory(ppu_status, value)
+	if p.state.IsVBlankStarted() {
+		value := p.bus.ReadFromMemory(domain.PPU_STATUS) ^ 0b10000000
+		p.bus.WriteToMemory(domain.PPU_STATUS, value)
 	}
 }
 
 func (p *ppu) checkIfNMIShouldBeCalled() bool {
-	return p.isNMIFlagEnabled() && p.isVBlankStarted()
+	return p.isNMIFlagEnabled() && p.state.IsVBlankStarted()
 }
 
 func (p *ppu) isNMIFlagEnabled() bool {
 	const nmiFlagMask = 0b10000000
-	return p.bus.ReadFromMemory(ppu_control)&nmiFlagMask != 0
-}
-
-func (p *ppu) isOnPreRender() bool {
-	return p.scanline == max_frame_scanline && p.pixel == 0
-}
-
-func (p *ppu) isVBlankStarted() bool {
-	return p.scanline == v_blank_scanline_start && p.pixel == v_blank_pixel_start
+	return p.bus.ReadFromMemory(domain.PPU_CONTROL)&nmiFlagMask != 0
 }
 
 // TODO 1: separate this logic into independent component
 func (p *ppu) updateVRAMAddress() {
 	const high_byte_mask = 0x3F00
 
-	if !p.w {
-		value := p.bus.ReadFromMemory(ppu_address)
-		p.t = (uint16(value) << 8) & high_byte_mask
+	if !p.state.IsWSet() {
+		value := p.bus.ReadFromMemory(domain.PPU_ADDRESS)
+		p.state.SetT((uint16(value) << 8) & high_byte_mask)
 	} else {
-		p.t |= uint16(p.bus.ReadFromMemory(ppu_address))
-		p.v = p.t
+		p.state.SetT(p.state.GetT() | uint16(p.bus.ReadFromMemory(domain.PPU_ADDRESS)))
+		p.state.CopyTToV()
 	}
 
-	p.toggleW()
+	p.state.ToggleW()
 }
 
 //TODO 1
 
 // TODO 2: separate this logic into independent component
 func (p *ppu) updateVRAMData() {
-	value := p.bus.ReadFromMemory(ppu_data)
-	p.writeToVMemory(p.v, value)
+	value := p.bus.ReadFromMemory(domain.PPU_DATA)
+	p.writeToVMemory(p.state.GetV(), value)
 	p.increaseVByOffset()
 }
 
 func (p *ppu) increaseVByOffset() {
 	if p.isOffsetIncrementBy32() {
-		p.setV(p.v + 32)
+		p.state.IncreaseVByOffset(32)
 	} else {
-		p.setV(p.v + 1)
+		p.state.IncreaseVByOffset(1)
 	}
 }
 
 func (p *ppu) isOffsetIncrementBy32() bool {
-	return p.bus.ReadFromMemory(ppu_control)&0b100 != 0
+	return p.bus.ReadFromMemory(domain.PPU_CONTROL)&0b100 != 0
 }
 
 //TODO 2
@@ -204,33 +140,12 @@ func (p *ppu) isOffsetIncrementBy32() bool {
 //TODO 3separate this logic into independent component
 
 func (p *ppu) resetWAndVBlankFlagOnRead() {
-	status := p.bus.ReadFromMemory(ppu_status)
-	p.bus.WriteToMemory(ppu_status, status&0x7F)
-	p.w = false
+	status := p.bus.ReadFromMemory(domain.PPU_STATUS)
+	p.bus.WriteToMemory(domain.PPU_STATUS, status&0x7F)
+	p.state.ClearW()
 }
 
 //TODO 3
-
-func (p *ppu) setV(value uint16) {
-	p.v = value % max_value_for_15_bits
-}
-
-func (p *ppu) setT(value uint16) {
-	p.t = value % max_value_for_15_bits
-}
-
-func (p *ppu) setX(value uint8) {
-	p.x = value % max_value_for_3_bits
-}
-
-func (p *ppu) toggleW() {
-	p.w = !p.w
-}
-
-func (p *ppu) getFineY() uint16 {
-	const fine_y_mask = 0x7000
-	return (p.v & fine_y_mask) >> 12
-}
 
 func (p *ppu) readVMemory(address uint16) uint8 {
 	return p.bus.ReadFromVideoMemory(address)

@@ -1,6 +1,9 @@
 package application
 
-import "nes-emu/src/emulator/application"
+import (
+	"nes-emu/src/emulator/application"
+	"nes-emu/src/emulator/ppu/domain"
+)
 
 type pipeline struct {
 	tileIndex                  byte
@@ -61,7 +64,7 @@ func (p *pipeline) RenderPixel(fineX byte) uint32 {
 	p.shiftRegisters()
 
 	pixelData := lowPatternBit | highPatternBit | lowAttrBit | highAttrBit
-	return colorPallet[pixelData]
+	return domain.ColorPallet[pixelData]
 }
 
 func (p *pipeline) GetShiftRegisters() (uint16, uint16, uint16, uint16) {
@@ -69,7 +72,7 @@ func (p *pipeline) GetShiftRegisters() (uint16, uint16, uint16, uint16) {
 }
 
 func (p *pipeline) getTileIndex(vValue uint16) uint8 {
-	return p.readVMemory(base_nametable_address | (vValue & 0x0FFF))
+	return p.readVMemory(domain.BASE_NAMETABLE_ADDRESS | (vValue & 0x0FFF))
 }
 
 func (p *pipeline) getAttrTableAddress(vValue uint16) uint16 {
@@ -82,7 +85,7 @@ func (p *pipeline) getAttrTableAddress(vValue uint16) uint16 {
 	offsetX := (vValue & coarse_x_mask) >> 2
 	offsetY := vValue >> 2 & coarse_y_mask
 
-	return base_nametable_address | nametable | fixed_offset | offsetY | offsetX
+	return domain.BASE_NAMETABLE_ADDRESS | nametable | fixed_offset | offsetY | offsetX
 }
 
 // Extrai os 2 bits da paleta apropriados a partir do byte lido da Attribute Table
@@ -133,7 +136,7 @@ func (p *pipeline) getByteFromPatternTable(tileIndex byte, fineY uint16, fetchHi
 
 func (p *pipeline) getPatternTableTileIndexFromControl() uint8 {
 	const index_mask = 0b1_0000
-	return (p.bus.ReadFromMemory(ppu_control) & index_mask) >> 4
+	return (p.bus.ReadFromMemory(domain.PPU_CONTROL) & index_mask) >> 4
 }
 
 func (p *pipeline) getBitFromBitPosition(register uint16, bitPosition byte) uint16 {

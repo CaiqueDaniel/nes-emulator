@@ -2,6 +2,7 @@ package application
 
 import (
 	"nes-emu/src/emulator/application"
+	"nes-emu/src/emulator/ppu/domain"
 	"testing"
 )
 
@@ -67,7 +68,7 @@ func TestStepUpPipelineSetsTileIndex(t *testing.T) {
 
 	vValue := uint16(0x0005)
 	expectedTile := byte(0xAA)
-	addr := base_nametable_address | (vValue & 0x0FFF)
+	addr := domain.BASE_NAMETABLE_ADDRESS | (vValue & 0x0FFF)
 	bus.WriteToVideoMemory(addr, expectedTile)
 
 	// dot 2 is fetch_tile_index_dot
@@ -183,7 +184,7 @@ func TestStepUpPipelineFetchLowerPatternByte(t *testing.T) {
 		expectedPatternTable uint16
 	}{
 		{
-			name:                 "pattern table 0 (ppu_control bit 4 is 0)",
+			name:                 "pattern table 0 (domain.PPU_CONTROL bit 4 is 0)",
 			ppuControlBit4:       0x00,
 			tileIndex:            0x05,
 			fineY:                2,
@@ -191,7 +192,7 @@ func TestStepUpPipelineFetchLowerPatternByte(t *testing.T) {
 			expectedPatternTable: 0x0000,
 		},
 		{
-			name:                 "pattern table 1 (ppu_control bit 4 is 1)",
+			name:                 "pattern table 1 (domain.PPU_CONTROL bit 4 is 1)",
 			ppuControlBit4:       0x10,
 			tileIndex:            0x0A,
 			fineY:                5,
@@ -205,7 +206,7 @@ func TestStepUpPipelineFetchLowerPatternByte(t *testing.T) {
 			bus := newMockBus()
 			p := NewPipeline(bus).(*pipeline)
 
-			bus.WriteToMemory(ppu_control, tt.ppuControlBit4)
+			bus.WriteToMemory(domain.PPU_CONTROL, tt.ppuControlBit4)
 			p.tileIndex = tt.tileIndex
 
 			// getByteFromPatternTable computes address: patternIndex | (tileIndex << 4) | high_byte_offset | fineY
@@ -233,9 +234,9 @@ func TestStepUpPipelineFetchHigherPatternByte_AndFillsShiftRegisters(t *testing.
 	tile := byte(0x10)
 	fineY := uint16(3)
 
-	bus.WriteToVideoMemory(base_nametable_address|(vValue&0x0FFF), tile)
-	bus.WriteToVideoMemory(base_nametable_address|0x03C0, 0b01) // palette 1 -> lowPalette: 255, highPalette: 0
-	bus.WriteToMemory(ppu_control, 0x10)                        // pattern table 1 (0x1000)
+	bus.WriteToVideoMemory(domain.BASE_NAMETABLE_ADDRESS|(vValue&0x0FFF), tile)
+	bus.WriteToVideoMemory(domain.BASE_NAMETABLE_ADDRESS|0x03C0, 0b01) // palette 1 -> lowPalette: 255, highPalette: 0
+	bus.WriteToMemory(domain.PPU_CONTROL, 0x10)                        // pattern table 1 (0x1000)
 
 	highByteOffset := uint16(0b1000)
 	patternAddr := (uint16(1) << 12) | (uint16(tile) << 4) | highByteOffset | fineY
@@ -293,7 +294,7 @@ func TestRenderPixel_PaletteLookup(t *testing.T) {
 	// bit 1: highPatternBit
 	// bit 2: lowAttrBit
 	// bit 3: highAttrBit
-	// and returns colorPallet[pixelData].
+	// and returns domain.ColorPallet[pixelData].
 	tests := []struct {
 		name              string
 		lowPatternBit     uint16
@@ -373,7 +374,7 @@ func TestRenderPixel_PaletteLookup(t *testing.T) {
 			p.lowAttributeShiftRegister = tt.lowAttrBit << bitPos
 			p.highAttributeShiftRegister = tt.highAttrBit << bitPos
 
-			expectedColor := colorPallet[tt.expectedPixelData]
+			expectedColor := domain.ColorPallet[tt.expectedPixelData]
 			color := p.RenderPixel(fineX)
 
 			if color != expectedColor {
@@ -395,7 +396,7 @@ func TestRenderPixel_FineXBitSelection(t *testing.T) {
 			p.lowPatternShiftRegister = 1 << bitPos // only this bit set
 
 			color := p.RenderPixel(fineX)
-			expectedColor := colorPallet[1] // lowPatternBit = 1 -> pixelData = 1
+			expectedColor := domain.ColorPallet[1] // lowPatternBit = 1 -> pixelData = 1
 
 			if color != expectedColor {
 				t.Fatalf("for fineX=%d, expected color 0x%06X, got 0x%06X",
@@ -457,7 +458,7 @@ func TestRenderPixel_ConsecutivePixels(t *testing.T) {
 
 	for i, expectedData := range expectedPixelData {
 		color := p.RenderPixel(0)
-		expectedColor := colorPallet[expectedData]
+		expectedColor := domain.ColorPallet[expectedData]
 		if color != expectedColor {
 			t.Fatalf("pixel %d: expected color 0x%06X (data %d), got 0x%06X",
 				i, expectedColor, expectedData, color)
