@@ -1,13 +1,14 @@
+//go:build ignore
+
 package emulator
 
 import (
 	"nes-emu/src/emulator/application"
-	"nes-emu/src/emulator/components/bus"
-	"nes-emu/src/emulator/components/memory"
-	screen_driver "nes-emu/src/emulator/components/screen"
 	cpu "nes-emu/src/emulator/cpu/application"
 	"nes-emu/src/emulator/delivery"
 	ppu "nes-emu/src/emulator/ppu/application"
+	memory "nes-emu/src/emulator/shared/persistance"
+	emulator_shared_services "nes-emu/src/emulator/shared/services"
 	shared_services "nes-emu/src/shared/services"
 
 	"golang.org/x/exp/shiny/screen"
@@ -29,10 +30,10 @@ func NewEmulatorModule(window *screen.Window, buffer *screen.Buffer) *emulatorMo
 
 func (e *emulatorModule) init(window *screen.Window, buffer *screen.Buffer) {
 	fs := shared_services.NewLocalFileSystem()
-	screen := screen_driver.NewShinyScreen(window, buffer)
-	bus := bus.NewBus()
+	screen := emulator_shared_services.NewShinyScreen(window, buffer)
+	bus := emulator_shared_services.NewBus()
 	cpu := cpu.NewCpu(bus)
-	ppu := ppu.NewRp2C02(bus, ppu.NewPipeline(bus), screen)
+	ppu := ppu.NewRenderGraphics(bus, ppu.NewPipeline(bus), screen)
 
 	bus.AtatchWorkMemory(memory.NewMemory())
 	bus.AtatchVideoMemory(memory.NewMemory())

@@ -6,7 +6,7 @@ import (
 	shared "nes-emu/src/emulator/shared/application"
 )
 
-type ppu struct {
+type RenderGraphics struct {
 	bus      shared.MNIBus
 	pipeline application.PixelPipeline
 	screen   application.Screen
@@ -14,8 +14,8 @@ type ppu struct {
 	buffer   [][]uint32
 }
 
-func NewRp2C02(bus shared.MNIBus, pipeline application.PixelPipeline, screen application.Screen) *ppu {
-	p := &ppu{
+func NewRenderGraphics(bus shared.MNIBus, pipeline application.PixelPipeline, screen application.Screen) *RenderGraphics {
+	p := &RenderGraphics{
 		pipeline: pipeline,
 		bus:      bus,
 		screen:   screen,
@@ -26,7 +26,7 @@ func NewRp2C02(bus shared.MNIBus, pipeline application.PixelPipeline, screen app
 	return p
 }
 
-func (p *ppu) Render() {
+func (p *RenderGraphics) Execute() {
 	if p.state.ShouldRenderScanlinePixel() {
 		p.renderPixel()
 		p.state.AdvanceToNextScanlinePixel()
@@ -47,7 +47,7 @@ func (p *ppu) Render() {
 	p.state.IncreaseDots()
 }
 
-func (p *ppu) TriggerLatchWithWriteSignal(address uint16) {
+func (p *RenderGraphics) TriggerLatchWithWriteSignal(address uint16) {
 	switch address {
 	case domain.PPU_ADDRESS:
 		p.updateVRAMAddress()
@@ -57,30 +57,30 @@ func (p *ppu) TriggerLatchWithWriteSignal(address uint16) {
 	}
 }
 
-func (p *ppu) TriggerLatchWithReadSignal(address uint16) {
+func (p *RenderGraphics) TriggerLatchWithReadSignal(address uint16) {
 	switch address {
 	case domain.PPU_STATUS:
 		p.resetWAndVBlankFlagOnRead()
 	}
 }
 
-func (p *ppu) GetCurrentScanline() uint16 {
+func (p *RenderGraphics) GetCurrentScanline() uint16 {
 	return p.state.GetCurrentScanline()
 }
 
-func (p *ppu) GetCurrentScanlinePixel() uint8 {
+func (p *RenderGraphics) GetCurrentScanlinePixel() uint8 {
 	return p.state.GetCurrentScanlinePixel()
 }
 
-func (p *ppu) renderPixel() {
+func (p *RenderGraphics) renderPixel() {
 	p.buffer[p.state.GetCurrentScanline()] = append(p.buffer[p.state.GetCurrentScanline()], p.pipeline.RenderPixel(p.state.GetX()))
 }
 
-func (p *ppu) fetchGraphics() {
+func (p *RenderGraphics) fetchGraphics() {
 	p.pipeline.StepUpPipeline(uint(p.state.GetCurrentDots()), p.state.GetV(), p.state.GetFineY())
 }
 
-func (p *ppu) updateStatusRegister() {
+func (p *RenderGraphics) updateStatusRegister() {
 	if p.state.IsOnPreRender() {
 		value := p.bus.ReadFromMemory(domain.PPU_STATUS) & 0b00011111
 		p.bus.WriteToMemory(domain.PPU_STATUS, value)
@@ -92,17 +92,17 @@ func (p *ppu) updateStatusRegister() {
 	}
 }
 
-func (p *ppu) checkIfNMIShouldBeCalled() bool {
+func (p *RenderGraphics) checkIfNMIShouldBeCalled() bool {
 	return p.isNMIFlagEnabled() && p.state.IsVBlankStarted()
 }
 
-func (p *ppu) isNMIFlagEnabled() bool {
+func (p *RenderGraphics) isNMIFlagEnabled() bool {
 	const nmiFlagMask = 0b10000000
 	return p.bus.ReadFromMemory(domain.PPU_CONTROL)&nmiFlagMask != 0
 }
 
 // TODO 1: separate this logic into independent component
-func (p *ppu) updateVRAMAddress() {
+func (p *RenderGraphics) updateVRAMAddress() {
 	const high_byte_mask = 0x3F00
 
 	if !p.state.IsWSet() {
@@ -119,13 +119,13 @@ func (p *ppu) updateVRAMAddress() {
 //TODO 1
 
 // TODO 2: separate this logic into independent component
-func (p *ppu) updateVRAMData() {
+func (p *RenderGraphics) updateVRAMData() {
 	value := p.bus.ReadFromMemory(domain.PPU_DATA)
 	p.writeToVMemory(p.state.GetV(), value)
 	p.increaseVByOffset()
 }
 
-func (p *ppu) increaseVByOffset() {
+func (p *RenderGraphics) increaseVByOffset() {
 	if p.isOffsetIncrementBy32() {
 		p.state.IncreaseVByOffset(32)
 	} else {
@@ -133,7 +133,7 @@ func (p *ppu) increaseVByOffset() {
 	}
 }
 
-func (p *ppu) isOffsetIncrementBy32() bool {
+func (p *RenderGraphics) isOffsetIncrementBy32() bool {
 	return p.bus.ReadFromMemory(domain.PPU_CONTROL)&0b100 != 0
 }
 
@@ -141,7 +141,7 @@ func (p *ppu) isOffsetIncrementBy32() bool {
 
 //TODO 3separate this logic into independent component
 
-func (p *ppu) resetWAndVBlankFlagOnRead() {
+func (p *RenderGraphics) resetWAndVBlankFlagOnRead() {
 	status := p.bus.ReadFromMemory(domain.PPU_STATUS)
 	p.bus.WriteToMemory(domain.PPU_STATUS, status&0x7F)
 	p.state.ClearW()
@@ -149,10 +149,10 @@ func (p *ppu) resetWAndVBlankFlagOnRead() {
 
 //TODO 3
 
-func (p *ppu) readVMemory(address uint16) uint8 {
+func (p *RenderGraphics) readVMemory(address uint16) uint8 {
 	return p.bus.ReadFromVideoMemory(address)
 }
 
-func (p *ppu) writeToVMemory(address uint16, value byte) {
+func (p *RenderGraphics) writeToVMemory(address uint16, value byte) {
 	p.bus.WriteToVideoMemory(address, value)
 }

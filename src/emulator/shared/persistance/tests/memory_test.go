@@ -1,7 +1,7 @@
 package tests
 
 import (
-	"nes-emu/src/emulator/components/memory"
+	memory "nes-emu/src/emulator/shared/persistance"
 	"testing"
 )
 

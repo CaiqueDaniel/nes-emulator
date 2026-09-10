@@ -1,3 +1,5 @@
+//go:build ignore
+
 package delivery
 
 import "nes-emu/src/emulator/application"

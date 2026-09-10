@@ -15,9 +15,9 @@ func TestPPURender_ShouldDrawAPixel(t *testing.T) {
 	bus.AtatchVideoMemory(vMemory)
 	mockPipeline := &PixelPipelineFixture{}
 	screenFixture := NewScreenFixture()
-	ppu := ppu.NewRp2C02(bus, mockPipeline, screenFixture)
+	ppu := ppu.NewRenderGraphics(bus, mockPipeline, screenFixture)
 
-	ppu.Render()
+	ppu.Execute()
 
 	if ppu.GetCurrentScanline() != 0 {
 		t.Fatal("scanline expected to be 0")
@@ -35,10 +35,10 @@ func TestPPURender_ShouldWrapScanlineToStart(t *testing.T) {
 	bus.AtatchVideoMemory(vMemory)
 	mockPipeline := &PixelPipelineFixture{}
 	screenFixture := NewScreenFixture()
-	ppu := ppu.NewRp2C02(bus, mockPipeline, screenFixture)
+	ppu := ppu.NewRenderGraphics(bus, mockPipeline, screenFixture)
 
 	for i := 0; i < 336*262; i++ {
-		ppu.Render()
+		ppu.Execute()
 	}
 
 	if ppu.GetCurrentScanline() != 0 {
@@ -61,10 +61,10 @@ func TestPPURender_ShouldNotTriggerAnNMIOnVBlank_WhenNMIFlagDisabled(t *testing.
 	bus.AttachNMI(mockCpu)
 
 	screenFixture := NewScreenFixture()
-	ppu := ppu.NewRp2C02(bus, mockPipeline, screenFixture)
+	ppu := ppu.NewRenderGraphics(bus, mockPipeline, screenFixture)
 
 	for i := 0; i < 336*240; i++ {
-		ppu.Render()
+		ppu.Execute()
 	}
 
 	if ppu.GetCurrentScanline() != 240 {
@@ -91,12 +91,12 @@ func TestPPURender_ShouldTriggerAnNMIOnVBlank_WhenNMIFlagEnabled(t *testing.T) {
 	bus.AttachNMI(mockCpu)
 
 	screenFixture := NewScreenFixture()
-	ppu := ppu.NewRp2C02(bus, mockPipeline, screenFixture)
+	ppu := ppu.NewRenderGraphics(bus, mockPipeline, screenFixture)
 
 	mem.Write(0x2000, 0b10000000)
 
 	for i := 0; i < 336*240; i++ {
-		ppu.Render()
+		ppu.Execute()
 	}
 
 	if ppu.GetCurrentScanline() != 240 {
@@ -123,10 +123,10 @@ func TestPPURender_ShouldResetFlagsOnStatusRegister_OnPreRender(t *testing.T) {
 	bus.AttachNMI(mockCpu)
 
 	screenFixture := NewScreenFixture()
-	ppu := ppu.NewRp2C02(bus, mockPipeline, screenFixture)
+	ppu := ppu.NewRenderGraphics(bus, mockPipeline, screenFixture)
 
 	for i := 0; i < 336*261; i++ {
-		ppu.Render()
+		ppu.Execute()
 	}
 
 	if ppu.GetCurrentScanline() != 261 {
@@ -153,12 +153,12 @@ func TestPPURender_ShouldResetFlagsOnStatusRegister_WithoutChangingOtherBits_OnP
 
 	mockPipeline := &PixelPipelineFixture{}
 	screenFixture := NewScreenFixture()
-	ppu := ppu.NewRp2C02(bus, mockPipeline, screenFixture)
+	ppu := ppu.NewRenderGraphics(bus, mockPipeline, screenFixture)
 
 	mem.Write(0x2002, 0b1111_1111)
 
 	for i := 0; i < 336*261; i++ {
-		ppu.Render()
+		ppu.Execute()
 	}
 
 	if ppu.GetCurrentScanline() != 261 {
@@ -185,10 +185,10 @@ func TestPPURender_ShouldSetVBlankFlagOnStatusRegister_OnVBlank(t *testing.T) {
 	bus.AttachNMI(mockCpu)
 
 	screenFixture := NewScreenFixture()
-	ppu := ppu.NewRp2C02(bus, mockPipeline, screenFixture)
+	ppu := ppu.NewRenderGraphics(bus, mockPipeline, screenFixture)
 
 	for i := 0; i < 336*240; i++ {
-		ppu.Render()
+		ppu.Execute()
 	}
 
 	if ppu.GetCurrentScanline() != 240 {
@@ -211,10 +211,10 @@ func TestPPURender_ShouldShiftRegisters_OnVisibleScanlines(t *testing.T) {
 	bus.AtatchVideoMemory(vMemory)
 	mockPipeline := &PixelPipelineFixture{}
 	screenFixture := NewScreenFixture()
-	sut := ppu.NewRp2C02(bus, mockPipeline, screenFixture)
+	sut := ppu.NewRenderGraphics(bus, mockPipeline, screenFixture)
 
 	for i := 0; i <= 16; i++ {
-		sut.Render()
+		sut.Execute()
 	}
 
 	lowPatternShiftRegister, highPatternShiftRegister, lowAttributeShiftRegister, highAttributeShiftRegister := mockPipeline.GetShiftRegisters()
@@ -243,10 +243,10 @@ func TestPPURender_ShouldShiftRegisters_OnHBlank(t *testing.T) {
 	bus.AtatchVideoMemory(vMemory)
 	mockPipeline := &PixelPipelineFixture{}
 	screenFixture := NewScreenFixture()
-	sut := ppu.NewRp2C02(bus, mockPipeline, screenFixture)
+	sut := ppu.NewRenderGraphics(bus, mockPipeline, screenFixture)
 
 	for i := 0; i <= 256; i++ {
-		sut.Render()
+		sut.Execute()
 	}
 
 	lowPatternShiftRegister, highPatternShiftRegister, lowAttributeShiftRegister, highAttributeShiftRegister := mockPipeline.GetShiftRegisters()
@@ -267,7 +267,7 @@ func TestPPURender_ShouldShiftRegisters_OnHBlank(t *testing.T) {
 		t.Errorf("expected high attribute shift register to be 0b1000000010000001, got %b", highAttributeShiftRegister)
 	}
 
-	sut.Render()
+	sut.Execute()
 	lowPatternShiftRegister, highPatternShiftRegister, lowAttributeShiftRegister, highAttributeShiftRegister = mockPipeline.GetShiftRegisters()
 
 	if lowPatternShiftRegister != 0b1000_00010 {
@@ -294,10 +294,10 @@ func TestPPURender_ShouldShiftRegisters_OnVBlank(t *testing.T) {
 	bus.AtatchVideoMemory(vMemory)
 	mockPipeline := &PixelPipelineFixture{}
 	screen := NewScreenFixture()
-	sut := ppu.NewRp2C02(bus, mockPipeline, screen)
+	sut := ppu.NewRenderGraphics(bus, mockPipeline, screen)
 
 	for i := 0; i <= 336*240; i++ {
-		sut.Render()
+		sut.Execute()
 	}
 
 	lowPatternShiftRegister, highPatternShiftRegister, lowAttributeShiftRegister, highAttributeShiftRegister := mockPipeline.GetShiftRegisters()
@@ -318,7 +318,7 @@ func TestPPURender_ShouldShiftRegisters_OnVBlank(t *testing.T) {
 		t.Errorf("expected high attribute shift register to be 0b1000000010000001, got %b", highAttributeShiftRegister)
 	}
 
-	sut.Render()
+	sut.Execute()
 	lowPatternShiftRegister, highPatternShiftRegister, lowAttributeShiftRegister, highAttributeShiftRegister = mockPipeline.GetShiftRegisters()
 
 	if lowPatternShiftRegister != 0b100000010 {
@@ -345,7 +345,7 @@ func TestPPUTriggerLatchWithWriteSignal_ShouldUpdateVRAMAddress_OnFirstAndSecond
 	bus.AtatchVideoMemory(vMemory)
 	mockPipeline := &PixelPipelineFixture{}
 	screenFixture := NewScreenFixture()
-	ppu := ppu.NewRp2C02(bus, mockPipeline, screenFixture)
+	ppu := ppu.NewRenderGraphics(bus, mockPipeline, screenFixture)
 
 	// First write: High byte
 	mem.Write(0x2006, 0x21)
@@ -371,7 +371,7 @@ func TestPPUTriggerLatchWithWriteSignal_ShouldApplyMaskToHighByte_OnFirstWriteTo
 	bus.AtatchVideoMemory(vMemory)
 	mockPipeline := &PixelPipelineFixture{}
 	screenFixture := NewScreenFixture()
-	ppu := ppu.NewRp2C02(bus, mockPipeline, screenFixture)
+	ppu := ppu.NewRenderGraphics(bus, mockPipeline, screenFixture)
 
 	// First write: 0xFF should be masked with 0x3F00 -> high byte is 0x3F
 	mem.Write(0x2006, 0xFF)
@@ -396,7 +396,7 @@ func TestPPUTriggerLatchWithWriteSignal_ShouldToggleWriteLatch_OnConsecutiveWrit
 	bus.AtatchVideoMemory(vMemory)
 	mockPipeline := &PixelPipelineFixture{}
 	screenFixture := NewScreenFixture()
-	ppu := ppu.NewRp2C02(bus, mockPipeline, screenFixture)
+	ppu := ppu.NewRenderGraphics(bus, mockPipeline, screenFixture)
 
 	// 1st write (high byte)
 	mem.Write(0x2006, 0x20)
@@ -427,7 +427,7 @@ func TestPPUTriggerLatchWithWriteSignal_ShouldWriteDataToVideoMemoryAndIncrement
 	bus.AtatchVideoMemory(vMemory)
 	mockPipeline := &PixelPipelineFixture{}
 	screenFixture := NewScreenFixture()
-	ppu := ppu.NewRp2C02(bus, mockPipeline, screenFixture)
+	ppu := ppu.NewRenderGraphics(bus, mockPipeline, screenFixture)
 
 	// PPU_CONTROL bit 2 = 0 (increment by 1)
 	mem.Write(0x2000, 0x00)
@@ -465,7 +465,7 @@ func TestPPUTriggerLatchWithWriteSignal_ShouldWriteDataToVideoMemoryAndIncrement
 	bus.AtatchVideoMemory(vMemory)
 	mockPipeline := &PixelPipelineFixture{}
 	screenFixture := NewScreenFixture()
-	ppu := ppu.NewRp2C02(bus, mockPipeline, screenFixture)
+	ppu := ppu.NewRenderGraphics(bus, mockPipeline, screenFixture)
 
 	// PPU_CONTROL bit 2 = 1 (increment by 32)
 	mem.Write(0x2000, 0b0000_0100)
@@ -503,7 +503,7 @@ func TestPPUTriggerLatchWithWriteSignal_ShouldWrapVAddress_WhenIncrementExceedsM
 	bus.AtatchVideoMemory(vMemory)
 	mockPipeline := &PixelPipelineFixture{}
 	screenFixture := NewScreenFixture()
-	ppu := ppu.NewRp2C02(bus, mockPipeline, screenFixture)
+	ppu := ppu.NewRenderGraphics(bus, mockPipeline, screenFixture)
 
 	// Increment by 32
 	mem.Write(0x2000, 0b0000_0100)
@@ -537,7 +537,7 @@ func TestPPUTriggerLatchWithWriteSignal_ShouldDoNothing_OnUnhandledAddress(t *te
 	bus.AtatchVideoMemory(vMemory)
 	mockPipeline := &PixelPipelineFixture{}
 	screenFixture := NewScreenFixture()
-	ppu := ppu.NewRp2C02(bus, mockPipeline, screenFixture)
+	ppu := ppu.NewRenderGraphics(bus, mockPipeline, screenFixture)
 
 	// Addresses other than 0x2006 and 0x2007
 	ppu.TriggerLatchWithWriteSignal(0x2000)
@@ -556,7 +556,7 @@ func TestPPUTriggerLatchWithReadSignal_ShouldClearVBlankFlag_OnPPUStatusRead(t *
 	bus.AtatchVideoMemory(vMemory)
 	mockPipeline := &PixelPipelineFixture{}
 	screenFixture := NewScreenFixture()
-	ppu := ppu.NewRp2C02(bus, mockPipeline, screenFixture)
+	ppu := ppu.NewRenderGraphics(bus, mockPipeline, screenFixture)
 
 	mem.Write(0x2002, 0b1000_0000)
 
@@ -574,7 +574,7 @@ func TestPPUTriggerLatchWithReadSignal_ShouldPreserveOtherStatusBits_OnPPUStatus
 	bus.AtatchVideoMemory(vMemory)
 	mockPipeline := &PixelPipelineFixture{}
 	screenFixture := NewScreenFixture()
-	ppu := ppu.NewRp2C02(bus, mockPipeline, screenFixture)
+	ppu := ppu.NewRenderGraphics(bus, mockPipeline, screenFixture)
 
 	mem.Write(0x2002, 0b1111_1111)
 
@@ -592,7 +592,7 @@ func TestPPUTriggerLatchWithReadSignal_ShouldResetWriteLatchW_OnPPUStatusRead(t 
 	bus.AtatchVideoMemory(vMemory)
 	mockPipeline := &PixelPipelineFixture{}
 	screenFixture := NewScreenFixture()
-	ppu := ppu.NewRp2C02(bus, mockPipeline, screenFixture)
+	ppu := ppu.NewRenderGraphics(bus, mockPipeline, screenFixture)
 
 	// First write to 0x2006 sets w = true
 	mem.Write(0x2006, 0x21)
@@ -625,7 +625,7 @@ func TestPPUTriggerLatchWithReadSignal_ShouldDoNothing_OnUnhandledAddress(t *tes
 	bus.AtatchVideoMemory(vMemory)
 	mockPipeline := &PixelPipelineFixture{}
 	screenFixture := NewScreenFixture()
-	ppu := ppu.NewRp2C02(bus, mockPipeline, screenFixture)
+	ppu := ppu.NewRenderGraphics(bus, mockPipeline, screenFixture)
 
 	mem.Write(0x2002, 0b1000_0000)
 
@@ -646,7 +646,7 @@ func TestPPURender_ShouldPassVAndFineYToPixelPipeline(t *testing.T) {
 	bus.AtatchVideoMemory(vMemory)
 	mockPipeline := &PixelPipelineFixture{}
 	screenFixture := NewScreenFixture()
-	ppu := ppu.NewRp2C02(bus, mockPipeline, screenFixture)
+	ppu := ppu.NewRenderGraphics(bus, mockPipeline, screenFixture)
 
 	// Set v to 0x3123:
 	// fineY is (0x3123 & 0x7000) >> 12 = 3
@@ -655,7 +655,7 @@ func TestPPURender_ShouldPassVAndFineYToPixelPipeline(t *testing.T) {
 	mem.Write(0x2006, 0x23)
 	ppu.TriggerLatchWithWriteSignal(0x2006)
 
-	ppu.Render()
+	ppu.Execute()
 
 	if mockPipeline.LastVValue != 0x3123 {
 		t.Errorf("expected pipeline to receive v 0x3123, got 0x%X", mockPipeline.LastVValue)
@@ -673,11 +673,11 @@ func TestPPURender_ShouldShowImageOnScreen_OnVBlankStart(t *testing.T) {
 	bus.AtatchVideoMemory(vMemory)
 	mockPipeline := &PixelPipelineFixture{}
 	screenFixture := NewScreenFixture()
-	ppu := ppu.NewRp2C02(bus, mockPipeline, screenFixture)
+	ppu := ppu.NewRenderGraphics(bus, mockPipeline, screenFixture)
 
 	// Render until start of VBlank (scanline 240)
 	for i := 0; i < 336*240; i++ {
-		ppu.Render()
+		ppu.Execute()
 	}
 
 	if screenFixture.ShowImageCalls == 0 {
