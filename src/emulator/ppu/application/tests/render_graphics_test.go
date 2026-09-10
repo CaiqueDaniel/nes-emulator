@@ -8,6 +8,43 @@ import (
 	"testing"
 )
 
+func TestNewRenderGraphics(t *testing.T) {
+	mem := memory.NewMemory()
+	vMemory := memory.NewMemory()
+	bus := bus.NewBusWithWorkMemory(mem)
+	bus.AtatchVideoMemory(vMemory)
+	mockPipeline := &PixelPipelineFixture{}
+	screenFixture := NewScreenFixture()
+	ppu := ppu.NewRenderGraphics(bus, mockPipeline, screenFixture)
+
+	if ppu == nil {
+		t.Fatal("expected NewRenderGraphics to return a non-nil instance")
+	}
+
+	if ppu.GetCurrentScanline() != 0 {
+		t.Errorf("expected initial scanline to be 0, got %d", ppu.GetCurrentScanline())
+	}
+
+	if ppu.GetCurrentScanlinePixel() != 0 {
+		t.Errorf("expected initial pixel to be 0, got %d", ppu.GetCurrentScanlinePixel())
+	}
+}
+
+func TestPPURender_ShouldPanic_WhenNotInitialized(t *testing.T) {
+	defer func() {
+		r := recover()
+		if r == nil {
+			t.Fatal("expected panic when RenderGraphics is not initialized")
+		}
+		if r != "RenderGraphics was not initialized" {
+			t.Errorf("expected panic message 'RenderGraphics was not initialized', got '%v'", r)
+		}
+	}()
+
+	sut := &ppu.RenderGraphics{}
+	sut.Execute()
+}
+
 func TestPPURender_ShouldDrawAPixel(t *testing.T) {
 	mem := memory.NewMemory()
 	vMemory := memory.NewMemory()
@@ -687,4 +724,65 @@ func TestPPURender_ShouldShowImageOnScreen_OnVBlankStart(t *testing.T) {
 	if screenFixture.LastBuffer == nil {
 		t.Error("expected LastBuffer to not be nil")
 	}
+
+	// Verify that visible scanlines in the buffer have rendered pixels (256 pixels each)
+	buffer := *screenFixture.LastBuffer
+	if len(buffer[0]) != 256 {
+		t.Errorf("expected 256 pixels rendered for scanline 0, got %d", len(buffer[0]))
+	}
 }
+
+func TestPPURender_ShouldNotRenderPixel_DuringHBlank(t *testing.T) {
+	mem := memory.NewMemory()
+	vMemory := memory.NewMemory()
+	bus := bus.NewBusWithWorkMemory(mem)
+	bus.AtatchVideoMemory(vMemory)
+	mockPipeline := &PixelPipelineFixture{}
+	screenFixture := NewScreenFixture()
+	ppu := ppu.NewRenderGraphics(bus, mockPipeline, screenFixture)
+
+	// Execute through the visible portion of scanline 0 (dots 0 to 255: 256 cycles)
+	for i := 0; i < 256; i++ {
+		ppu.Execute()
+	}
+
+	pixelAfterVisible := ppu.GetCurrentScanlinePixel()
+
+	// Execute through HBlank portion of scanline 0 (dots 256 to 335: 80 cycles)
+	for i := 0; i < 80; i++ {
+		ppu.Execute()
+		if ppu.GetCurrentScanlinePixel() != pixelAfterVisible {
+			t.Fatalf("expected pixel to remain unchanged during HBlank at dot %d, got %d", 256+i, ppu.GetCurrentScanlinePixel())
+		}
+	}
+}
+
+func TestPPURender_ShouldNotRenderPixel_DuringVBlank(t *testing.T) {
+	mem := memory.NewMemory()
+	vMemory := memory.NewMemory()
+	bus := bus.NewBusWithWorkMemory(mem)
+	bus.AtatchVideoMemory(vMemory)
+	mockPipeline := &PixelPipelineFixture{}
+	screenFixture := NewScreenFixture()
+	ppu := ppu.NewRenderGraphics(bus, mockPipeline, screenFixture)
+
+	// Execute until VBlank begins (scanline 240, dot 0)
+	for i := 0; i < 336*240; i++ {
+		ppu.Execute()
+	}
+
+	if ppu.GetCurrentScanline() != 240 {
+		t.Fatalf("expected scanline 240, got %d", ppu.GetCurrentScanline())
+	}
+
+	pixelAtVBlankStart := ppu.GetCurrentScanlinePixel()
+
+	// Execute 336 cycles across scanline 240 during VBlank
+	for i := 0; i < 336; i++ {
+		ppu.Execute()
+		if ppu.GetCurrentScanlinePixel() != pixelAtVBlankStart {
+			t.Fatalf("expected pixel to not advance during VBlank scanline at step %d, got %d", i, ppu.GetCurrentScanlinePixel())
+		}
+	}
+}
+

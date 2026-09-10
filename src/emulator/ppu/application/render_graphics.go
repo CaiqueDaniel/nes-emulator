@@ -7,26 +7,33 @@ import (
 )
 
 type RenderGraphics struct {
-	bus      shared.MNIBus
-	pipeline application.PixelPipeline
-	screen   application.Screen
-	state    *domain.PPU
-	buffer   [][]uint32
+	initialized bool
+	bus         shared.MNIBus
+	pipeline    application.PixelPipeline
+	screen      application.Screen
+	state       *domain.PPU
+	buffer      [][]uint32
+}
+
+type RenderGraphicsInput struct {
 }
 
 func NewRenderGraphics(bus shared.MNIBus, pipeline application.PixelPipeline, screen application.Screen) *RenderGraphics {
 	p := &RenderGraphics{
-		pipeline: pipeline,
-		bus:      bus,
-		screen:   screen,
-		buffer:   make([][]uint32, domain.MAX_FRAME_SCANLINE+1),
-		state:    domain.NewPPU(),
+		initialized: true,
+		pipeline:    pipeline,
+		bus:         bus,
+		screen:      screen,
+		buffer:      make([][]uint32, domain.MAX_FRAME_SCANLINE+1),
+		state:       domain.NewPPU(),
 	}
 
 	return p
 }
 
 func (p *RenderGraphics) Execute() {
+	p.checkIfInitilized()
+
 	if p.state.ShouldRenderScanlinePixel() {
 		p.renderPixel()
 		p.state.AdvanceToNextScanlinePixel()
@@ -148,6 +155,12 @@ func (p *RenderGraphics) resetWAndVBlankFlagOnRead() {
 }
 
 //TODO 3
+
+func (p *RenderGraphics) checkIfInitilized() {
+	if !p.initialized {
+		panic("RenderGraphics was not initialized")
+	}
+}
 
 func (p *RenderGraphics) readVMemory(address uint16) uint8 {
 	return p.bus.ReadFromVideoMemory(address)
