@@ -15,16 +15,21 @@ func NewCPUController(cpu *application.CPU) *CPUController {
 }
 
 func (c *CPUController) RunProgram() {
-	c.checkIfInitialize()
+	c.checkIfInitialized()
 	c.cpu.RunProgram()
 }
 
+func (c *CPUController) Reset() {
+	c.checkIfInitialized()
+	c.cpu.Reset()
+}
+
 func (c *CPUController) SetNMI() {
-	c.checkIfInitialize()
+	c.checkIfInitialized()
 	c.cpu.SetNMI()
 }
 
-func (c *CPUController) checkIfInitialize() {
+func (c *CPUController) checkIfInitialized() {
 	if !c.initialize {
 		panic("CPU not initialized")
 	}

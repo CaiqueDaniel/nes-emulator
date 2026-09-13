@@ -27,6 +27,10 @@ func NewPPUModule(bus shared_application.MNIBus, window *screen.Window, buffer *
 	}
 }
 
+func (p *PPUModule) GetController() *delivery.PPUController {
+	return p.controller
+}
+
 func (p *PPUModule) checkIfInitilized() {
 	if !p.initilized {
 		panic("PPUModule was not initilized")

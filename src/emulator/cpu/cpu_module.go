@@ -20,6 +20,10 @@ func NewCPUModule(bus shared_application.Bus) *CPUModule {
 	}
 }
 
+func (c *CPUModule) GetController() *delivery.CPUController {
+	return c.controller
+}
+
 func (c *CPUModule) checkIfInitialize() {
 	if !c.initialize {
 		panic("CPU not initialized")

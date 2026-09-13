@@ -23,6 +23,10 @@ func NewConsoleModule(bus emu_application.Bus, cpu emu_application.CPU) *Console
 	}
 }
 
+func (c *ConsoleModule) GetController() *delivery.ConsoleController {
+	return c.controller
+}
+
 func (c *ConsoleModule) checkIfInitilized() {
 	if !c.initialized {
 		panic("ConsoleModule was not initilized")

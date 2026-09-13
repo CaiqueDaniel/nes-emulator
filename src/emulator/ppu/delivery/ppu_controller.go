@@ -1,6 +1,9 @@
 package delivery
 
-import "nes-emu/src/emulator/ppu/internal/application"
+import (
+	application "nes-emu/src/emulator/ppu/internal/application"
+	shared_application "nes-emu/src/emulator/shared/application"
+)
 
 type PPUController struct {
 	initialized    bool
@@ -16,7 +19,7 @@ func NewPPUController(renderGraphics *application.RenderGraphics) *PPUController
 	}
 }
 
-func (p *PPUController) Render(request *RenderRequest) {
+func (p *PPUController) Render(request *shared_application.PPUIOEvent) {
 	p.checkIfInitilized()
 	p.renderGraphics.Execute(&application.RenderGraphicsInput{
 		Address: request.Address,
