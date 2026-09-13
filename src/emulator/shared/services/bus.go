@@ -1,7 +1,6 @@
 package services
 
 import (
-	"nes-emu/src/emulator/application"
 	ppu "nes-emu/src/emulator/ppu/delivery"
 	shared "nes-emu/src/emulator/shared/application"
 )
@@ -70,7 +69,7 @@ func (b *bus) Tick() {
 	b.tickCount++
 }
 
-func (b *bus) AttachNMI(cpu application.CPU) {
+func (b *bus) AttachNMI(cpu CPU) {
 	b.nmiMethod = func() { cpu.SetNMI() }
 }
 
@@ -140,4 +139,8 @@ func translateMemoryAddress(address uint16) uint16 {
 
 type PPU interface {
 	Render(request *ppu.RenderRequest)
+}
+
+type CPU interface {
+	SetNMI()
 }
