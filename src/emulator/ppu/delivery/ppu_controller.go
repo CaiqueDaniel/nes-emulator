@@ -21,10 +21,17 @@ func NewPPUController(renderGraphics *application.RenderGraphics) *PPUController
 
 func (p *PPUController) Render(request *shared_application.PPUIOEvent) {
 	p.checkIfInitilized()
-	p.renderGraphics.Execute(&application.RenderGraphicsInput{
-		Address: request.Address,
-		IsWrite: request.IsWrite,
-	})
+
+	var input *application.RenderGraphicsInput
+
+	if request != nil {
+		input = &application.RenderGraphicsInput{
+			Address: request.Address,
+			IsWrite: request.IsWrite,
+		}
+	}
+
+	p.renderGraphics.Execute(input)
 }
 
 func (p *PPUController) checkIfInitilized() {

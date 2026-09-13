@@ -58,11 +58,15 @@ func (b *bus) AttachPictureProcessingUnit(ppu application.PPU) {
 
 func (b *bus) Tick() {
 	if b.ppu != nil {
-		for range 3 {
-			b.ppu.Render(&application.PPUIOEvent{
-				Address: b.lastOperationAddress,
-				IsWrite: b.lastOperationIsWrite,
-			})
+		for i := range 3 {
+			if i == 0 {
+				b.ppu.Render(&application.PPUIOEvent{
+					Address: b.lastOperationAddress,
+					IsWrite: b.lastOperationIsWrite,
+				})
+			} else {
+				b.ppu.Render(nil)
+			}
 		}
 	}
 
@@ -82,10 +86,12 @@ func (b *bus) ReadFromMemory(address uint16) uint8 {
 		panic("read operation on unattached work memory!")
 	}
 
-	b.lastOperationAddress = address
+	translatedAddress := translateMemoryAddress(address)
+
+	b.lastOperationAddress = translatedAddress
 	b.lastOperationIsWrite = false
 
-	return b.workMemory.Read(translateMemoryAddress(address))
+	return b.workMemory.Read(translatedAddress)
 }
 
 func (b *bus) WriteToMemory(address uint16, value uint8) {
@@ -93,10 +99,12 @@ func (b *bus) WriteToMemory(address uint16, value uint8) {
 		panic("write operation on unattached work memory!")
 	}
 
-	b.lastOperationAddress = address
+	translatedAddress := translateMemoryAddress(address)
+
+	b.lastOperationAddress = translatedAddress
 	b.lastOperationIsWrite = true
 
-	b.workMemory.Write(translateMemoryAddress(address), value)
+	b.workMemory.Write(translatedAddress, value)
 }
 
 func (b *bus) ReadFromVideoMemory(address uint16) uint8 {
