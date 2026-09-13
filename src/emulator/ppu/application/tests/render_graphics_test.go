@@ -42,7 +42,7 @@ func TestPPURender_ShouldPanic_WhenNotInitialized(t *testing.T) {
 	}()
 
 	sut := &ppu.RenderGraphics{}
-	sut.Execute()
+	sut.Execute(nil)
 }
 
 func TestPPURender_ShouldDrawAPixel(t *testing.T) {
@@ -54,7 +54,7 @@ func TestPPURender_ShouldDrawAPixel(t *testing.T) {
 	screenFixture := NewScreenFixture()
 	ppu := ppu.NewRenderGraphics(bus, mockPipeline, screenFixture)
 
-	ppu.Execute()
+	ppu.Execute(nil)
 
 	if ppu.GetCurrentScanline() != 0 {
 		t.Fatal("scanline expected to be 0")
@@ -75,7 +75,7 @@ func TestPPURender_ShouldWrapScanlineToStart(t *testing.T) {
 	ppu := ppu.NewRenderGraphics(bus, mockPipeline, screenFixture)
 
 	for i := 0; i < 336*262; i++ {
-		ppu.Execute()
+		ppu.Execute(nil)
 	}
 
 	if ppu.GetCurrentScanline() != 0 {
@@ -101,7 +101,7 @@ func TestPPURender_ShouldNotTriggerAnNMIOnVBlank_WhenNMIFlagDisabled(t *testing.
 	ppu := ppu.NewRenderGraphics(bus, mockPipeline, screenFixture)
 
 	for i := 0; i < 336*240; i++ {
-		ppu.Execute()
+		ppu.Execute(nil)
 	}
 
 	if ppu.GetCurrentScanline() != 240 {
@@ -133,7 +133,7 @@ func TestPPURender_ShouldTriggerAnNMIOnVBlank_WhenNMIFlagEnabled(t *testing.T) {
 	mem.Write(0x2000, 0b10000000)
 
 	for i := 0; i < 336*240; i++ {
-		ppu.Execute()
+		ppu.Execute(nil)
 	}
 
 	if ppu.GetCurrentScanline() != 240 {
@@ -163,7 +163,7 @@ func TestPPURender_ShouldResetFlagsOnStatusRegister_OnPreRender(t *testing.T) {
 	ppu := ppu.NewRenderGraphics(bus, mockPipeline, screenFixture)
 
 	for i := 0; i < 336*261; i++ {
-		ppu.Execute()
+		ppu.Execute(nil)
 	}
 
 	if ppu.GetCurrentScanline() != 261 {
@@ -195,7 +195,7 @@ func TestPPURender_ShouldResetFlagsOnStatusRegister_WithoutChangingOtherBits_OnP
 	mem.Write(0x2002, 0b1111_1111)
 
 	for i := 0; i < 336*261; i++ {
-		ppu.Execute()
+		ppu.Execute(nil)
 	}
 
 	if ppu.GetCurrentScanline() != 261 {
@@ -225,7 +225,7 @@ func TestPPURender_ShouldSetVBlankFlagOnStatusRegister_OnVBlank(t *testing.T) {
 	ppu := ppu.NewRenderGraphics(bus, mockPipeline, screenFixture)
 
 	for i := 0; i < 336*240; i++ {
-		ppu.Execute()
+		ppu.Execute(nil)
 	}
 
 	if ppu.GetCurrentScanline() != 240 {
@@ -251,7 +251,7 @@ func TestPPURender_ShouldShiftRegisters_OnVisibleScanlines(t *testing.T) {
 	sut := ppu.NewRenderGraphics(bus, mockPipeline, screenFixture)
 
 	for i := 0; i <= 16; i++ {
-		sut.Execute()
+		sut.Execute(nil)
 	}
 
 	lowPatternShiftRegister, highPatternShiftRegister, lowAttributeShiftRegister, highAttributeShiftRegister := mockPipeline.GetShiftRegisters()
@@ -283,7 +283,7 @@ func TestPPURender_ShouldShiftRegisters_OnHBlank(t *testing.T) {
 	sut := ppu.NewRenderGraphics(bus, mockPipeline, screenFixture)
 
 	for i := 0; i <= 256; i++ {
-		sut.Execute()
+		sut.Execute(nil)
 	}
 
 	lowPatternShiftRegister, highPatternShiftRegister, lowAttributeShiftRegister, highAttributeShiftRegister := mockPipeline.GetShiftRegisters()
@@ -304,7 +304,7 @@ func TestPPURender_ShouldShiftRegisters_OnHBlank(t *testing.T) {
 		t.Errorf("expected high attribute shift register to be 0b1000000010000001, got %b", highAttributeShiftRegister)
 	}
 
-	sut.Execute()
+	sut.Execute(nil)
 	lowPatternShiftRegister, highPatternShiftRegister, lowAttributeShiftRegister, highAttributeShiftRegister = mockPipeline.GetShiftRegisters()
 
 	if lowPatternShiftRegister != 0b1000_00010 {
@@ -334,7 +334,7 @@ func TestPPURender_ShouldShiftRegisters_OnVBlank(t *testing.T) {
 	sut := ppu.NewRenderGraphics(bus, mockPipeline, screen)
 
 	for i := 0; i <= 336*240; i++ {
-		sut.Execute()
+		sut.Execute(nil)
 	}
 
 	lowPatternShiftRegister, highPatternShiftRegister, lowAttributeShiftRegister, highAttributeShiftRegister := mockPipeline.GetShiftRegisters()
@@ -355,7 +355,7 @@ func TestPPURender_ShouldShiftRegisters_OnVBlank(t *testing.T) {
 		t.Errorf("expected high attribute shift register to be 0b1000000010000001, got %b", highAttributeShiftRegister)
 	}
 
-	sut.Execute()
+	sut.Execute(nil)
 	lowPatternShiftRegister, highPatternShiftRegister, lowAttributeShiftRegister, highAttributeShiftRegister = mockPipeline.GetShiftRegisters()
 
 	if lowPatternShiftRegister != 0b100000010 {
@@ -692,7 +692,7 @@ func TestPPURender_ShouldPassVAndFineYToPixelPipeline(t *testing.T) {
 	mem.Write(0x2006, 0x23)
 	ppu.TriggerLatchWithWriteSignal(0x2006)
 
-	ppu.Execute()
+	ppu.Execute(nil)
 
 	if mockPipeline.LastVValue != 0x3123 {
 		t.Errorf("expected pipeline to receive v 0x3123, got 0x%X", mockPipeline.LastVValue)
@@ -714,7 +714,7 @@ func TestPPURender_ShouldShowImageOnScreen_OnVBlankStart(t *testing.T) {
 
 	// Render until start of VBlank (scanline 240)
 	for i := 0; i < 336*240; i++ {
-		ppu.Execute()
+		ppu.Execute(nil)
 	}
 
 	if screenFixture.ShowImageCalls == 0 {
@@ -743,14 +743,14 @@ func TestPPURender_ShouldNotRenderPixel_DuringHBlank(t *testing.T) {
 
 	// Execute through the visible portion of scanline 0 (dots 0 to 255: 256 cycles)
 	for i := 0; i < 256; i++ {
-		ppu.Execute()
+		ppu.Execute(nil)
 	}
 
 	pixelAfterVisible := ppu.GetCurrentScanlinePixel()
 
 	// Execute through HBlank portion of scanline 0 (dots 256 to 335: 80 cycles)
 	for i := 0; i < 80; i++ {
-		ppu.Execute()
+		ppu.Execute(nil)
 		if ppu.GetCurrentScanlinePixel() != pixelAfterVisible {
 			t.Fatalf("expected pixel to remain unchanged during HBlank at dot %d, got %d", 256+i, ppu.GetCurrentScanlinePixel())
 		}
@@ -768,7 +768,7 @@ func TestPPURender_ShouldNotRenderPixel_DuringVBlank(t *testing.T) {
 
 	// Execute until VBlank begins (scanline 240, dot 0)
 	for i := 0; i < 336*240; i++ {
-		ppu.Execute()
+		ppu.Execute(nil)
 	}
 
 	if ppu.GetCurrentScanline() != 240 {
@@ -779,10 +779,9 @@ func TestPPURender_ShouldNotRenderPixel_DuringVBlank(t *testing.T) {
 
 	// Execute 336 cycles across scanline 240 during VBlank
 	for i := 0; i < 336; i++ {
-		ppu.Execute()
+		ppu.Execute(nil)
 		if ppu.GetCurrentScanlinePixel() != pixelAtVBlankStart {
 			t.Fatalf("expected pixel to not advance during VBlank scanline at step %d, got %d", i, ppu.GetCurrentScanlinePixel())
 		}
 	}
 }
-

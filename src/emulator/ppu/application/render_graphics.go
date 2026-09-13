@@ -16,6 +16,8 @@ type RenderGraphics struct {
 }
 
 type RenderGraphicsInput struct {
+	Address uint16
+	IsWrite bool
 }
 
 func NewRenderGraphics(bus shared.MNIBus, pipeline application.PixelPipeline, screen application.Screen) *RenderGraphics {
@@ -31,7 +33,7 @@ func NewRenderGraphics(bus shared.MNIBus, pipeline application.PixelPipeline, sc
 	return p
 }
 
-func (p *RenderGraphics) Execute() {
+func (p *RenderGraphics) Execute(input *RenderGraphicsInput) {
 	p.checkIfInitilized()
 
 	if p.state.ShouldRenderScanlinePixel() {
