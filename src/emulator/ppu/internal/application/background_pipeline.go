@@ -2,7 +2,7 @@ package application
 
 import (
 	"nes-emu/src/emulator/application"
-	"nes-emu/src/emulator/ppu/domain"
+	"nes-emu/src/emulator/ppu/internal/domain"
 	shared "nes-emu/src/emulator/shared/application"
 )
 
