@@ -40,7 +40,7 @@ func TestItShouldLoadPGRROMIntoMemory(t *testing.T) {
 	sut, bus, _, _ := createSut()
 
 	input := application.StartGameInput{
-		Path: "./../../../../test/resources/PALTEST.NES",
+		Path: "./../../../../../../test/resources/PALTEST.NES",
 	}
 
 	err := sut.Execute(input)
@@ -64,7 +64,7 @@ func TestItShouldLoadCHRROMIntoMemory(t *testing.T) {
 	sut, _, vRam, _ := createSut()
 
 	input := application.StartGameInput{
-		Path: "./../../../../test/resources/Zelda.NES",
+		Path: "./../../../../../../test/resources/Zelda.NES",
 	}
 
 	err := sut.Execute(input)
@@ -88,7 +88,7 @@ func TestItShouldRunTheProgram(t *testing.T) {
 	sut, _, _, cpu := createSut()
 
 	input := application.StartGameInput{
-		Path: "./../../../../test/resources/Zelda.NES",
+		Path: "./../../../../../../test/resources/Zelda.NES",
 	}
 
 	err := sut.Execute(input)
