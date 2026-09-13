@@ -1,7 +1,7 @@
 package tests
 
 import (
-	internal "nes-emu/src/emulator/cpu/application"
+	internal "nes-emu/src/emulator/cpu/internal/application"
 	memory "nes-emu/src/emulator/shared/persistance"
 	bus "nes-emu/src/emulator/shared/services"
 	"testing"
