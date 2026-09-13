@@ -3,7 +3,7 @@ package tests
 import (
 	"bytes"
 	"math"
-	"nes-emu/src/emulator/loader/domain"
+	"nes-emu/src/emulator/console/internal/domain"
 	shared_services "nes-emu/src/shared/services"
 	"testing"
 )
@@ -251,7 +251,7 @@ func TestShouldGetCHRROMSizeOnNES20FileWithPowerOfTwo(t *testing.T) {
 
 func getTestFile() *[]byte {
 	fs := shared_services.NewLocalFileSystem()
-	file, err := fs.ReadFile("./../../../../../test/resources/PALTEST.NES")
+	file, err := fs.ReadFile("./../../../../../../test/resources/PALTEST.NES")
 
 	if err != nil {
 		panic("file not loaded")
@@ -262,7 +262,7 @@ func getTestFile() *[]byte {
 
 func getGraphicTestFile() *[]byte {
 	fs := shared_services.NewLocalFileSystem()
-	file, err := fs.ReadFile("./../../../../../test/resources/Zelda.NES")
+	file, err := fs.ReadFile("./../../../../../../test/resources/Zelda.NES")
 
 	if err != nil {
 		panic("file not loaded")
@@ -273,7 +273,7 @@ func getGraphicTestFile() *[]byte {
 
 func getTestWithTrainerFile() *[]byte {
 	fs := shared_services.NewLocalFileSystem()
-	file, err := fs.ReadFile("./../../../../../test/resources/PALTEST_With_Trainer.NES")
+	file, err := fs.ReadFile("./../../../../../../test/resources/PALTEST_With_Trainer.NES")
 
 	if err != nil {
 		panic("file not loaded")
