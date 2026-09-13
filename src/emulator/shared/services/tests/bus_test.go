@@ -1,7 +1,7 @@
 package tests
 
 import (
-	ppu "nes-emu/src/emulator/ppu/delivery"
+	"nes-emu/src/emulator/shared/application"
 	memory "nes-emu/src/emulator/shared/persistance"
 	bus "nes-emu/src/emulator/shared/services"
 	"nes-emu/test/fixtures"
@@ -12,7 +12,7 @@ type mockPPU struct {
 	renderCalled int
 }
 
-func (m *mockPPU) Render(request *ppu.RenderRequest) {
+func (m *mockPPU) Render(request *application.PPUIOEvent) {
 	m.renderCalled++
 }
 

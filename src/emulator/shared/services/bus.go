@@ -1,7 +1,7 @@
 package services
 
 import (
-	ppu "nes-emu/src/emulator/ppu/delivery"
+	"nes-emu/src/emulator/shared/application"
 	shared "nes-emu/src/emulator/shared/application"
 )
 
@@ -22,7 +22,7 @@ const (
 type bus struct {
 	workMemory           shared.Memory
 	videoMemory          shared.Memory
-	ppu                  PPU
+	ppu                  application.PPU
 	tickCount            uint
 	nmiMethod            func()
 	lastOperationAddress uint16
@@ -52,14 +52,14 @@ func (b *bus) AtatchVideoMemory(memory shared.Memory) {
 	b.videoMemory = memory
 }
 
-func (b *bus) AttachPictureProcessingUnit(ppu PPU) {
+func (b *bus) AttachPictureProcessingUnit(ppu application.PPU) {
 	b.ppu = ppu
 }
 
 func (b *bus) Tick() {
 	if b.ppu != nil {
 		for range 3 {
-			b.ppu.Render(&ppu.RenderRequest{
+			b.ppu.Render(&application.PPUIOEvent{
 				Address: b.lastOperationAddress,
 				IsWrite: b.lastOperationIsWrite,
 			})
@@ -69,7 +69,7 @@ func (b *bus) Tick() {
 	b.tickCount++
 }
 
-func (b *bus) AttachNMI(cpu CPU) {
+func (b *bus) AttachNMI(cpu application.CPU) {
 	b.nmiMethod = func() { cpu.SetNMI() }
 }
 
@@ -135,12 +135,4 @@ func translateMemoryAddress(address uint16) uint16 {
 	}
 
 	return address
-}
-
-type PPU interface {
-	Render(request *ppu.RenderRequest)
-}
-
-type CPU interface {
-	SetNMI()
 }
