@@ -1,7 +1,6 @@
 package application
 
 import (
-	"nes-emu/src/emulator/application"
 	"nes-emu/src/emulator/ppu/internal/domain"
 	shared "nes-emu/src/emulator/shared/application"
 )
@@ -10,7 +9,7 @@ type RenderGraphics struct {
 	initialized     bool
 	bus             shared.MNIBus
 	pipeline        PixelPipeline
-	screen          application.Screen
+	screen          Screen
 	ioEventsContext IOEventsContext
 	state           *domain.PPU
 	buffer          [][]uint32
@@ -21,7 +20,7 @@ type RenderGraphicsInput struct {
 	IsWrite bool
 }
 
-func NewRenderGraphics(bus shared.MNIBus, pipeline PixelPipeline, screen application.Screen, ioEventsContext IOEventsContext) *RenderGraphics {
+func NewRenderGraphics(bus shared.MNIBus, pipeline PixelPipeline, screen Screen, ioEventsContext IOEventsContext) *RenderGraphics {
 	p := &RenderGraphics{
 		initialized:     true,
 		pipeline:        pipeline,
