@@ -1,6 +1,6 @@
 package delivery
 
-import "nes-emu/src/emulator/ppu/application"
+import "nes-emu/src/emulator/ppu/internal/application"
 
 type PPUController struct {
 	initialized    bool
