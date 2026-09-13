@@ -24,12 +24,28 @@ func TestJumpProgramCounterByIndirectValue(t *testing.T) {
 	b := bus.NewBusWithWorkMemory(mem)
 	cpu := internal.NewCpuWithInternal(b)
 
+	mem.Write(0x03FE, 0xFE)
+	mem.Write(0x03FF, 0xFF)
+
+	cpu.JumpProgramCounterByIndirectValue(0x03FE)
+
+	if cpu.GetProgramCounter() != 0xFFFE {
+		t.Errorf("Expected instruction to corretcly imitate a hardware bug in the 6502 processor where the higher byte is read twice, to have the program counter to be 255, got %d", cpu.GetProgramCounter())
+	}
+}
+
+func TestJumpProgramCounterByIndirectValueHardwareBug(t *testing.T) {
+	mem := memory.NewMemory()
+	b := bus.NewBusWithWorkMemory(mem)
+	cpu := internal.NewCpuWithInternal(b)
+
 	mem.Write(0x03FF, 1)
+	mem.Write(0x0300, 2)
 	mem.Write(0x4000, 123)
 
 	cpu.JumpProgramCounterByIndirectValue(0x03FF)
 
-	if cpu.GetProgramCounter() != 0x0300 {
+	if cpu.GetProgramCounter() != 0x0201 {
 		t.Errorf("Expected instruction to corretcly imitate a hardware bug in the 6502 processor where the higher byte is read twice, to have the program counter to be 255, got %d", cpu.GetProgramCounter())
 	}
 }

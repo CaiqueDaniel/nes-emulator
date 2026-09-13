@@ -5,11 +5,13 @@ func (c *CPU) JumpProgramCounterToValue(value uint16) {
 }
 
 func (c *CPU) JumpProgramCounterByIndirectValue(address uint16) {
-	ptrValue := c.readFromMemory(address)
-	lowAddress := uint8(address) + ptrValue
-	highAddress := address & 0xFF00
+	highPtrAddress := address & 0xFF00
+	lowPtrAddress := address & 0x00FF
+	lowAddress := uint16(c.readFromMemory(address))
+	highAddress := uint16(c.readFromMemory(highPtrAddress | (lowPtrAddress + 1)))
+	finalAddress := highAddress<<8 | lowAddress
 
-	c.JumpProgramCounterToValue(highAddress + uint16(lowAddress))
+	c.JumpProgramCounterToValue(finalAddress)
 }
 
 func (c *CPU) JumpProgramCounterToSubRoutine(value uint16) {
