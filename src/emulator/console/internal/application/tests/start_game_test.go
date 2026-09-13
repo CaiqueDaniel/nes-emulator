@@ -1,21 +1,20 @@
-//go:build ignore
-
 package tests
 
 import (
-	"nes-emu/src/emulator/application"
-	"nes-emu/src/emulator/components/bus"
-	"nes-emu/src/emulator/components/memory"
+	"nes-emu/src/emulator/console/internal/application"
+	shared_application "nes-emu/src/emulator/shared/application"
+	"nes-emu/src/emulator/shared/persistance"
+	shared_console_services "nes-emu/src/emulator/shared/services"
 	shared_services "nes-emu/src/shared/services"
 	"nes-emu/test/fixtures"
 	"testing"
 )
 
-func createSut() (application.StartGame, application.Bus, application.Memory, *fixtures.MockCPU) {
+func createSut() (application.StartGame, shared_application.Bus, shared_application.Memory, *fixtures.MockCPU) {
 	fs := shared_services.NewLocalFileSystem()
-	mem := memory.NewMemory()
-	videoMemory := memory.NewMemory()
-	bus := bus.NewBus()
+	mem := persistance.NewMemory()
+	videoMemory := persistance.NewMemory()
+	bus := shared_console_services.NewBus()
 	cpu := &fixtures.MockCPU{}
 
 	bus.AtatchWorkMemory(mem)

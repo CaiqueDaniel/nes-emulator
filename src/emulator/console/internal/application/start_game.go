@@ -1,9 +1,8 @@
-//go:build ignore
-
 package application
 
 import (
-	"nes-emu/src/emulator/domain"
+	"nes-emu/src/emulator/console/internal/domain"
+	"nes-emu/src/emulator/shared/application"
 	shared_application "nes-emu/src/shared/application"
 )
 
@@ -13,11 +12,11 @@ type StartGame interface {
 
 type startGame struct {
 	fs  shared_application.FileSystem
-	bus Bus
-	cpu CPU
+	bus application.Bus
+	cpu application.CPU
 }
 
-func NewStartGame(fs shared_application.FileSystem, bus Bus, cpu CPU) StartGame {
+func NewStartGame(fs shared_application.FileSystem, bus application.Bus, cpu application.CPU) StartGame {
 	return &startGame{
 		fs:  fs,
 		cpu: cpu,
