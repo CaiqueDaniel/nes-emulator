@@ -241,13 +241,13 @@ func TestBit(t *testing.T) {
 		{
 			name:       "BIT: result is zero (no shared bits)",
 			initialAcc: 0b00001111,
-			value:      0b11110000,
+			value:      0b00110000,
 			expectedZ:  true,
 			expectedN:  false,
 			expectedV:  false,
 		},
 		{
-			name:       "BIT: result has bit 7 set (negative flag)",
+			name:       "BIT: memory has bit 7 set (negative flag)",
 			initialAcc: 0xFF,
 			value:      0b10000000,
 			expectedZ:  false,
@@ -255,7 +255,7 @@ func TestBit(t *testing.T) {
 			expectedV:  false,
 		},
 		{
-			name:       "BIT: result has bit 6 set (overflow flag)",
+			name:       "BIT: memory has bit 6 set (overflow flag)",
 			initialAcc: 0xFF,
 			value:      0b01000000,
 			expectedZ:  false,
@@ -263,7 +263,7 @@ func TestBit(t *testing.T) {
 			expectedV:  true,
 		},
 		{
-			name:       "BIT: result has bits 6 and 7 set",
+			name:       "BIT: memory has bits 6 and 7 set",
 			initialAcc: 0xFF,
 			value:      0b11000000,
 			expectedZ:  false,
@@ -271,12 +271,12 @@ func TestBit(t *testing.T) {
 			expectedV:  true,
 		},
 		{
-			name:       "BIT: AND with zero clears all flags (only zero flag)",
+			name:       "BIT: AND with zero sets all flags",
 			initialAcc: 0x00,
 			value:      0xFF,
 			expectedZ:  true,
-			expectedN:  false,
-			expectedV:  false,
+			expectedN:  true,
+			expectedV:  true,
 		},
 		{
 			name:       "BIT: sets both negative and overflow flags",

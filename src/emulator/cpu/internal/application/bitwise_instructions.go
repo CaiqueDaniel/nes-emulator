@@ -22,6 +22,6 @@ func (c *CPU) Bit(value uint8) {
 	result := c.acc & value
 
 	c.zero = c.isValueZero(result)
-	c.negative = c.isValueNegative(result)
-	c.overflow = result&0b01000000 != 0
+	c.negative = c.isValueNegative(value)
+	c.overflow = value&0b01000000 != 0
 }
