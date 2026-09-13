@@ -1,7 +1,6 @@
 package application
 
 import (
-	"nes-emu/src/emulator/application"
 	"nes-emu/src/emulator/ppu/internal/domain"
 	shared "nes-emu/src/emulator/shared/application"
 )
@@ -19,7 +18,7 @@ type pipeline struct {
 	bus                        shared.MNIBus
 }
 
-func NewPipeline(bus shared.MNIBus) application.PixelPipeline {
+func NewPipeline(bus shared.MNIBus) PixelPipeline {
 	return &pipeline{
 		bus: bus,
 	}

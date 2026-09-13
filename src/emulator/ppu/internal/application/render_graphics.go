@@ -9,7 +9,7 @@ import (
 type RenderGraphics struct {
 	initialized     bool
 	bus             shared.MNIBus
-	pipeline        application.PixelPipeline
+	pipeline        PixelPipeline
 	screen          application.Screen
 	ioEventsContext IOEventsContext
 	state           *domain.PPU
@@ -21,7 +21,7 @@ type RenderGraphicsInput struct {
 	IsWrite bool
 }
 
-func NewRenderGraphics(bus shared.MNIBus, pipeline application.PixelPipeline, screen application.Screen, ioEventsContext IOEventsContext) *RenderGraphics {
+func NewRenderGraphics(bus shared.MNIBus, pipeline PixelPipeline, screen application.Screen, ioEventsContext IOEventsContext) *RenderGraphics {
 	p := &RenderGraphics{
 		initialized:     true,
 		pipeline:        pipeline,
