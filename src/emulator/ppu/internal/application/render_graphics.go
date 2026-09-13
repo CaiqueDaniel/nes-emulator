@@ -36,6 +36,14 @@ func NewRenderGraphics(bus shared.MNIBus, pipeline application.PixelPipeline, sc
 func (p *RenderGraphics) Execute(input *RenderGraphicsInput) {
 	p.checkIfInitilized()
 
+	if input != nil {
+		if input.IsWrite {
+			p.TriggerLatchWithWriteSignal(input.Address)
+		} else {
+			p.TriggerLatchWithReadSignal(input.Address)
+		}
+	}
+
 	if p.state.ShouldRenderScanlinePixel() {
 		p.renderPixel()
 		p.state.AdvanceToNextScanlinePixel()

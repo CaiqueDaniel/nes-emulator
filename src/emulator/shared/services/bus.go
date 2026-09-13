@@ -2,6 +2,7 @@ package services
 
 import (
 	"nes-emu/src/emulator/application"
+	ppu "nes-emu/src/emulator/ppu/delivery"
 	shared "nes-emu/src/emulator/shared/application"
 )
 
@@ -20,11 +21,13 @@ const (
 )
 
 type bus struct {
-	workMemory  shared.Memory
-	videoMemory shared.Memory
-	ppu         application.PPU
-	tickCount   uint
-	nmiMethod   func()
+	workMemory           shared.Memory
+	videoMemory          shared.Memory
+	ppu                  PPU
+	tickCount            uint
+	nmiMethod            func()
+	lastOperationAddress uint16
+	lastOperationIsWrite bool
 }
 
 func NewBus() *bus {
@@ -50,14 +53,17 @@ func (b *bus) AtatchVideoMemory(memory shared.Memory) {
 	b.videoMemory = memory
 }
 
-func (b *bus) AttachPictureProcessingUnit(ppu application.PPU) {
+func (b *bus) AttachPictureProcessingUnit(ppu PPU) {
 	b.ppu = ppu
 }
 
 func (b *bus) Tick() {
 	if b.ppu != nil {
 		for range 3 {
-			b.ppu.Render()
+			b.ppu.Render(&ppu.RenderRequest{
+				Address: b.lastOperationAddress,
+				IsWrite: b.lastOperationIsWrite,
+			})
 		}
 	}
 
@@ -77,6 +83,9 @@ func (b *bus) ReadFromMemory(address uint16) uint8 {
 		panic("read operation on unattached work memory!")
 	}
 
+	b.lastOperationAddress = address
+	b.lastOperationIsWrite = false
+
 	return b.workMemory.Read(translateMemoryAddress(address))
 }
 
@@ -84,6 +93,9 @@ func (b *bus) WriteToMemory(address uint16, value uint8) {
 	if b.workMemory == nil {
 		panic("write operation on unattached work memory!")
 	}
+
+	b.lastOperationAddress = address
+	b.lastOperationIsWrite = true
 
 	b.workMemory.Write(translateMemoryAddress(address), value)
 }
@@ -124,4 +136,8 @@ func translateMemoryAddress(address uint16) uint16 {
 	}
 
 	return address
+}
+
+type PPU interface {
+	Render(request *ppu.RenderRequest)
 }

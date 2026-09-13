@@ -1,6 +1,7 @@
 package tests
 
 import (
+	ppu "nes-emu/src/emulator/ppu/delivery"
 	memory "nes-emu/src/emulator/shared/persistance"
 	bus "nes-emu/src/emulator/shared/services"
 	"nes-emu/test/fixtures"
@@ -11,13 +12,9 @@ type mockPPU struct {
 	renderCalled int
 }
 
-func (m *mockPPU) Render() {
+func (m *mockPPU) Render(request *ppu.RenderRequest) {
 	m.renderCalled++
 }
-
-func (m *mockPPU) TriggerLatchWithWriteSignal(address uint16) {}
-
-func (m *mockPPU) TriggerLatchWithReadSignal(address uint16) {}
 
 func TestNewBus(t *testing.T) {
 	b := bus.NewBus()
