@@ -38,7 +38,7 @@ func (c *CPU) CompareWithRegister(value uint8, register string) {
 
 	c.zero = registerValue == value
 	c.carry = registerValue >= value
-	c.negative = c.isValueNegative(registerValue & value)
+	c.negative = c.isValueNegative(registerValue - value)
 }
 
 func (c *CPU) IncrementMemory(address uint16) {

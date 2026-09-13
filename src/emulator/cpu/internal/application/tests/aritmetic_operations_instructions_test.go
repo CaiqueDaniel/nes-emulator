@@ -337,13 +337,13 @@ func TestCompareWithRegister(t *testing.T) {
 			expectedN:       false,
 		},
 		{
-			name:            "ACC less than value: no flags set",
+			name:            "ACC less than value:negative set only",
 			register:        internal.ACCUMULATOR,
 			initialRegister: 0x10,
 			value:           0x20,
 			expectedZ:       false,
 			expectedC:       false,
-			expectedN:       false,
+			expectedN:       true,
 		},
 		{
 			name:            "ACC both zero: zero and carry set",
@@ -364,10 +364,10 @@ func TestCompareWithRegister(t *testing.T) {
 			expectedN:       true,
 		},
 		{
-			name:            "ACC: negative flag clear when bit 7 of (reg AND value) is 0",
+			name:            "ACC: negative flag clear when bit 6 of (reg AND value) is 0",
 			register:        internal.ACCUMULATOR,
-			initialRegister: 0b11000000,
-			value:           0b01000000,
+			initialRegister: 0b01000000,
+			value:           0b00100000,
 			expectedZ:       false,
 			expectedC:       true,
 			expectedN:       false,
@@ -379,7 +379,7 @@ func TestCompareWithRegister(t *testing.T) {
 			value:           0xFF,
 			expectedZ:       true,
 			expectedC:       true,
-			expectedN:       true,
+			expectedN:       false,
 		},
 		// Register X (CPX)
 		{
@@ -401,13 +401,13 @@ func TestCompareWithRegister(t *testing.T) {
 			expectedN:       false,
 		},
 		{
-			name:            "X less than value: no flags set",
+			name:            "X less than value: negative set",
 			register:        internal.REGISTER_X,
 			initialRegister: 0x10,
 			value:           0x40,
 			expectedZ:       false,
 			expectedC:       false,
-			expectedN:       false,
+			expectedN:       true,
 		},
 		// Register Y (CPY)
 		{
@@ -429,13 +429,13 @@ func TestCompareWithRegister(t *testing.T) {
 			expectedN:       false,
 		},
 		{
-			name:            "Y less than value: no flags set",
+			name:            "Y less than value: negative set",
 			register:        internal.REGISTER_Y,
 			initialRegister: 0x01,
 			value:           0x80,
 			expectedZ:       false,
 			expectedC:       false,
-			expectedN:       false,
+			expectedN:       true,
 		},
 	}
 
