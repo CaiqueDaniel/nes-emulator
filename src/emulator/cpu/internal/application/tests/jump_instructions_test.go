@@ -61,12 +61,12 @@ func TestJumpProgramCounterToSubRoutine(t *testing.T) {
 		t.Errorf("Expected program counter to be 0x5678, got %d", cpu.GetProgramCounter())
 	}
 
-	if cpu.PullValueFromStack() != 0x34 {
-		t.Errorf("Expected high address to be 0x12, got %d", cpu.PullValueFromStack())
+	if cpu.PullValueFromStack() != 0x33 {
+		t.Errorf("Expected high address to be 0x33, got %X", cpu.PullValueFromStack())
 	}
 
 	if cpu.PullValueFromStack() != 0x12 {
-		t.Errorf("Expected low address to be 0x34, got %d", cpu.PullValueFromStack())
+		t.Errorf("Expected low address to be 0x12, got %X", cpu.PullValueFromStack())
 	}
 }
 
