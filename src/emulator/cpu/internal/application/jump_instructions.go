@@ -15,8 +15,9 @@ func (c *CPU) JumpProgramCounterByIndirectValue(address uint16) {
 }
 
 func (c *CPU) JumpProgramCounterToSubRoutine(value uint16) {
-	lowAddress := uint8(c.programCounter)
-	highAddress := uint8(c.programCounter & 0xFF00 >> 8)
+	result := c.programCounter - 1
+	lowAddress := uint8(result)
+	highAddress := uint8((result & 0xFF00) >> 8)
 
 	c.PushValueToStack(highAddress)
 	c.PushValueToStack(lowAddress)

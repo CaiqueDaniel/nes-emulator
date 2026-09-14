@@ -78,8 +78,8 @@ func TestReturnFromSubRoutine(t *testing.T) {
 	cpu.JumpProgramCounterToSubRoutine(0x5678)
 	cpu.ReturnFromSubRoutine()
 
-	if cpu.GetProgramCounter() != 0x1235 {
-		t.Errorf("Expected program counter to be 0x1235, got %d", cpu.GetProgramCounter())
+	if cpu.GetProgramCounter() != 0x1234 {
+		t.Errorf("Expected program counter to be 0x1235, got %X", cpu.GetProgramCounter())
 	}
 }
 
