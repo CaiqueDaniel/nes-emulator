@@ -37,14 +37,14 @@ func TestInterruptFlagInstructions(t *testing.T) {
 
 	// Set Interrupt Flag
 	cpu.SetInterruptFlag()
-	if cpu.GetIRQFlag() {
-		t.Error("Expected IRQ flag to be false after SetInterruptFlag")
+	if !cpu.GetIRQFlag() {
+		t.Error("Expected IRQ flag to be true after SetInterruptFlag")
 	}
 
 	// Clear Interrupt Flag
 	cpu.ClearInterruptFlag()
-	if !cpu.GetIRQFlag() {
-		t.Error("Expected IRQ flag to be true after ClearInterruptFlag")
+	if cpu.GetIRQFlag() {
+		t.Error("Expected IRQ flag to be false after ClearInterruptFlag")
 	}
 }
 

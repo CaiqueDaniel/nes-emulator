@@ -15,16 +15,16 @@ const START_POINTER = 0xFFFC
 const clock_in_mhz = 1.789773
 
 type CPU struct {
-	programCounter                                            uint16
-	acc, x, y                                                 uint8
-	carry, zero, overflow, negative, irq, decimal, bFlag, nmi bool
-	stackPointer                                              uint8
-	memory                                                    application.Memory
-	bus                                                       application.Bus
-	stopPcAt                                                  int
-	instructionSet                                            instructionSet
-	currentFrameCycles                                        uint16
-	stopProgram                                               bool
+	programCounter                                                  uint16
+	acc, x, y                                                       uint8
+	carry, zero, overflow, negative, interrupt, decimal, bFlag, nmi bool
+	stackPointer                                                    uint8
+	memory                                                          application.Memory
+	bus                                                             application.Bus
+	stopPcAt                                                        int
+	instructionSet                                                  instructionSet
+	currentFrameCycles                                              uint16
+	stopProgram                                                     bool
 }
 
 func NewCpu(bus application.Bus) *CPU {
@@ -82,7 +82,7 @@ func (c *CPU) Reset() {
 	c.zero = false
 	c.overflow = false
 	c.negative = false
-	c.irq = true
+	c.interrupt = true
 	c.stackPointer = 0xFF
 	c.nmi = false
 }
@@ -119,7 +119,7 @@ func (c *CPU) PullValueFromStack() uint8 {
 func (c *CPU) PushFlagsIntoStack() {
 	carry := transformFlagIntoUint8(c.carry)
 	zero := transformFlagIntoUint8(c.zero) << 1
-	irq := transformFlagIntoUint8(c.irq) << 2
+	irq := transformFlagIntoUint8(c.interrupt) << 2
 	decimal := transformFlagIntoUint8(c.decimal) << 3
 	breakFlag := transformFlagIntoUint8(c.bFlag) << 4
 	overflow := transformFlagIntoUint8(c.overflow) << 6

@@ -9,11 +9,11 @@ func (c *CPU) SetCarryFlag() {
 }
 
 func (c *CPU) ClearInterruptFlag() {
-	c.irq = true
+	c.interrupt = false
 }
 
 func (c *CPU) SetInterruptFlag() {
-	c.irq = false
+	c.interrupt = true
 }
 
 func (c *CPU) ClearOverflowFlag() {

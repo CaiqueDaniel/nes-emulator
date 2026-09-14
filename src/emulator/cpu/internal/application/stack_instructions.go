@@ -30,7 +30,7 @@ func (c *CPU) PullStatusFromStack() {
 
 	c.carry = value&0b00000001 != 0
 	c.zero = value&0b00000010 != 0
-	c.irq = value&0b00000100 != 0
+	c.interrupt = value&0b00000100 != 0
 	c.decimal = value&0b00001000 != 0
 	c.overflow = value&0b01000000 != 0
 	c.negative = value&0b10000000 != 0

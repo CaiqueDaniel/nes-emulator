@@ -84,7 +84,7 @@ func TestPushStatusIntoStack_DefaultStateHasBits4And5Set(t *testing.T) {
 	b := bus.NewBusWithWorkMemory(mem)
 	cpu := internal.NewCpuWithInternal(b)
 
-	cpu.SetInterruptFlag()
+	cpu.ClearInterruptFlag()
 	cpu.PushStatusIntoStack()
 
 	got := cpu.PullValueFromStack()

@@ -17,7 +17,7 @@ func (c *CPU) GetOverflowFlag() bool {
 }
 
 func (c *CPU) GetIRQFlag() bool {
-	return c.irq
+	return c.interrupt
 }
 
 func (c *CPU) GetZeroFlag() bool {

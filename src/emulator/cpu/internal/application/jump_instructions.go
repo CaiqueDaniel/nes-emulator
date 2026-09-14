@@ -39,7 +39,7 @@ func (c *CPU) ReturnFromInterrupt() {
 
 	c.carry = flags&0b00000001 != 0
 	c.zero = flags&0b00000010 != 0
-	c.irq = flags&0b00000100 != 0
+	c.interrupt = flags&0b00000100 != 0
 	c.decimal = flags&0b00001000 != 0
 	c.overflow = flags&0b01000000 != 0
 	c.negative = flags&0b10000000 != 0
@@ -50,7 +50,7 @@ func (c *CPU) Break() {
 	pcHighAddress := uint8(c.programCounter >> 8)
 	pcLowAddress := uint8(c.programCounter)
 
-	c.irq = true
+	c.interrupt = true
 	c.bFlag = true
 
 	c.PushValueToStack(pcHighAddress)
