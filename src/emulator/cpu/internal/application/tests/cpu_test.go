@@ -362,7 +362,7 @@ func TestRunProgramHandlesNMI(t *testing.T) {
 	}
 
 	// Validate it executed the NMI handler instead of normal flow
-	if cpu.GetProgramCounter() != 0x8002 {
-		t.Errorf("Expected Program Counter to be 0x8002 (0x8001 inside NMI handler + 1), got 0x%X", cpu.GetProgramCounter())
+	if cpu.GetProgramCounter() != 0x8001 {
+		t.Errorf("Expected Program Counter to be 0x8001 (0x8001 inside NMI handler), got 0x%X", cpu.GetProgramCounter())
 	}
 }

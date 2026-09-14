@@ -12,7 +12,7 @@ func (c *CPU) initInstructions() instructionSet {
 
 	instructionSet[0xEA] = &instruction{
 		Method:    func(u []uint8) { c.NoOp() },
-		ArgsBytes: 1,
+		ArgsBytes: 0,
 	}
 
 	instructionSet[0x00] = &instruction{
