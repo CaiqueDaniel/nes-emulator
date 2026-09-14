@@ -64,6 +64,20 @@ func TestGetValueByZeroPageIndexedMode(t *testing.T) {
 	}
 }
 
+func TestGetValueByZeroPageIndexedModeWrapsAtPageBoundary(t *testing.T) {
+	mem := memory.NewMemory()
+	b := bus.NewBusWithWorkMemory(mem)
+	cpu := internal.NewCpuWithInternal(b)
+
+	mem.Write(0x0000, 0xFF)
+
+	value := cpu.GetValueByZeroPageIndexedMode(0xFF, 0x01)
+
+	if value != 0xFF {
+		t.Errorf("Expected zero-page indexed address to wrap to 0x0000, got %d", value)
+	}
+}
+
 func TestGetValueByIndirectAbsoluteMode(t *testing.T) {
 	memory := memory.NewMemory()
 	b := bus.NewBusWithWorkMemory(memory)
@@ -130,6 +144,22 @@ func TestGetAddressByIndexedIndirectXMode(t *testing.T) {
 	}
 }
 
+func TestGetAddressByIndexedIndirectXModeWrapsPointerInZeroPage(t *testing.T) {
+	mem := memory.NewMemory()
+	b := bus.NewBusWithWorkMemory(mem)
+	cpu := internal.NewCpuWithInternal(b)
+
+	mem.Write(0x0000, 0x34)
+	mem.Write(0x0001, 0x12)
+	cpu.LoadValueIntoRegister(0x01, internal.REGISTER_X)
+
+	address := cpu.GetAddressByIndexedIndirectXMode(0xFF)
+
+	if address != 0x1234 {
+		t.Errorf("Expected indexed indirect pointer to wrap to 0x0000/0x0001, got 0x%04X", address)
+	}
+}
+
 func TestGetAddressByIndirectIndexedYMode(t *testing.T) {
 	memory := memory.NewMemory()
 	b := bus.NewBusWithWorkMemory(memory)
@@ -143,5 +173,20 @@ func TestGetAddressByIndirectIndexedYMode(t *testing.T) {
 
 	if address != 0xFAFF {
 		t.Errorf("Expected %d, got %d", 0xFAFF, address)
+	}
+}
+
+func TestGetAddressByIndirectIndexedYModeWrapsPointerInZeroPage(t *testing.T) {
+	mem := memory.NewMemory()
+	b := bus.NewBusWithWorkMemory(mem)
+	cpu := internal.NewCpuWithInternal(b)
+
+	mem.Write(0x00FF, 0x34)
+	mem.Write(0x0000, 0x12)
+
+	address := cpu.GetAddressByIndirectIndexedYMode(0xFF)
+
+	if address != 0x1234 {
+		t.Errorf("Expected indirect indexed pointer to wrap to 0x0000, got 0x%04X", address)
 	}
 }
