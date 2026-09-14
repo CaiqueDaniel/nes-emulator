@@ -56,7 +56,7 @@ func (c *CPU) Break() {
 
 	c.PushValueToStack(pcHighAddress)
 	c.PushValueToStack(pcLowAddress)
-	c.PushStatusIntoStack()
+	c.PushFlagsIntoStack()
 
 	newPcLowAddress := uint16(c.readFromMemory(0xFFFE))
 	newPcHighAddress := uint16(c.readFromMemory(0xFFFF))

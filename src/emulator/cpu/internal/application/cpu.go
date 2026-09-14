@@ -96,16 +96,18 @@ func (c *CPU) HandleNMI() {
 
 	highPcByte := byte((c.programCounter & 0xFF00) >> 8)
 	lowPcByte := byte(c.programCounter)
+	c.bFlag = false
 
 	c.PushValueToStack(highPcByte)
 	c.PushValueToStack(lowPcByte)
-	c.PushStatusIntoStack()
+	c.PushFlagsIntoStack()
 	c.SetInterruptFlag()
 
 	lowByte := c.readFromMemory(nmi_handler_byte_ptr)
 	highByte := c.readFromMemory(nmi_handler_byte_ptr + 1)
 
 	c.programCounter = uint16(highByte)<<8 | uint16(lowByte)
+	c.nmi = false
 }
 
 func (c *CPU) PushValueToStack(value uint8) {
@@ -170,7 +172,6 @@ func (c *CPU) renderFrame() {
 	for c.currentFrameCycles < cycles_per_frame {
 		if c.nmi {
 			c.HandleNMI()
-			c.nmi = false
 		}
 
 		opCode := c.readFromMemory(c.programCounter)

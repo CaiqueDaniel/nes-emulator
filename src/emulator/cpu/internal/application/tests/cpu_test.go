@@ -307,7 +307,7 @@ func TestHandleNMI(t *testing.T) {
 		t.Errorf("Expected Program Counter to be 0x8000, got 0x%X", cpu.GetProgramCounter())
 	}
 
-	// Verify stack pointer decreased by 1 (PushStatusIntoStack)
+	// Verify stack pointer decreased by 1 (PushFlagsIntoStack)
 	if cpu.GetStackPointer() != 0xFC {
 		t.Errorf("Expected Stack Pointer to be 0xFC, got 0x%X", cpu.GetStackPointer())
 	}
@@ -322,8 +322,8 @@ func TestHandleNMI(t *testing.T) {
 
 	// Verify the stack contents for pushed status
 	// Default status flag is 0x30
-	if memory.Read(0x01FD) != 0x30 {
-		t.Errorf("Expected Stack at 0x01FD to have Status 0x30, got 0x%X", memory.Read(0x01FD))
+	if memory.Read(0x01FD) != 0b100000 {
+		t.Errorf("Expected Stack at 0x01FD to have Status 0b100000, got 0x%X", memory.Read(0x01FD))
 	}
 
 	if !cpu.GetIRQFlag() {
