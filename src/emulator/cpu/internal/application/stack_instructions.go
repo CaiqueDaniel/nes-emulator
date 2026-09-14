@@ -1,0 +1,37 @@
+package application
+
+func (c *CPU) PushAccToStack() {
+	c.PushValueToStack(c.acc)
+}
+
+func (c *CPU) PullAccFromStack() {
+	c.acc = c.PullValueFromStack()
+	c.zero = c.isValueZero(c.acc)
+	c.negative = c.isValueNegative(c.acc)
+}
+
+func (c *CPU) TransferXToStack() {
+	c.stackPointer = c.x
+}
+
+func (c *CPU) TransferStackToX() {
+	c.x = c.stackPointer
+	c.zero = c.isValueZero(c.x)
+	c.negative = c.isValueNegative(c.x)
+}
+
+func (c *CPU) PushStatusIntoStack() {
+	c.bFlag = true
+	c.PushFlagsIntoStack()
+}
+
+func (c *CPU) PullStatusFromStack() {
+	value := c.PullValueFromStack()
+
+	c.carry = value&0b00000001 != 0
+	c.zero = value&0b00000010 != 0
+	c.interrupt = value&0b00000100 != 0
+	c.decimal = value&0b00001000 != 0
+	c.overflow = value&0b01000000 != 0
+	c.negative = value&0b10000000 != 0
+}
