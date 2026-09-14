@@ -308,14 +308,26 @@ func TestHandleNMI(t *testing.T) {
 	}
 
 	// Verify stack pointer decreased by 1 (PushStatusIntoStack)
-	if cpu.GetStackPointer() != 0xFE {
-		t.Errorf("Expected Stack Pointer to be 0xFE, got 0x%X", cpu.GetStackPointer())
+	if cpu.GetStackPointer() != 0xFC {
+		t.Errorf("Expected Stack Pointer to be 0xFC, got 0x%X", cpu.GetStackPointer())
+	}
+
+	if memory.Read(0x01FF) != 0x12 {
+		t.Errorf("Expected Stack at 0x01FF to have value 0x12, got 0x%X", memory.Read(0x01FF))
+	}
+
+	if memory.Read(0x01FE) != 0x34 {
+		t.Errorf("Expected Stack at 0x01FE to have value 0x34, got 0x%X", memory.Read(0x01FE))
 	}
 
 	// Verify the stack contents for pushed status
 	// Default status flag is 0x30
-	if memory.Read(0x01FF) != 0x30 {
-		t.Errorf("Expected Stack at 0x01FF to have Status 0x30, got 0x%X", memory.Read(0x01FF))
+	if memory.Read(0x01FD) != 0x30 {
+		t.Errorf("Expected Stack at 0x01FD to have Status 0x30, got 0x%X", memory.Read(0x01FD))
+	}
+
+	if !cpu.GetIRQFlag() {
+		t.Errorf("Expected interrupt flag to be set")
 	}
 }
 

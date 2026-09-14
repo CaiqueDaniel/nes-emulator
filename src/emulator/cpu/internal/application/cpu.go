@@ -94,7 +94,13 @@ func (c *CPU) SetNMI() {
 func (c *CPU) HandleNMI() {
 	const nmi_handler_byte_ptr = 0xFFFA
 
+	highPcByte := byte((c.programCounter & 0xFF00) >> 8)
+	lowPcByte := byte(c.programCounter)
+
+	c.PushValueToStack(highPcByte)
+	c.PushValueToStack(lowPcByte)
 	c.PushStatusIntoStack()
+	c.SetInterruptFlag()
 
 	lowByte := c.readFromMemory(nmi_handler_byte_ptr)
 	highByte := c.readFromMemory(nmi_handler_byte_ptr + 1)
