@@ -43,30 +43,30 @@ func (r *ROM) GetPRGROMAddressRange() (uint, uint) {
 
 	if r.HaveTrainer() {
 		startAddress := initial_start_index + trainer_size
-		return uint(startAddress), uint(startAddress) + r.prgSize
+		return uint(startAddress), uint(startAddress) + r.prgSize - 1
 	}
 
-	return initial_start_index, initial_start_index + r.prgSize
+	return initial_start_index, initial_start_index + r.prgSize - 1
 }
 
 func (r *ROM) GetPRGROM() []byte {
 	initial_start_index, end_index := r.GetPRGROMAddressRange()
 
 	if r.prgSize <= 16*1024 {
-		return append(r.raw[initial_start_index:end_index], r.raw[initial_start_index:end_index]...)
+		return append(r.raw[initial_start_index:end_index+1], r.raw[initial_start_index:end_index+1]...)
 	}
 
-	return r.raw[initial_start_index:end_index]
+	return r.raw[initial_start_index : end_index+1]
 }
 
 func (r *ROM) GetCHRROMAddressRange() (uint, uint) {
 	_, endPgrAddress := r.GetPRGROMAddressRange()
-	return endPgrAddress + 1, endPgrAddress + 1 + r.chrSize
+	return endPgrAddress + 1, endPgrAddress + r.chrSize
 }
 
 func (r *ROM) GetCHRROM() []byte {
 	initial_start_index, end_index := r.GetCHRROMAddressRange()
-	return r.raw[initial_start_index:end_index]
+	return r.raw[initial_start_index : end_index+1]
 }
 
 func (r *ROM) GetVersion() int8 {

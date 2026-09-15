@@ -159,8 +159,8 @@ func TestNewROM_ShouldGetPRGROMWithoutTrainerData(t *testing.T) {
 		t.Errorf("start address should be %d", expected_start_address)
 	}
 
-	if endAddress != expected_end_address {
-		t.Errorf("end address should be %d", expected_end_address)
+	if endAddress != expected_end_address-1 {
+		t.Errorf("end address should be %d", expected_end_address-1)
 	}
 
 	if uint(len(prgBytes)) != rom.GetPRGSize() {
@@ -186,8 +186,8 @@ func TestNewROM_ShouldGetPRGROMWithTrainerData(t *testing.T) {
 		t.Errorf("start address should be %d", expected_start_address)
 	}
 
-	if endAddress != expected_end_address {
-		t.Errorf("end address should be %d", expected_end_address)
+	if endAddress != expected_end_address-1 {
+		t.Errorf("end address should be %d", expected_end_address-1)
 	}
 
 	if uint(len(prgBytes)) != rom.GetPRGSize() {
