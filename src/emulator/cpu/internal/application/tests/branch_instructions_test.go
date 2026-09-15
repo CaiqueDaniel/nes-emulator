@@ -14,8 +14,8 @@ func TestBranchIfCarryIsClearAndValuePositive(t *testing.T) {
 
 	cpu.BranchIfCarryIsClear(0x10)
 
-	if cpu.GetProgramCounter() != 0x12 {
-		t.Errorf("Expected pc to be 0x%04X, got 0x%04X", 0x12, cpu.GetProgramCounter())
+	if cpu.GetProgramCounter() != 0x10 {
+		t.Errorf("Expected pc to be 0x%04X, got 0x%04X", 0x10, cpu.GetProgramCounter())
 	}
 }
 
@@ -26,8 +26,8 @@ func TestBranchIfCarryIsClearAndValueNegative(t *testing.T) {
 
 	cpu.BranchIfCarryIsClear(128)
 
-	if cpu.GetProgramCounter() != 0xB {
-		t.Errorf("Expected pc to be 0x%04X, got 0x%04X", 0xB, cpu.GetProgramCounter())
+	if cpu.GetProgramCounter() != 0xFF8A {
+		t.Errorf("Expected pc to be 0x%04X, got 0x%04X", 0xFF8A, cpu.GetProgramCounter())
 	}
 }
 
@@ -54,8 +54,8 @@ func TestBranchIfCarryIsSetAndValuePositive(t *testing.T) {
 	cpu.AddWithCarry(1)
 	cpu.BranchIfCarryIsSet(0x10)
 
-	if cpu.GetProgramCounter() != 0x12 {
-		t.Errorf("Expected pc to be 0x%04X, got 0x%04X", 0x12, cpu.GetProgramCounter())
+	if cpu.GetProgramCounter() != 0x10 {
+		t.Errorf("Expected pc to be 0x%04X, got 0x%04X", 0x10, cpu.GetProgramCounter())
 	}
 }
 
@@ -68,8 +68,8 @@ func TestBranchIfCarryIsSetAndValueNegative(t *testing.T) {
 	cpu.AddWithCarry(1)
 	cpu.BranchIfCarryIsSet(128)
 
-	if cpu.GetProgramCounter() != 0xB {
-		t.Errorf("Expected pc to be 0x%04X, got 0x%04X", 0xB, cpu.GetProgramCounter())
+	if cpu.GetProgramCounter() != 0xFF8A {
+		t.Errorf("Expected pc to be 0x%04X, got 0x%04X", 0xFF8A, cpu.GetProgramCounter())
 	}
 }
 
@@ -93,8 +93,8 @@ func TestBranchIfEqualWithValuePositive(t *testing.T) {
 	cpu.AddWithCarry(0)
 	cpu.BranchIfEqual(0x10)
 
-	if cpu.GetProgramCounter() != 0x12 {
-		t.Errorf("Expected pc to be 0x%04X, got 0x%04X", 0x12, cpu.GetProgramCounter())
+	if cpu.GetProgramCounter() != 0x10 {
+		t.Errorf("Expected pc to be 0x%04X, got 0x%04X", 0x10, cpu.GetProgramCounter())
 	}
 }
 
@@ -106,8 +106,8 @@ func TestBranchIfEqualWithValueNegative(t *testing.T) {
 	cpu.AddWithCarry(0)
 	cpu.BranchIfEqual(128)
 
-	if cpu.GetProgramCounter() != 0xB {
-		t.Errorf("Expected pc to be 0x%04X, got 0x%04X", 0xB, cpu.GetProgramCounter())
+	if cpu.GetProgramCounter() != 0xFF8A {
+		t.Errorf("Expected pc to be 0x%04X, got 0x%04X", 0xFF8A, cpu.GetProgramCounter())
 	}
 }
 
@@ -144,8 +144,8 @@ func TestBranchIfPositiveWithValuePositive(t *testing.T) {
 	cpu.AddWithCarry(1)
 	cpu.BranchIfPositive(10)
 
-	if cpu.GetProgramCounter() != 0x16 {
-		t.Errorf("Expected pc to be 0x%04X, got 0x%04X", 0x16, cpu.GetProgramCounter())
+	if cpu.GetProgramCounter() != 0x14 {
+		t.Errorf("Expected pc to be 0x%04X, got 0x%04X", 0x14, cpu.GetProgramCounter())
 	}
 }
 
@@ -183,8 +183,8 @@ func TestBranchIfNegativeWithValueNegative(t *testing.T) {
 	cpu.AddWithCarry(128)
 	cpu.BranchIfNegative(128)
 
-	if cpu.GetProgramCounter() != 0xB {
-		t.Errorf("Expected pc to be 0x%04X, got 0x%04X", 0xB, cpu.GetProgramCounter())
+	if cpu.GetProgramCounter() != 0xFF8A {
+		t.Errorf("Expected pc to be 0x%04X, got 0x%04X", 0xFF8A, cpu.GetProgramCounter())
 	}
 }
 
@@ -196,8 +196,8 @@ func TestBranchIfNotEqual_ZeroIsNotClear(t *testing.T) {
 	cpu.AddWithCarry(1)
 	cpu.BranchIfNotEqual(10)
 
-	if cpu.GetProgramCounter() != 0x16 {
-		t.Errorf("Expected pc to be 0x%04X, got 0x%04X", 0x16, cpu.GetProgramCounter())
+	if cpu.GetProgramCounter() != 0x14 {
+		t.Errorf("Expected pc to be 0x%04X, got 0x%04X", 0x14, cpu.GetProgramCounter())
 	}
 }
 
@@ -236,8 +236,8 @@ func TestBranchIfOverflowClear_OverflowIsClear(t *testing.T) {
 	cpu.AddWithCarry(1)
 	cpu.BranchIfOverflowClear(10)
 
-	if cpu.GetProgramCounter() != 0x16 {
-		t.Errorf("Expected pc to be 0x%04X, got 0x%04X", 0x16, cpu.GetProgramCounter())
+	if cpu.GetProgramCounter() != 0x14 {
+		t.Errorf("Expected pc to be 0x%04X, got 0x%04X", 0x14, cpu.GetProgramCounter())
 	}
 }
 
@@ -263,7 +263,7 @@ func TestBranchIfOverflowSet_OverflowIsSet(t *testing.T) {
 	cpu.AddWithCarry(1)
 	cpu.BranchIfOverflowSet(10)
 
-	if cpu.GetProgramCounter() != 0x16 {
-		t.Errorf("Expected pc to be 0x%04X, got 0x%04X", 0x16, cpu.GetProgramCounter())
+	if cpu.GetProgramCounter() != 0x14 {
+		t.Errorf("Expected pc to be 0x%04X, got 0x%04X", 0x14, cpu.GetProgramCounter())
 	}
 }

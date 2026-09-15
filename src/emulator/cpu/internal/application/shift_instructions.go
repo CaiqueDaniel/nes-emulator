@@ -18,7 +18,9 @@ func (c *CPU) ArithmeticShiftLeftAbsolute(address uint16, xIndexedMode bool) {
 }
 
 func (c *CPU) ArithmeticShiftLeftZeroPage(address uint8, xIndexedMode bool) {
-	c.ArithmeticShiftLeftAbsolute(uint16(address), xIndexedMode)
+	c.shiftMemoryZeroPage(address, xIndexedMode,
+		func(value uint8) uint8 { return value << 1 },
+		func(value uint8) bool { return value&0x80 != 0 })
 }
 
 func (c *CPU) LogicalShiftRight() {
@@ -39,7 +41,9 @@ func (c *CPU) LogicalShiftRightAbsolute(address uint16, xIndexedMode bool) {
 }
 
 func (c *CPU) LogicalShiftRightZeroPage(address uint8, xIndexedMode bool) {
-	c.LogicalShiftRightAbsolute(uint16(address), xIndexedMode)
+	c.shiftMemoryZeroPage(address, xIndexedMode,
+		func(value uint8) uint8 { return value >> 1 },
+		func(value uint8) bool { return value&0x01 != 0 })
 }
 
 func (c *CPU) RotateLeft() {
@@ -64,7 +68,10 @@ func (c *CPU) RotateLeftAbsolute(address uint16, xIndexedMode bool) {
 }
 
 func (c *CPU) RotateLeftZeroPage(address uint8, xIndexedMode bool) {
-	c.RotateLeftAbsolute(uint16(address), xIndexedMode)
+	prevCarry := c.carry
+	c.shiftMemoryZeroPage(address, xIndexedMode,
+		func(value uint8) uint8 { return bitShiftLeftWithCarry(value, prevCarry) },
+		func(value uint8) bool { return value&0x80 != 0 })
 }
 
 func (c *CPU) RotateRight() {
@@ -89,7 +96,27 @@ func (c *CPU) RotateRightAbsolute(address uint16, xIndexedMode bool) {
 }
 
 func (c *CPU) RotateRightZeroPage(address uint8, xIndexedMode bool) {
-	c.RotateRightAbsolute(uint16(address), xIndexedMode)
+	prevCarry := c.carry
+	c.shiftMemoryZeroPage(address, xIndexedMode,
+		func(value uint8) uint8 { return bitShiftRightWithCarry(value, prevCarry) },
+		func(value uint8) bool { return value&0x01 != 0 })
+}
+
+func (c *CPU) shiftMemoryZeroPage(
+	address uint8,
+	xIndexedMode bool,
+	transform func(uint8) uint8,
+	carry func(uint8) bool,
+) {
+	if xIndexedMode {
+		address = uint8(c.GetAddressByZeroPageIndexedModeWithDummyRead(address, c.x))
+	}
+
+	prevValue := c.GetValueByAbsoluteMode(uint16(address))
+	value := transform(prevValue)
+	c.doubleWriteToMemory(uint16(address), prevValue, value)
+	c.updateFlagsOnShift(value)
+	c.carry = carry(prevValue)
 }
 
 func (c *CPU) doubleWriteToMemory(address uint16, prevValue, currentValue uint8) {

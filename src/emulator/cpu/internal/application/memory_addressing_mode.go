@@ -21,6 +21,11 @@ func (c *CPU) GetValueByZeroPageIndexedModeWithDummyRead(address uint8, index ui
 	return c.readFromMemory(uint16(address + index))
 }
 
+func (c *CPU) GetAddressByZeroPageIndexedModeWithDummyRead(address uint8, index uint8) uint16 {
+	c.doDummyMemoryRead(uint16(address))
+	return uint16(address + index)
+}
+
 func (c *CPU) GetValueByIndirectAbsoluteMode(initialAddress uint16) uint8 {
 	lastByte := c.readFromMemory(initialAddress)
 	firstByte := c.readFromMemory(initialAddress + 1)

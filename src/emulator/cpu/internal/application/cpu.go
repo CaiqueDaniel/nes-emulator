@@ -83,8 +83,12 @@ func (c *CPU) Reset() {
 	c.overflow = false
 	c.negative = false
 	c.interrupt = true
+	c.decimal = false
+	c.bFlag = false
 	c.stackPointer = 0xFF
 	c.nmi = false
+	c.currentFrameCycles = 0
+	c.stopProgram = false
 }
 
 func (c *CPU) SetNMI() {
@@ -211,13 +215,13 @@ func (c *CPU) interpretInstruction(opCode uint8) {
 func (c *CPU) writeToMemory(address uint16, value uint8) {
 	c.bus.Tick()
 	c.bus.WriteToMemory(address, value)
-	c.currentFrameCycles += 2
+	c.currentFrameCycles++
 }
 
 func (c *CPU) readFromMemory(address uint16) uint8 {
 	c.bus.Tick()
 	value := c.bus.ReadFromMemory(address)
-	c.currentFrameCycles += 2
+	c.currentFrameCycles++
 	return value
 }
 

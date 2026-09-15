@@ -67,18 +67,10 @@ func (c *CPU) BranchIfOverflowSet(value uint8) {
 func (c *CPU) branchByValue(value uint8) {
 	c.doDummyMemoryRead(c.programCounter)
 
-	prevPCHighByte := c.programCounter & 0xFF00
-	prevPCLowByte := c.programCounter & 0xFF
+	previousPage := c.programCounter & 0xFF00
+	c.programCounter += uint16(int16(int8(value)))
 
-	if c.isValueNegative(value) {
-		c.programCounter = c.programCounter - (uint16(value^0b10000000) + 1) + 2
-	}
-
-	if !c.isValueNegative(value) {
-		c.programCounter += uint16(value) + 2
-	}
-
-	if prevPCHighByte != c.programCounter&0xFF00 {
-		c.doDummyMemoryRead(prevPCHighByte | prevPCLowByte + uint16(value))
+	if previousPage != c.programCounter&0xFF00 {
+		c.doDummyMemoryRead(previousPage | (c.programCounter & 0x00FF))
 	}
 }
