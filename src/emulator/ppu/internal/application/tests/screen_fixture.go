@@ -2,12 +2,13 @@ package tests
 
 import (
 	"image"
+	"nes-emu/src/emulator/ppu/internal/domain"
 )
 
 type screenFixture struct {
-	image           *image.RGBA
+	image          *image.RGBA
 	ShowImageCalls int
-	LastBuffer      *[][]uint32
+	LastBuffer     *[domain.MAX_FRAME_SCANLINE + 1][domain.MAX_PIXEL_PER_SCANLINE + 1]uint32
 }
 
 func NewScreenFixture() *screenFixture {
@@ -16,7 +17,7 @@ func NewScreenFixture() *screenFixture {
 	}
 }
 
-func (s *screenFixture) ShowImage(buffer *[][]uint32) {
+func (s *screenFixture) ShowImage(buffer *[domain.MAX_FRAME_SCANLINE + 1][domain.MAX_PIXEL_PER_SCANLINE + 1]uint32) {
 	s.ShowImageCalls++
 	s.LastBuffer = buffer
 }

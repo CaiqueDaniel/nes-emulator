@@ -1,7 +1,6 @@
 package application
 
 import (
-	"fmt"
 	"nes-emu/src/emulator/ppu/internal/domain"
 	shared "nes-emu/src/emulator/shared/application"
 )
@@ -13,7 +12,7 @@ type RenderGraphics struct {
 	screen          Screen
 	ioEventsContext IOEventsContext
 	state           *domain.PPU
-	buffer          [][]uint32
+	buffer          [domain.MAX_FRAME_SCANLINE + 1][domain.MAX_PIXEL_PER_SCANLINE + 1]uint32
 }
 
 type RenderGraphicsInput struct {
@@ -28,7 +27,7 @@ func NewRenderGraphics(bus shared.MNIBus, pipeline PixelPipeline, screen Screen,
 		bus:             bus,
 		screen:          screen,
 		ioEventsContext: ioEventsContext,
-		buffer:          make([][]uint32, domain.MAX_FRAME_SCANLINE+1),
+		buffer:          [domain.MAX_FRAME_SCANLINE + 1][domain.MAX_PIXEL_PER_SCANLINE + 1]uint32{},
 		state:           domain.NewPPU(),
 	}
 
@@ -39,13 +38,6 @@ func (p *RenderGraphics) Execute(input *RenderGraphicsInput) {
 	p.checkIfInitilized()
 
 	if input != nil {
-		if input.Address == 0x2006 && input.IsWrite {
-			fmt.Printf("Address: %X, V_Addr: %X, Value: %X\n", input.Address, p.state.GetV(), p.bus.ReadFromMemory(input.Address))
-		}
-
-		if input.Address == 0x2007 && input.IsWrite {
-			fmt.Printf("Address: %X, V_Addr: %X, Value: %X\n", input.Address, p.state.GetV(), p.bus.ReadFromMemory(input.Address))
-		}
 		p.ioEventsContext.HandleEvent(&IOEvent{Address: input.Address, IsWrite: input.IsWrite}, p.state)
 	}
 
@@ -80,9 +72,7 @@ func (p *RenderGraphics) GetCurrentScanlinePixel() uint8 {
 func (p *RenderGraphics) renderPixel() {
 	pixelColor := p.pipeline.RenderPixel(p.state.GetX())
 
-	//fmt.Printf("Pixel Color: %x\n", p.state.GetT())
-
-	p.buffer[p.state.GetCurrentScanline()] = append(p.buffer[p.state.GetCurrentScanline()], pixelColor)
+	p.buffer[p.state.GetCurrentScanline()][p.state.GetCurrentScanlinePixel()] = pixelColor
 }
 
 func (p *RenderGraphics) fetchGraphics() {
