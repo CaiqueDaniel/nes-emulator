@@ -1,6 +1,7 @@
 package application
 
 import (
+	"fmt"
 	"nes-emu/src/emulator/ppu/internal/domain"
 	shared "nes-emu/src/emulator/shared/application"
 )
@@ -53,18 +54,31 @@ func (p *pipeline) StepUpPipeline(currentDot uint, vValue uint16, fineY uint16) 
 }
 
 func (p *pipeline) RenderPixel(fineX byte) uint32 {
+	const initial_pallete_address = 0x3F00
 	const highestBit = 15
 	bitPosition := highestBit - fineX
 
-	lowPatternBit := p.getBitFromBitPosition(p.lowPatternShiftRegister, bitPosition)
-	highPatternBit := p.getBitFromBitPosition(p.highPatternShiftRegister, bitPosition) << 1
-	lowAttrBit := p.getBitFromBitPosition(p.lowAttributeShiftRegister, bitPosition) << 2
-	highAttrBit := p.getBitFromBitPosition(p.highAttributeShiftRegister, bitPosition) << 3
+	lowPatternBit := p.getBitFromBitPosition(p.lowPatternShiftRegister, bitPosition) & 1
+	highPatternBit := p.getBitFromBitPosition(p.highPatternShiftRegister, bitPosition) & 1
+	lowAttrBit := p.getBitFromBitPosition(p.lowAttributeShiftRegister, bitPosition) & 1
+	highAttrBit := p.getBitFromBitPosition(p.highAttributeShiftRegister, bitPosition) & 1
 
 	p.shiftRegisters()
 
-	pixelData := lowPatternBit | highPatternBit | lowAttrBit | highAttrBit
-	return domain.ColorPallet[pixelData]
+	var palleteAddress uint16
+
+	if (highPatternBit | lowPatternBit) == 0 {
+		palleteAddress = initial_pallete_address
+	} else {
+		palleteAddress = initial_pallete_address | (lowPatternBit | (highPatternBit << 1) | (lowAttrBit << 2) | (highAttrBit << 3))
+	}
+
+	byteValue := p.bus.ReadFromVideoMemory(palleteAddress)
+	color := domain.ColorPallet[byteValue]
+
+	fmt.Printf("Pallete Address: %x, Value: %x, Color: %x, FineX: %d\n", palleteAddress, byteValue, color, fineX)
+
+	return color
 }
 
 func (p *pipeline) GetShiftRegisters() (uint16, uint16, uint16, uint16) {

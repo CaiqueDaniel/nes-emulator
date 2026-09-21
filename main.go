@@ -47,7 +47,7 @@ func main() {
 				}
 			}()
 
-			err := emulator.GetStartGameController().StartGame("./test/resources/Zelda.NES")
+			err := emulator.GetStartGameController().StartGame("./test/resources/color_test.nes")
 
 			if err != nil {
 				panic(err)
