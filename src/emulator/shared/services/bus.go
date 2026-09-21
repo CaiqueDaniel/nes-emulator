@@ -112,7 +112,7 @@ func (b *bus) ReadFromVideoMemory(address uint16) uint8 {
 		panic("read operation on unattached video memory!")
 	}
 
-	return b.videoMemory.Read(address)
+	return b.videoMemory.Read(translateVideoMemoryAddress(address))
 }
 
 func (b *bus) WriteToVideoMemory(address uint16, value uint8) {
@@ -120,7 +120,7 @@ func (b *bus) WriteToVideoMemory(address uint16, value uint8) {
 		panic("write operation on unattached video memory!")
 	}
 
-	b.videoMemory.Write(address, value)
+	b.videoMemory.Write(translateVideoMemoryAddress(address), value)
 }
 
 func (b *bus) GetTickCount() uint {
@@ -140,6 +140,18 @@ func translateMemoryAddress(address uint16) uint16 {
 	if address < initial_ppu_memory_address {
 		index := (address - initial_work_memory_address) % max_work_memory_size
 		address = initial_work_memory_address + index
+	}
+
+	return address
+}
+
+func translateVideoMemoryAddress(address uint16) uint16 {
+	const initial_pallete_address = 0x3F00
+	const pallete_memory_size = 32
+
+	if address >= initial_pallete_address {
+		index := (address - initial_pallete_address) % pallete_memory_size
+		address = initial_pallete_address + index
 	}
 
 	return address
