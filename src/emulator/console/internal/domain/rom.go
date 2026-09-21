@@ -122,7 +122,7 @@ func (r *ROM) setCHRSize() {
 	}
 
 	highByte := uint(r.raw[9] & 0xF0)
-	lowByte := uint(r.raw[4])
+	lowByte := uint(r.raw[5])
 
 	if highByte == 0xF0 {
 		multiplier := float64((lowByte&0x3)*2 + 1)
