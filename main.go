@@ -3,9 +3,7 @@ package main
 import (
 	"fmt"
 	"image"
-	"image/color"
 	"log"
-	"math/rand"
 	"nes-emu/src/emulator"
 
 	"golang.org/x/exp/shiny/driver"
@@ -73,21 +71,4 @@ func main() {
 			}
 		}
 	})
-}
-
-func fillPixelBuffer(img *image.RGBA) {
-	bounds := img.Bounds()
-
-	for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
-		for x := bounds.Min.X; x < bounds.Max.X; x++ {
-			// Cria um gradiente simples baseado nas coordenadas (X, Y)
-			c := color.RGBA{
-				R: uint8(rand.Int() % 256),
-				G: uint8(y % 256),
-				B: 200,
-				A: 255,
-			}
-			img.SetRGBA(x, y, c)
-		}
-	}
 }
