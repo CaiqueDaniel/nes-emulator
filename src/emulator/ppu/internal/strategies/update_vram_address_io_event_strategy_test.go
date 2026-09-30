@@ -2,11 +2,12 @@ package strategies
 
 import (
 	"nes-emu/src/emulator/ppu/internal/domain"
+	"nes-emu/test/fixtures"
 	"testing"
 )
 
 func TestNewUpdateVRAMAddressIOEventStrategy(t *testing.T) {
-	bus := newMockBus()
+	bus := fixtures.NewMockBus()
 	sut := NewUpdateVRAMAddressIOEventStrategy(bus)
 
 	if sut == nil {
@@ -39,7 +40,7 @@ func TestUpdateVRAMAddressIOEventStrategy_PanicWhenNotInitialized(t *testing.T) 
 }
 
 func TestUpdateVRAMAddressIOEventStrategy_Handle_FirstWrite(t *testing.T) {
-	bus := newMockBus()
+	bus := fixtures.NewMockBus()
 	sut := NewUpdateVRAMAddressIOEventStrategy(bus)
 	state := domain.NewPPU()
 
@@ -63,7 +64,7 @@ func TestUpdateVRAMAddressIOEventStrategy_Handle_FirstWrite(t *testing.T) {
 }
 
 func TestUpdateVRAMAddressIOEventStrategy_Handle_FirstWrite_MasksBitsAbove14(t *testing.T) {
-	bus := newMockBus()
+	bus := fixtures.NewMockBus()
 	sut := NewUpdateVRAMAddressIOEventStrategy(bus)
 	state := domain.NewPPU()
 
@@ -79,7 +80,7 @@ func TestUpdateVRAMAddressIOEventStrategy_Handle_FirstWrite_MasksBitsAbove14(t *
 }
 
 func TestUpdateVRAMAddressIOEventStrategy_Handle_SecondWrite(t *testing.T) {
-	bus := newMockBus()
+	bus := fixtures.NewMockBus()
 	sut := NewUpdateVRAMAddressIOEventStrategy(bus)
 	state := domain.NewPPU()
 
@@ -110,7 +111,7 @@ func TestUpdateVRAMAddressIOEventStrategy_Handle_SecondWrite(t *testing.T) {
 }
 
 func TestUpdateVRAMAddressIOEventStrategy_Handle_FullTwoWriteCycle(t *testing.T) {
-	bus := newMockBus()
+	bus := fixtures.NewMockBus()
 	sut := NewUpdateVRAMAddressIOEventStrategy(bus)
 	state := domain.NewPPU()
 

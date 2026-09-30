@@ -2,11 +2,12 @@ package strategies
 
 import (
 	"nes-emu/src/emulator/ppu/internal/domain"
+	"nes-emu/test/fixtures"
 	"testing"
 )
 
 func TestNewUpdateVRAMDataIOEventStrategy(t *testing.T) {
-	bus := newMockBus()
+	bus := fixtures.NewMockBus()
 	sut := NewUpdateVRAMDataIOEventStrategy(bus)
 
 	if sut == nil {
@@ -39,7 +40,7 @@ func TestUpdateVRAMDataIOEventStrategy_PanicWhenNotInitialized(t *testing.T) {
 }
 
 func TestUpdateVRAMDataIOEventStrategy_Handle_WritesDataToVideoMemory(t *testing.T) {
-	bus := newMockBus()
+	bus := fixtures.NewMockBus()
 	sut := NewUpdateVRAMDataIOEventStrategy(bus)
 	state := domain.NewPPU()
 
@@ -69,7 +70,7 @@ func TestUpdateVRAMDataIOEventStrategy_Handle_IncrementsVBy1_WhenIncrementBitCle
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			bus := newMockBus()
+			bus := fixtures.NewMockBus()
 			bus.WriteToMemory(domain.PPU_CONTROL, tc.controlVal)
 
 			sut := NewUpdateVRAMDataIOEventStrategy(bus)
@@ -96,7 +97,7 @@ func TestUpdateVRAMDataIOEventStrategy_Handle_IncrementsVBy32_WhenIncrementBitSe
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			bus := newMockBus()
+			bus := fixtures.NewMockBus()
 			bus.WriteToMemory(domain.PPU_CONTROL, tc.controlVal)
 
 			sut := NewUpdateVRAMDataIOEventStrategy(bus)
@@ -113,7 +114,7 @@ func TestUpdateVRAMDataIOEventStrategy_Handle_IncrementsVBy32_WhenIncrementBitSe
 }
 
 func TestUpdateVRAMDataIOEventStrategy_ReadAndWriteVMemory(t *testing.T) {
-	bus := newMockBus()
+	bus := fixtures.NewMockBus()
 	sut := NewUpdateVRAMDataIOEventStrategy(bus)
 
 	address := uint16(0x3000)
@@ -128,7 +129,7 @@ func TestUpdateVRAMDataIOEventStrategy_ReadAndWriteVMemory(t *testing.T) {
 }
 
 func TestUpdateVRAMDataIOEventStrategy_IsOffsetIncrementBy32(t *testing.T) {
-	bus := newMockBus()
+	bus := fixtures.NewMockBus()
 	sut := NewUpdateVRAMDataIOEventStrategy(bus)
 
 	bus.WriteToMemory(domain.PPU_CONTROL, 0x00)

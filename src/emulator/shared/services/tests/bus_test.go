@@ -23,6 +23,8 @@ func (m *mockPPU) Render(request *application.PPUIOEvent) {
 	}
 }
 
+func (m *mockPPU) HandleIOEvents(address uint16, isWrite bool) {}
+
 func TestNewBus(t *testing.T) {
 	b := bus.NewBus()
 	if b == nil {

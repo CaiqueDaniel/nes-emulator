@@ -2,24 +2,25 @@ package services
 
 import (
 	"image/color"
+	"nes-emu/src/emulator/ppu/internal/domain"
 
 	"golang.org/x/exp/shiny/screen"
 	"golang.org/x/mobile/event/paint"
 )
 
-type shinyScreen struct {
+type ShinyScreen struct {
 	window *screen.Window
 	buffer *screen.Buffer
 }
 
-func NewShinyScreen(window *screen.Window, buffer *screen.Buffer) *shinyScreen {
-	return &shinyScreen{
+func NewShinyScreen(window *screen.Window, buffer *screen.Buffer) *ShinyScreen {
+	return &ShinyScreen{
 		window: window,
 		buffer: buffer,
 	}
 }
 
-func (s *shinyScreen) ShowImage(buffer *[][]uint32) {
+func (s *ShinyScreen) ShowImage(buffer *[domain.MAX_FRAME_SCANLINE + 1][domain.MAX_PIXEL_PER_SCANLINE + 1]uint32) {
 	img := (*s.buffer).RGBA()
 
 	for y, scanline := range *buffer {

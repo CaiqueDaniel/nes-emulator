@@ -11,8 +11,8 @@ type RenderGraphics struct {
 	pipeline        PixelPipeline
 	screen          Screen
 	ioEventsContext IOEventsContext
-	state           *domain.PPU
-	buffer          [][]uint32
+	repository      domain.PPURepository
+	buffer          [domain.MAX_FRAME_SCANLINE + 1][domain.MAX_PIXEL_PER_SCANLINE + 1]uint32
 }
 
 type RenderGraphicsInput struct {
@@ -20,15 +20,15 @@ type RenderGraphicsInput struct {
 	IsWrite bool
 }
 
-func NewRenderGraphics(bus shared.MNIBus, pipeline PixelPipeline, screen Screen, ioEventsContext IOEventsContext) *RenderGraphics {
+func NewRenderGraphics(bus shared.MNIBus, pipeline PixelPipeline, screen Screen, ioEventsContext IOEventsContext, repository domain.PPURepository) *RenderGraphics {
 	p := &RenderGraphics{
 		initialized:     true,
 		pipeline:        pipeline,
 		bus:             bus,
 		screen:          screen,
 		ioEventsContext: ioEventsContext,
-		buffer:          make([][]uint32, domain.MAX_FRAME_SCANLINE+1),
-		state:           domain.NewPPU(),
+		buffer:          [domain.MAX_FRAME_SCANLINE + 1][domain.MAX_PIXEL_PER_SCANLINE + 1]uint32{},
+		repository:      repository,
 	}
 
 	return p
@@ -37,60 +37,72 @@ func NewRenderGraphics(bus shared.MNIBus, pipeline PixelPipeline, screen Screen,
 func (p *RenderGraphics) Execute(input *RenderGraphicsInput) {
 	p.checkIfInitilized()
 
+	state := p.repository.GetState()
+
 	if input != nil {
-		p.ioEventsContext.HandleEvent(&IOEvent{Address: input.Address, IsWrite: input.IsWrite}, p.state)
+		p.ioEventsContext.HandleEvent(&IOEvent{Address: input.Address, IsWrite: input.IsWrite}, &state)
 	}
 
-	if p.state.ShouldRenderScanlinePixel() {
-		p.renderPixel()
-		p.state.AdvanceToNextScanlinePixel()
+	if state.ShouldRenderScanlinePixel() {
+		p.renderPixel(&state)
+		state.AdvanceToNextScanlinePixel()
 	}
 
-	p.state.AdvanceToNextScanline()
-	p.fetchGraphics()
-	p.updateStatusRegister()
+	state.AdvanceToNextScanline()
+	p.fetchGraphics(&state)
+	p.updateStatusRegister(&state)
 
-	if p.state.IsVBlankStarted() {
+	if state.IsVBlankStarted() {
 		p.screen.ShowImage(&p.buffer)
 	}
 
-	if p.checkIfNMIShouldBeCalled() {
+	if p.checkIfNMIShouldBeCalled(&state) {
 		p.bus.CallNMIHandler()
 	}
 
-	p.state.IncreaseDots()
+	state.IncreaseDots()
+	p.repository.Save(state)
 }
 
 func (p *RenderGraphics) GetCurrentScanline() uint16 {
-	return p.state.GetCurrentScanline()
+	state := p.repository.GetState()
+	return state.GetCurrentScanline()
 }
 
 func (p *RenderGraphics) GetCurrentScanlinePixel() uint8 {
-	return p.state.GetCurrentScanlinePixel()
+	state := p.repository.GetState()
+	return state.GetCurrentScanlinePixel()
 }
 
-func (p *RenderGraphics) renderPixel() {
-	p.buffer[p.state.GetCurrentScanline()] = append(p.buffer[p.state.GetCurrentScanline()], p.pipeline.RenderPixel(p.state.GetX()))
+func (p *RenderGraphics) GetV() uint16 {
+	state := p.repository.GetState()
+	return state.GetV()
 }
 
-func (p *RenderGraphics) fetchGraphics() {
-	p.pipeline.StepUpPipeline(uint(p.state.GetCurrentDots()), p.state.GetV(), p.state.GetFineY())
+func (p *RenderGraphics) renderPixel(state *domain.PPU) {
+	pixelColor := p.pipeline.RenderPixel(state.GetX())
+
+	p.buffer[state.GetCurrentScanline()][state.GetCurrentScanlinePixel()] = pixelColor
 }
 
-func (p *RenderGraphics) updateStatusRegister() {
-	if p.state.IsOnPreRender() {
+func (p *RenderGraphics) fetchGraphics(state *domain.PPU) {
+	p.pipeline.StepUpPipeline(uint(state.GetCurrentDots()), state.GetV(), state.GetFineY())
+}
+
+func (p *RenderGraphics) updateStatusRegister(state *domain.PPU) {
+	if state.IsOnPreRender() {
 		value := p.bus.ReadFromMemory(domain.PPU_STATUS) & 0b00011111
 		p.bus.WriteToMemory(domain.PPU_STATUS, value)
 	}
 
-	if p.state.IsVBlankStarted() {
+	if state.IsVBlankStarted() {
 		value := p.bus.ReadFromMemory(domain.PPU_STATUS) ^ 0b10000000
 		p.bus.WriteToMemory(domain.PPU_STATUS, value)
 	}
 }
 
-func (p *RenderGraphics) checkIfNMIShouldBeCalled() bool {
-	return p.isNMIFlagEnabled() && p.state.IsVBlankStarted()
+func (p *RenderGraphics) checkIfNMIShouldBeCalled(state *domain.PPU) bool {
+	return p.isNMIFlagEnabled() && state.IsVBlankStarted()
 }
 
 func (p *RenderGraphics) isNMIFlagEnabled() bool {

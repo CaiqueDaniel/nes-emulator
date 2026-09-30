@@ -2,48 +2,12 @@ package application
 
 import (
 	"nes-emu/src/emulator/ppu/internal/domain"
-	shared "nes-emu/src/emulator/shared/application"
+	"nes-emu/test/fixtures"
 	"testing"
 )
 
-type mockBus struct {
-	workMemory  map[uint16]byte
-	videoMemory map[uint16]byte
-}
-
-func newMockBus() *mockBus {
-	return &mockBus{
-		workMemory:  make(map[uint16]byte),
-		videoMemory: make(map[uint16]byte),
-	}
-}
-
-func (b *mockBus) Tick() {}
-func (b *mockBus) ReadFromMemory(address uint16) uint8 {
-	if v, ok := b.workMemory[address]; ok {
-		return v
-	}
-	return 0
-}
-func (b *mockBus) WriteToMemory(address uint16, value uint8) {
-	b.workMemory[address] = value
-}
-func (b *mockBus) CallNMIHandler() {}
-func (b *mockBus) ReadFromVideoMemory(address uint16) uint8 {
-	if v, ok := b.videoMemory[address]; ok {
-		return v
-	}
-	return 0
-}
-func (b *mockBus) WriteToVideoMemory(address uint16, value uint8) {
-	b.videoMemory[address] = value
-}
-
-func (b *mockBus) AtatchWorkMemory(memory shared.Memory)  {}
-func (b *mockBus) AtatchVideoMemory(memory shared.Memory) {}
-
 func TestNewPipeline(t *testing.T) {
-	bus := newMockBus()
+	bus := fixtures.NewMockBus()
 	p := NewPipeline(bus)
 
 	if p == nil {
@@ -63,7 +27,7 @@ func TestNewPipeline(t *testing.T) {
 }
 
 func TestStepUpPipelineSetsTileIndex(t *testing.T) {
-	bus := newMockBus()
+	bus := fixtures.NewMockBus()
 	p := NewPipeline(bus).(*pipeline)
 
 	vValue := uint16(0x0005)
@@ -151,7 +115,7 @@ func TestStepUpPipelineExtractPaletteBits_AllQuadrants(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			bus := newMockBus()
+			bus := fixtures.NewMockBus()
 			p := NewPipeline(bus).(*pipeline)
 
 			vValue := (tt.coarseY << 5) | tt.coarseX
@@ -203,7 +167,7 @@ func TestStepUpPipelineFetchLowerPatternByte(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			bus := newMockBus()
+			bus := fixtures.NewMockBus()
 			p := NewPipeline(bus).(*pipeline)
 
 			bus.WriteToMemory(domain.PPU_CONTROL, tt.ppuControlBit4)
@@ -227,7 +191,7 @@ func TestStepUpPipelineFetchLowerPatternByte(t *testing.T) {
 }
 
 func TestStepUpPipelineFetchHigherPatternByte_AndFillsShiftRegisters(t *testing.T) {
-	bus := newMockBus()
+	bus := fixtures.NewMockBus()
 	p := NewPipeline(bus).(*pipeline)
 
 	vValue := uint16(0x0005)
@@ -276,7 +240,7 @@ func TestStepUpPipelineFetchHigherPatternByte_AndFillsShiftRegisters(t *testing.
 }
 
 func TestStepUpPipelineNonFetchingDots(t *testing.T) {
-	bus := newMockBus()
+	bus := fixtures.NewMockBus()
 	p := NewPipeline(bus).(*pipeline)
 
 	nonFetchingDots := []uint{1, 3, 5, 7, 9, 11, 13, 15}
@@ -289,82 +253,123 @@ func TestStepUpPipelineNonFetchingDots(t *testing.T) {
 }
 
 func TestRenderPixel_PaletteLookup(t *testing.T) {
-	// Tests that pixelData is correctly assembled from:
+	// Tests that palette address is correctly assembled from:
 	// bit 0: lowPatternBit
 	// bit 1: highPatternBit
 	// bit 2: lowAttrBit
 	// bit 3: highAttrBit
-	// and returns domain.ColorPallet[pixelData].
+	// offset from 0x3F00 (or 0x3F00 if pattern bits are 0),
+	// and returns domain.ColorPallet[bus.ReadFromVideoMemory(paletteAddress)].
 	tests := []struct {
-		name              string
-		lowPatternBit     uint16
-		highPatternBit    uint16
-		lowAttrBit        uint16
-		highAttrBit       uint16
-		expectedPixelData uint8
+		name                   string
+		lowPatternBit          uint16
+		highPatternBit         uint16
+		lowAttrBit             uint16
+		highAttrBit            uint16
+		expectedPaletteAddress uint16
 	}{
 		{
-			name:              "all zero",
-			lowPatternBit:     0,
-			highPatternBit:    0,
-			lowAttrBit:        0,
-			highAttrBit:       0,
-			expectedPixelData: 0,
+			name:                   "all zero (transparent pixel at backdrop 0x3F00)",
+			lowPatternBit:          0,
+			highPatternBit:         0,
+			lowAttrBit:             0,
+			highAttrBit:            0,
+			expectedPaletteAddress: 0x3F00,
 		},
 		{
-			name:              "low pattern bit set",
-			lowPatternBit:     1,
-			highPatternBit:    0,
-			lowAttrBit:        0,
-			highAttrBit:       0,
-			expectedPixelData: 0b0001,
+			name:                   "low pattern bit set (palette 0, color 1: 0x3F01)",
+			lowPatternBit:          1,
+			highPatternBit:         0,
+			lowAttrBit:             0,
+			highAttrBit:            0,
+			expectedPaletteAddress: 0x3F01,
 		},
 		{
-			name:              "high pattern bit set",
-			lowPatternBit:     0,
-			highPatternBit:    1,
-			lowAttrBit:        0,
-			highAttrBit:       0,
-			expectedPixelData: 0b0010,
+			name:                   "high pattern bit set (palette 0, color 2: 0x3F02)",
+			lowPatternBit:          0,
+			highPatternBit:         1,
+			lowAttrBit:             0,
+			highAttrBit:            0,
+			expectedPaletteAddress: 0x3F02,
 		},
 		{
-			name:              "low attribute bit set",
-			lowPatternBit:     0,
-			highPatternBit:    0,
-			lowAttrBit:        1,
-			highAttrBit:       0,
-			expectedPixelData: 0b0100,
+			name:                   "both pattern bits set (palette 0, color 3: 0x3F03)",
+			lowPatternBit:          1,
+			highPatternBit:         1,
+			lowAttrBit:             0,
+			highAttrBit:            0,
+			expectedPaletteAddress: 0x3F03,
 		},
 		{
-			name:              "high attribute bit set",
-			lowPatternBit:     0,
-			highPatternBit:    0,
-			lowAttrBit:        0,
-			highAttrBit:       1,
-			expectedPixelData: 0b1000,
+			name:                   "low pattern bit with low attribute bit set (palette 1, color 1: 0x3F05)",
+			lowPatternBit:          1,
+			highPatternBit:         0,
+			lowAttrBit:             1,
+			highAttrBit:            0,
+			expectedPaletteAddress: 0x3F05,
 		},
 		{
-			name:              "all bits set (pixel data 15)",
-			lowPatternBit:     1,
-			highPatternBit:    1,
-			lowAttrBit:        1,
-			highAttrBit:       1,
-			expectedPixelData: 15,
+			name:                   "low pattern bit with high attribute bit set (palette 2, color 1: 0x3F09)",
+			lowPatternBit:          1,
+			highPatternBit:         0,
+			lowAttrBit:             0,
+			highAttrBit:            1,
+			expectedPaletteAddress: 0x3F09,
 		},
 		{
-			name:              "mixed pattern and attribute (pixel data 10: 0b1010)",
-			lowPatternBit:     0,
-			highPatternBit:    1,
-			lowAttrBit:        0,
-			highAttrBit:       1,
-			expectedPixelData: 0b1010,
+			name:                   "mixed pattern and attribute (palette 2, color 2: 0b1010 -> 0x3F0A)",
+			lowPatternBit:          0,
+			highPatternBit:         1,
+			lowAttrBit:             0,
+			highAttrBit:            1,
+			expectedPaletteAddress: 0x3F0A,
+		},
+		{
+			name:                   "all bits set (palette 3, color 3: 0b1111 -> 0x3F0F)",
+			lowPatternBit:          1,
+			highPatternBit:         1,
+			lowAttrBit:             1,
+			highAttrBit:            1,
+			expectedPaletteAddress: 0x3F0F,
+		},
+		{
+			name:                   "transparent pattern with low attribute bit set should use backdrop 0x3F00",
+			lowPatternBit:          0,
+			highPatternBit:         0,
+			lowAttrBit:             1,
+			highAttrBit:            0,
+			expectedPaletteAddress: 0x3F00,
+		},
+		{
+			name:                   "transparent pattern with high attribute bit set should use backdrop 0x3F00",
+			lowPatternBit:          0,
+			highPatternBit:         0,
+			lowAttrBit:             0,
+			highAttrBit:            1,
+			expectedPaletteAddress: 0x3F00,
+		},
+		{
+			name:                   "transparent pattern with all attribute bits set should use backdrop 0x3F00",
+			lowPatternBit:          0,
+			highPatternBit:         0,
+			lowAttrBit:             1,
+			highAttrBit:            1,
+			expectedPaletteAddress: 0x3F00,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			bus := newMockBus()
+			bus := fixtures.NewMockBus()
 			p := NewPipeline(bus).(*pipeline)
+
+			// Pre-fill palette addresses with a default color index
+			for i := uint16(0); i < 16; i++ {
+				bus.WriteToVideoMemory(0x3F00+i, 0x00)
+			}
+			// Write a distinct color index at the expected palette address
+			expectedColorIndex := byte(0x15)
+			bus.WriteToVideoMemory(tt.expectedPaletteAddress, expectedColorIndex)
 
 			fineX := byte(0)
 			bitPos := 15 - fineX
@@ -374,12 +379,12 @@ func TestRenderPixel_PaletteLookup(t *testing.T) {
 			p.lowAttributeShiftRegister = tt.lowAttrBit << bitPos
 			p.highAttributeShiftRegister = tt.highAttrBit << bitPos
 
-			expectedColor := domain.ColorPallet[tt.expectedPixelData]
+			expectedColor := domain.ColorPallet[expectedColorIndex]
 			color := p.RenderPixel(fineX)
 
 			if color != expectedColor {
-				t.Fatalf("expected color 0x%06X for pixel data %d, got 0x%06X",
-					expectedColor, tt.expectedPixelData, color)
+				t.Fatalf("expected color 0x%06X from palette address 0x%04X, got 0x%06X",
+					expectedColor, tt.expectedPaletteAddress, color)
 			}
 		})
 	}
@@ -389,14 +394,17 @@ func TestRenderPixel_FineXBitSelection(t *testing.T) {
 	// Tests that fineX selects bit (15 - fineX)
 	for fineX := byte(0); fineX <= 7; fineX++ {
 		t.Run("fineX bit position", func(t *testing.T) {
-			bus := newMockBus()
+			bus := fixtures.NewMockBus()
 			p := NewPipeline(bus).(*pipeline)
+
+			colorIndex := byte(0x25)
+			bus.WriteToVideoMemory(0x3F01, colorIndex)
 
 			bitPos := 15 - fineX
 			p.lowPatternShiftRegister = 1 << bitPos // only this bit set
 
 			color := p.RenderPixel(fineX)
-			expectedColor := domain.ColorPallet[1] // lowPatternBit = 1 -> pixelData = 1
+			expectedColor := domain.ColorPallet[colorIndex] // lowPatternBit = 1 -> palette 0x3F01
 
 			if color != expectedColor {
 				t.Fatalf("for fineX=%d, expected color 0x%06X, got 0x%06X",
@@ -407,7 +415,7 @@ func TestRenderPixel_FineXBitSelection(t *testing.T) {
 }
 
 func TestRenderPixel_ShiftsRegisters(t *testing.T) {
-	bus := newMockBus()
+	bus := fixtures.NewMockBus()
 	p := NewPipeline(bus).(*pipeline)
 
 	p.lowPatternShiftRegister = 0b00000000_00000011
@@ -434,8 +442,13 @@ func TestRenderPixel_ShiftsRegisters(t *testing.T) {
 }
 
 func TestRenderPixel_ConsecutivePixels(t *testing.T) {
-	bus := newMockBus()
+	bus := fixtures.NewMockBus()
 	p := NewPipeline(bus).(*pipeline)
+
+	color1 := byte(0x01)
+	color2 := byte(0x02)
+	bus.WriteToVideoMemory(0x3F01, color1)
+	bus.WriteToVideoMemory(0x3F02, color2)
 
 	// Preload registers so that at fineX=0, MSB (bit 15) represents the current pixel,
 	// and each call to RenderPixel(0) shifts registers left to reveal the next pixel.
@@ -446,14 +459,14 @@ func TestRenderPixel_ConsecutivePixels(t *testing.T) {
 	p.highPatternShiftRegister = 0x5500
 
 	expectedPixelData := []uint8{
-		0b01, // bit 15: low=1, high=0 -> 1
-		0b10, // bit 14: low=0, high=1 -> 2
-		0b01, // bit 13: low=1, high=0 -> 1
-		0b10, // bit 12: low=0, high=1 -> 2
-		0b01, // bit 11: low=1, high=0 -> 1
-		0b10, // bit 10: low=0, high=1 -> 2
-		0b01, // bit 9:  low=1, high=0 -> 1
-		0b10, // bit 8:  low=0, high=1 -> 2
+		color1, // bit 15: low=1, high=0 -> pattern 1 -> palette 0x3F01
+		color2, // bit 14: low=0, high=1 -> pattern 2 -> palette 0x3F02
+		color1, // bit 13: low=1, high=0 -> pattern 1 -> palette 0x3F01
+		color2, // bit 12: low=0, high=1 -> pattern 2 -> palette 0x3F02
+		color1, // bit 11: low=1, high=0 -> pattern 1 -> palette 0x3F01
+		color2, // bit 10: low=0, high=1 -> pattern 2 -> palette 0x3F02
+		color1, // bit 9:  low=1, high=0 -> pattern 1 -> palette 0x3F01
+		color2, // bit 8:  low=0, high=1 -> pattern 2 -> palette 0x3F02
 	}
 
 	for i, expectedData := range expectedPixelData {
@@ -467,7 +480,7 @@ func TestRenderPixel_ConsecutivePixels(t *testing.T) {
 }
 
 func TestGetAttrTableAddress(t *testing.T) {
-	bus := newMockBus()
+	bus := fixtures.NewMockBus()
 	p := NewPipeline(bus).(*pipeline)
 
 	tests := []struct {

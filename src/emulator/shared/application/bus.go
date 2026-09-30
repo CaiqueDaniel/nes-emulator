@@ -8,6 +8,7 @@ type Bus interface {
 	WriteToMemory(address uint16, value uint8)
 	ReadFromVideoMemory(address uint16) uint8
 	WriteToVideoMemory(address uint16, value uint8)
+	TriggerIOEvents(address uint16, isWrite bool)
 }
 
 type MNIBus interface {

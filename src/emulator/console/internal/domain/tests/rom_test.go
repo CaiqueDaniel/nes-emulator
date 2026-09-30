@@ -217,11 +217,11 @@ func TestShouldGetCHRROMBytes(t *testing.T) {
 }
 
 func TestShouldGetCHRROMSizeOnNES20File(t *testing.T) {
-	file := []byte{'N', 'E', 'S', 0x1A, 0x01, 0x01, 0x00, 0x08, 0x00, 0xE0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}
+	file := []byte{'N', 'E', 'S', 0x1A, 0x01, 0x02, 0x00, 0x08, 0x00, 0xE0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}
 	rom, _ := domain.NewROM(file)
 
-	//byte 4=1; byte 9=0xE0; ((0xE0)+1) * 1024 * 8
-	const expected_size = (0xE0 + 1) * 1024 * 8
+	//byte 5=2; byte 9=0xE0; ((0xE0)+1) * 1024 * 8
+	expected_size := (uint(file[9]) + uint(file[5])) * 1024 * 8
 
 	if rom.GetVersion() != 2 {
 		t.Errorf("Expected version 2 for standard iNES header, got %d", rom.GetVersion())
@@ -233,11 +233,11 @@ func TestShouldGetCHRROMSizeOnNES20File(t *testing.T) {
 }
 
 func TestShouldGetCHRROMSizeOnNES20FileWithPowerOfTwo(t *testing.T) {
-	file := []byte{'N', 'E', 'S', 0x1A, 0xFF, 0x01, 0x00, 0x08, 0x00, 0xF0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}
+	file := []byte{'N', 'E', 'S', 0x1A, 0x01, 0xFF, 0x00, 0x08, 0x00, 0xF0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}
 	rom, _ := domain.NewROM(file)
 
-	multiplier := float64((file[4]&0x3)*2 + 1)
-	expoent := float64(file[4] >> 2)
+	multiplier := float64((file[5]&0x3)*2 + 1)
+	expoent := float64(file[5] >> 2)
 	expected_size := uint(math.Pow(2, expoent)) * uint(multiplier)
 
 	if rom.GetVersion() != 2 {
@@ -250,30 +250,20 @@ func TestShouldGetCHRROMSizeOnNES20FileWithPowerOfTwo(t *testing.T) {
 }
 
 func getTestFile() *[]byte {
-	fs := shared_services.NewLocalFileSystem()
-	file, err := fs.ReadFile("./../../../../../../test/resources/PALTEST.NES")
-
-	if err != nil {
-		panic("file not loaded")
-	}
-
-	return &file
+	return loadTestResourceFile("./../../../../../../test/resources/PALTEST.NES")
 }
 
 func getGraphicTestFile() *[]byte {
-	fs := shared_services.NewLocalFileSystem()
-	file, err := fs.ReadFile("./../../../../../../test/resources/Zelda.NES")
-
-	if err != nil {
-		panic("file not loaded")
-	}
-
-	return &file
+	return loadTestResourceFile("./../../../../../../test/resources/Zelda.NES")
 }
 
 func getTestWithTrainerFile() *[]byte {
+	return loadTestResourceFile("./../../../../../../test/resources/PALTEST_With_Trainer.NES")
+}
+
+func loadTestResourceFile(path string) *[]byte {
 	fs := shared_services.NewLocalFileSystem()
-	file, err := fs.ReadFile("./../../../../../../test/resources/PALTEST_With_Trainer.NES")
+	file, err := fs.ReadFile(path)
 
 	if err != nil {
 		panic("file not loaded")
