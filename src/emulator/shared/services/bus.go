@@ -79,12 +79,7 @@ func (b *bus) ReadFromMemory(address uint16) uint8 {
 		panic("read operation on unattached work memory!")
 	}
 
-	translatedAddress := translateMemoryAddress(address)
-	value := b.workMemory.Read(translatedAddress)
-
-	b.ppu.HandleIOEvents(translatedAddress, false)
-
-	return value
+	return b.workMemory.Read(translateMemoryAddress(address))
 }
 
 func (b *bus) WriteToMemory(address uint16, value uint8) {
@@ -92,10 +87,7 @@ func (b *bus) WriteToMemory(address uint16, value uint8) {
 		panic("write operation on unattached work memory!")
 	}
 
-	translatedAddress := translateMemoryAddress(address)
-
-	b.workMemory.Write(translatedAddress, value)
-	b.ppu.HandleIOEvents(translatedAddress, true)
+	b.workMemory.Write(translateMemoryAddress(address), value)
 }
 
 func (b *bus) ReadFromVideoMemory(address uint16) uint8 {
@@ -112,6 +104,12 @@ func (b *bus) WriteToVideoMemory(address uint16, value uint8) {
 	}
 
 	b.videoMemory.Write(translateVideoMemoryAddress(address), value)
+}
+
+func (b *bus) TriggerIOEvents(address uint16, isWrite bool) {
+	if b.ppu != nil {
+		b.ppu.HandleIOEvents(translateMemoryAddress(address), isWrite)
+	}
 }
 
 func (b *bus) GetTickCount() uint {
