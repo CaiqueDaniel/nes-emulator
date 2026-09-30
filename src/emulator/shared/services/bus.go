@@ -58,15 +58,8 @@ func (b *bus) AttachPictureProcessingUnit(ppu application.PPU) {
 
 func (b *bus) Tick() {
 	if b.ppu != nil {
-		for i := range 3 {
-			if i == 0 {
-				b.ppu.Render(&application.PPUIOEvent{
-					Address: b.lastOperationAddress,
-					IsWrite: b.lastOperationIsWrite,
-				})
-			} else {
-				b.ppu.Render(nil)
-			}
+		for range 3 {
+			b.ppu.Render(nil)
 		}
 	}
 
@@ -87,11 +80,11 @@ func (b *bus) ReadFromMemory(address uint16) uint8 {
 	}
 
 	translatedAddress := translateMemoryAddress(address)
+	value := b.workMemory.Read(translatedAddress)
 
-	b.lastOperationAddress = translatedAddress
-	b.lastOperationIsWrite = false
+	b.ppu.HandleIOEvents(translatedAddress, false)
 
-	return b.workMemory.Read(translatedAddress)
+	return value
 }
 
 func (b *bus) WriteToMemory(address uint16, value uint8) {
@@ -101,10 +94,8 @@ func (b *bus) WriteToMemory(address uint16, value uint8) {
 
 	translatedAddress := translateMemoryAddress(address)
 
-	b.lastOperationAddress = translatedAddress
-	b.lastOperationIsWrite = true
-
 	b.workMemory.Write(translatedAddress, value)
+	b.ppu.HandleIOEvents(translatedAddress, true)
 }
 
 func (b *bus) ReadFromVideoMemory(address uint16) uint8 {
