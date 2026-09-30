@@ -2,11 +2,12 @@ package strategies
 
 import (
 	"nes-emu/src/emulator/ppu/internal/domain"
+	"nes-emu/test/fixtures"
 	"testing"
 )
 
 func TestNewResetWAndVBlankFlagIOEventStrategy(t *testing.T) {
-	bus := newMockBus()
+	bus := fixtures.NewMockBus()
 	sut := NewResetWAndVBlankFlagIOEventStrategy(bus)
 
 	if sut == nil {
@@ -65,7 +66,7 @@ func TestResetWAndVBlankFlagIOEventStrategy_Handle_ClearsVBlankFlagAndPreservesO
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			bus := newMockBus()
+			bus := fixtures.NewMockBus()
 			bus.WriteToMemory(domain.PPU_STATUS, tc.initialStatus)
 
 			sut := NewResetWAndVBlankFlagIOEventStrategy(bus)
@@ -82,7 +83,7 @@ func TestResetWAndVBlankFlagIOEventStrategy_Handle_ClearsVBlankFlagAndPreservesO
 }
 
 func TestResetWAndVBlankFlagIOEventStrategy_Handle_ClearsWFlag(t *testing.T) {
-	bus := newMockBus()
+	bus := fixtures.NewMockBus()
 	sut := NewResetWAndVBlankFlagIOEventStrategy(bus)
 	state := domain.NewPPU()
 

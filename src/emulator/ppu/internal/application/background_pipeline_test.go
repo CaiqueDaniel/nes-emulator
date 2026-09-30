@@ -2,48 +2,12 @@ package application
 
 import (
 	"nes-emu/src/emulator/ppu/internal/domain"
-	shared "nes-emu/src/emulator/shared/application"
+	"nes-emu/test/fixtures"
 	"testing"
 )
 
-type mockBus struct {
-	workMemory  map[uint16]byte
-	videoMemory map[uint16]byte
-}
-
-func newMockBus() *mockBus {
-	return &mockBus{
-		workMemory:  make(map[uint16]byte),
-		videoMemory: make(map[uint16]byte),
-	}
-}
-
-func (b *mockBus) Tick() {}
-func (b *mockBus) ReadFromMemory(address uint16) uint8 {
-	if v, ok := b.workMemory[address]; ok {
-		return v
-	}
-	return 0
-}
-func (b *mockBus) WriteToMemory(address uint16, value uint8) {
-	b.workMemory[address] = value
-}
-func (b *mockBus) CallNMIHandler() {}
-func (b *mockBus) ReadFromVideoMemory(address uint16) uint8 {
-	if v, ok := b.videoMemory[address]; ok {
-		return v
-	}
-	return 0
-}
-func (b *mockBus) WriteToVideoMemory(address uint16, value uint8) {
-	b.videoMemory[address] = value
-}
-
-func (b *mockBus) AtatchWorkMemory(memory shared.Memory)  {}
-func (b *mockBus) AtatchVideoMemory(memory shared.Memory) {}
-
 func TestNewPipeline(t *testing.T) {
-	bus := newMockBus()
+	bus := fixtures.NewMockBus()
 	p := NewPipeline(bus)
 
 	if p == nil {
@@ -63,7 +27,7 @@ func TestNewPipeline(t *testing.T) {
 }
 
 func TestStepUpPipelineSetsTileIndex(t *testing.T) {
-	bus := newMockBus()
+	bus := fixtures.NewMockBus()
 	p := NewPipeline(bus).(*pipeline)
 
 	vValue := uint16(0x0005)
@@ -151,7 +115,7 @@ func TestStepUpPipelineExtractPaletteBits_AllQuadrants(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			bus := newMockBus()
+			bus := fixtures.NewMockBus()
 			p := NewPipeline(bus).(*pipeline)
 
 			vValue := (tt.coarseY << 5) | tt.coarseX
@@ -203,7 +167,7 @@ func TestStepUpPipelineFetchLowerPatternByte(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			bus := newMockBus()
+			bus := fixtures.NewMockBus()
 			p := NewPipeline(bus).(*pipeline)
 
 			bus.WriteToMemory(domain.PPU_CONTROL, tt.ppuControlBit4)
@@ -227,7 +191,7 @@ func TestStepUpPipelineFetchLowerPatternByte(t *testing.T) {
 }
 
 func TestStepUpPipelineFetchHigherPatternByte_AndFillsShiftRegisters(t *testing.T) {
-	bus := newMockBus()
+	bus := fixtures.NewMockBus()
 	p := NewPipeline(bus).(*pipeline)
 
 	vValue := uint16(0x0005)
@@ -276,7 +240,7 @@ func TestStepUpPipelineFetchHigherPatternByte_AndFillsShiftRegisters(t *testing.
 }
 
 func TestStepUpPipelineNonFetchingDots(t *testing.T) {
-	bus := newMockBus()
+	bus := fixtures.NewMockBus()
 	p := NewPipeline(bus).(*pipeline)
 
 	nonFetchingDots := []uint{1, 3, 5, 7, 9, 11, 13, 15}
@@ -396,7 +360,7 @@ func TestRenderPixel_PaletteLookup(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			bus := newMockBus()
+			bus := fixtures.NewMockBus()
 			p := NewPipeline(bus).(*pipeline)
 
 			// Pre-fill palette addresses with a default color index
@@ -430,7 +394,7 @@ func TestRenderPixel_FineXBitSelection(t *testing.T) {
 	// Tests that fineX selects bit (15 - fineX)
 	for fineX := byte(0); fineX <= 7; fineX++ {
 		t.Run("fineX bit position", func(t *testing.T) {
-			bus := newMockBus()
+			bus := fixtures.NewMockBus()
 			p := NewPipeline(bus).(*pipeline)
 
 			colorIndex := byte(0x25)
@@ -451,7 +415,7 @@ func TestRenderPixel_FineXBitSelection(t *testing.T) {
 }
 
 func TestRenderPixel_ShiftsRegisters(t *testing.T) {
-	bus := newMockBus()
+	bus := fixtures.NewMockBus()
 	p := NewPipeline(bus).(*pipeline)
 
 	p.lowPatternShiftRegister = 0b00000000_00000011
@@ -478,7 +442,7 @@ func TestRenderPixel_ShiftsRegisters(t *testing.T) {
 }
 
 func TestRenderPixel_ConsecutivePixels(t *testing.T) {
-	bus := newMockBus()
+	bus := fixtures.NewMockBus()
 	p := NewPipeline(bus).(*pipeline)
 
 	color1 := byte(0x01)
@@ -516,7 +480,7 @@ func TestRenderPixel_ConsecutivePixels(t *testing.T) {
 }
 
 func TestGetAttrTableAddress(t *testing.T) {
-	bus := newMockBus()
+	bus := fixtures.NewMockBus()
 	p := NewPipeline(bus).(*pipeline)
 
 	tests := []struct {

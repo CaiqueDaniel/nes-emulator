@@ -3,11 +3,12 @@ package strategies
 import (
 	"nes-emu/src/emulator/ppu/internal/application"
 	"nes-emu/src/emulator/ppu/internal/domain"
+	"nes-emu/test/fixtures"
 	"testing"
 )
 
 func TestNewPPUIOEventContext(t *testing.T) {
-	bus := newMockBus()
+	bus := fixtures.NewMockBus()
 	sut := NewPPUIOEventContext(bus)
 
 	if sut == nil {
@@ -44,7 +45,7 @@ func TestPPUIOEventContext_PanicWhenNotInitialized(t *testing.T) {
 }
 
 func TestPPUIOEventContext_HandleEvent_Write_PPUAddress(t *testing.T) {
-	bus := newMockBus()
+	bus := fixtures.NewMockBus()
 	bus.WriteToMemory(domain.PPU_ADDRESS, 0x24)
 
 	sut := NewPPUIOEventContext(bus)
@@ -66,7 +67,7 @@ func TestPPUIOEventContext_HandleEvent_Write_PPUAddress(t *testing.T) {
 }
 
 func TestPPUIOEventContext_HandleEvent_Write_PPUData(t *testing.T) {
-	bus := newMockBus()
+	bus := fixtures.NewMockBus()
 	bus.WriteToMemory(domain.PPU_DATA, 0x55)
 	bus.WriteToMemory(domain.PPU_CONTROL, 0x00) // increment by 1
 
@@ -90,7 +91,7 @@ func TestPPUIOEventContext_HandleEvent_Write_PPUData(t *testing.T) {
 }
 
 func TestPPUIOEventContext_HandleEvent_Write_UnhandledAddress(t *testing.T) {
-	bus := newMockBus()
+	bus := fixtures.NewMockBus()
 	sut := NewPPUIOEventContext(bus)
 	state := domain.NewPPU()
 
@@ -114,7 +115,7 @@ func TestPPUIOEventContext_HandleEvent_Write_UnhandledAddress(t *testing.T) {
 }
 
 func TestPPUIOEventContext_HandleEvent_Read_PPUStatus(t *testing.T) {
-	bus := newMockBus()
+	bus := fixtures.NewMockBus()
 	bus.WriteToMemory(domain.PPU_STATUS, 0x80) // VBlank flag set
 
 	sut := NewPPUIOEventContext(bus)
@@ -137,7 +138,7 @@ func TestPPUIOEventContext_HandleEvent_Read_PPUStatus(t *testing.T) {
 }
 
 func TestPPUIOEventContext_HandleEvent_Read_UnhandledAddress(t *testing.T) {
-	bus := newMockBus()
+	bus := fixtures.NewMockBus()
 	sut := NewPPUIOEventContext(bus)
 	state := domain.NewPPU()
 	state.ToggleW()
@@ -156,7 +157,7 @@ func TestPPUIOEventContext_HandleEvent_Read_UnhandledAddress(t *testing.T) {
 }
 
 func TestPPUIOEventContext_GetStrategyForWriteSignal(t *testing.T) {
-	bus := newMockBus()
+	bus := fixtures.NewMockBus()
 	sut := NewPPUIOEventContext(bus)
 	state := domain.NewPPU()
 
@@ -177,7 +178,7 @@ func TestPPUIOEventContext_GetStrategyForWriteSignal(t *testing.T) {
 }
 
 func TestPPUIOEventContext_GetStrategyForReadSignal(t *testing.T) {
-	bus := newMockBus()
+	bus := fixtures.NewMockBus()
 	sut := NewPPUIOEventContext(bus)
 	state := domain.NewPPU()
 

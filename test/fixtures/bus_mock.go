@@ -1,4 +1,4 @@
-package strategies
+package fixtures
 
 import (
 	shared "nes-emu/src/emulator/shared/application"
@@ -10,7 +10,7 @@ type mockBus struct {
 	nmiCalled   int
 }
 
-func newMockBus() *mockBus {
+func NewMockBus() *mockBus {
 	return &mockBus{
 		workMemory:  make(map[uint16]byte),
 		videoMemory: make(map[uint16]byte),
@@ -45,5 +45,6 @@ func (b *mockBus) WriteToVideoMemory(address uint16, value uint8) {
 	b.videoMemory[address] = value
 }
 
-func (b *mockBus) AtatchWorkMemory(memory shared.Memory)  {}
-func (b *mockBus) AtatchVideoMemory(memory shared.Memory) {}
+func (b *mockBus) AtatchWorkMemory(memory shared.Memory)        {}
+func (b *mockBus) AtatchVideoMemory(memory shared.Memory)       {}
+func (b *mockBus) TriggerIOEvents(address uint16, isWrite bool) {}
