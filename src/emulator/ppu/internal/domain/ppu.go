@@ -14,7 +14,10 @@ type PPU struct {
 	dot                       uint16
 	enableBackgroundRendering bool
 	enableSpriteRendering     bool
+	frameBuffer               *PPUFrameBuffer
 }
+
+type PPUFrameBuffer [MAX_VISIBLE_SCANLINES][MAX_VISIBLE_DOTS]uint32
 
 func NewPPU() *PPU {
 	return &PPU{
@@ -22,6 +25,7 @@ func NewPPU() *PPU {
 		dot:                       0,
 		enableBackgroundRendering: false,
 		enableSpriteRendering:     false,
+		frameBuffer:               &PPUFrameBuffer{},
 	}
 }
 
@@ -51,4 +55,16 @@ func (p *PPU) IsSpriteRenderingEnabled() bool {
 
 func (p *PPU) IsRenderingEnabled() bool {
 	return p.enableBackgroundRendering || p.enableSpriteRendering
+}
+
+func (p *PPU) IsVBlankStarted() bool {
+	return p.scanline+1 == INITIAL_V_BLANK_SCANLINE && p.dot == 0
+}
+
+func (p *PPU) ClearFrameBuffer() {
+	*p.frameBuffer = PPUFrameBuffer{}
+}
+
+func (p *PPU) GetFrameBuffer() *PPUFrameBuffer {
+	return p.frameBuffer
 }

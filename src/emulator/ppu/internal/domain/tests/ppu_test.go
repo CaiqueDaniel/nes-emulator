@@ -76,3 +76,21 @@ func TestPPUShouldWrapAroundScanlines(t *testing.T) {
 		t.Errorf("GetScanline() after MoveToNextDot() = %d, want 0", got)
 	}
 }
+
+func TestPPUShouldIdentifyVBlank(t *testing.T) {
+	ppu := domain.NewPPU()
+
+	for scanline := 0; scanline < domain.MAX_VISIBLE_SCANLINES; scanline++ {
+		for i := 0; i < domain.MAX_DOTS_PER_SCANLINE; i++ {
+			ppu.MoveToNextDot()
+		}
+	}
+
+	if ppu.GetDot() != 0 {
+		t.Errorf("Expected dot to be 0; got %d", ppu.GetDot())
+	}
+
+	if !ppu.IsVBlankStarted() {
+		t.Errorf("Expected to be at v-blank")
+	}
+}

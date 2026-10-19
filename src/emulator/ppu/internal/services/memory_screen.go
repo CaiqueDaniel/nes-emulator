@@ -5,17 +5,17 @@ import (
 )
 
 type MemoryScreen struct {
-	buffer *[domain.MAX_VISIBLE_SCANLINES][domain.MAX_VISIBLE_DOTS]uint32
+	buffer *domain.PPUFrameBuffer
 }
 
 func NewMemoryScreen() *MemoryScreen {
 	return &MemoryScreen{}
 }
 
-func (s *MemoryScreen) ShowImage(buffer *[domain.MAX_VISIBLE_SCANLINES][domain.MAX_VISIBLE_DOTS]uint32) {
+func (s *MemoryScreen) ShowImage(buffer *domain.PPUFrameBuffer) {
 	s.buffer = buffer
 }
 
-func (s *MemoryScreen) GetImageBuffer() *[domain.MAX_VISIBLE_SCANLINES][domain.MAX_VISIBLE_DOTS]uint32 {
+func (s *MemoryScreen) GetImageBuffer() *domain.PPUFrameBuffer {
 	return s.buffer
 }

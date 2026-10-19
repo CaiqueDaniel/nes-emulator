@@ -20,5 +20,13 @@ func NewRenderGraphics(repository domain.PPURepository, vram shared.Memory, scre
 }
 
 func (rg *RenderGraphics) Execute() {
-	//TODO: Implement the logic to render graphics based on the PPU state and VRAM content.
+	state := rg.repository.Get()
+
+	state.MoveToNextDot()
+
+	if state.IsVBlankStarted() {
+		rg.screen.ShowImage(state.GetFrameBuffer())
+	}
+
+	rg.repository.Save(state)
 }
