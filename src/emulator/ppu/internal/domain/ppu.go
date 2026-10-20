@@ -26,6 +26,8 @@ type PPU struct {
 	enableBackgroundRendering bool
 	enableSpriteRendering     bool
 	frameBuffer               *PPUFrameBuffer
+	v                         uint16
+	t                         uint16
 }
 
 type PPUFrameBuffer [MAX_VISIBLE_SCANLINES][MAX_VISIBLE_DOTS]uint32
@@ -78,4 +80,14 @@ func (p *PPU) ClearFrameBuffer() {
 
 func (p *PPU) GetFrameBuffer() *PPUFrameBuffer {
 	return p.frameBuffer
+}
+
+func (p *PPU) GetV() uint16 {
+	return p.v
+}
+
+func (p *PPU) GetNameTableAddress() uint16 {
+	const nametable_base_address = 0x2000
+	const nametable_v_register_mask = 0x0FFF
+	return nametable_base_address | (p.v & nametable_v_register_mask)
 }

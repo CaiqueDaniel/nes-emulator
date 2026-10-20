@@ -94,3 +94,15 @@ func TestPPUShouldIdentifyVBlank(t *testing.T) {
 		t.Errorf("Expected to be at v-blank")
 	}
 }
+
+func TestGetNameTableAddressGivenVZero(t *testing.T) {
+	ppu := domain.NewPPU()
+
+	if ppu.GetV() != 0 {
+		t.Errorf("Expected v to be 0 at start; got %d", ppu.GetV())
+	}
+
+	if ppu.GetNameTableAddress() != 0x2000 {
+		t.Errorf("Expected nametable address to be 0x2000 (at start) given v is 0; got %X", ppu.GetNameTableAddress())
+	}
+}
