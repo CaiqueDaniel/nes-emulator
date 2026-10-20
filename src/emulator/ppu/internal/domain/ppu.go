@@ -82,6 +82,10 @@ func (p *PPU) GetFrameBuffer() *PPUFrameBuffer {
 	return p.frameBuffer
 }
 
+func (p *PPU) SetVDirectly(v uint16) {
+	p.v = v
+}
+
 func (p *PPU) GetV() uint16 {
 	return p.v
 }
@@ -90,4 +94,13 @@ func (p *PPU) GetNameTableAddress() uint16 {
 	const nametable_base_address = 0x2000
 	const nametable_v_register_mask = 0x0FFF
 	return nametable_base_address | (p.v & nametable_v_register_mask)
+}
+
+func (p *PPU) GetAttributeTableAddress() uint16 {
+	const attribute_table_base_address = 0x23C0
+	const coarse_bits_mask = 0x0C00
+	const coarse_y_mask = 0x38
+	const coarse_x_mask = 0x7
+
+	return attribute_table_base_address | (p.v & coarse_bits_mask) | ((p.v >> 4) & coarse_y_mask) | ((p.v >> 2) & coarse_x_mask)
 }
