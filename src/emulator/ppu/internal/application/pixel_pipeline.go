@@ -12,5 +12,5 @@ type PixelPipelineContext interface {
 }
 
 type PixelPipelineStrategy interface {
-	FetchPixel(ppu domain.PPU) uint32
+	FetchPixel(ppu *domain.PPU) uint32
 }

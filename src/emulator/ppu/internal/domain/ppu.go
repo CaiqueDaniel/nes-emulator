@@ -9,6 +9,10 @@ const (
 	LAST_V_BLANK_SCANLINE    = 261
 )
 
+const (
+	PPU_CONTROL = 0x2000
+)
+
 var ColorPallet = [64]uint32{
 	0x7C7C7C, 0x0000FC, 0x0000BC, 0x4428BC, 0x940084, 0xA80020, 0xA81000, 0x881400,
 	0x503000, 0x007800, 0x006800, 0x005800, 0x004058, 0x000000, 0x000000, 0x000000,
@@ -28,6 +32,8 @@ type PPU struct {
 	frameBuffer               *PPUFrameBuffer
 	v                         uint16
 	t                         uint16
+	currentBgTileIndex        byte
+	currentBgAttribute        byte
 }
 
 type PPUFrameBuffer [MAX_VISIBLE_SCANLINES][MAX_VISIBLE_DOTS]uint32
@@ -94,6 +100,22 @@ func (p *PPU) GetFineY() byte {
 	return byte(p.v >> 12)
 }
 
+func (p *PPU) SetCurrentBgTileIndex(index byte) {
+	p.currentBgTileIndex = index
+}
+
+func (p *PPU) GetCurrentBgTileIndex() byte {
+	return p.currentBgTileIndex
+}
+
+func (p *PPU) SetCurrentBgAttribute(attribute byte) {
+	p.currentBgAttribute = attribute
+}
+
+func (p *PPU) GetCurrentBgAttribute() byte {
+	return p.currentBgAttribute
+}
+
 func (p *PPU) GetNameTableAddress() uint16 {
 	const nametable_base_address = 0x2000
 	const nametable_v_register_mask = 0x0FFF
@@ -107,4 +129,13 @@ func (p *PPU) GetAttributeTableAddress() uint16 {
 	const coarse_x_mask = 0x7
 
 	return attribute_table_base_address | (p.v & coarse_bits_mask) | ((p.v >> 4) & coarse_y_mask) | ((p.v >> 2) & coarse_x_mask)
+}
+
+func (p *PPU) GetPaletteIndexFromTileAttribute() byte {
+	const palette_mask = 0b11
+	const coarse_x_mask = 0b10
+	const coarse_y_mask = 0b00010_00000
+
+	attrPosition := byte((((p.v & coarse_x_mask) >> 1) | ((p.v & coarse_y_mask) >> 5)))
+	return p.currentBgAttribute >> (attrPosition * 2) & palette_mask
 }

@@ -299,3 +299,51 @@ func TestGetFineYFromV(t *testing.T) {
 		t.Errorf("Expected fineY to be 0b111; got %d", state.GetFineY())
 	}
 }
+
+func TestGetPalatteIndexFromAttribute(t *testing.T) {
+	tests := []struct {
+		name            string
+		coarseX         uint16
+		coarseY         uint16
+		expectedPalette byte
+	}{
+		{
+			name:            "given coarse is pointing to top-left palette",
+			coarseX:         0,
+			coarseY:         0,
+			expectedPalette: 0b1,
+		},
+		{
+			name:            "given coarse is pointing to top-right palette",
+			coarseX:         0b00000_00010,
+			coarseY:         0b00000_00000,
+			expectedPalette: 0b10,
+		},
+		{
+			name:            "given coarse is pointing to bottom-left palette",
+			coarseX:         0b00000_00000,
+			coarseY:         0b00010_00000,
+			expectedPalette: 0b11,
+		},
+		{
+			name:            "given coarse is pointing to bottom-right palette",
+			coarseX:         0b00000_00010,
+			coarseY:         0b00010_00000,
+			expectedPalette: 0b0,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			state := domain.NewPPU()
+			state.SetCurrentBgAttribute(0b00_11_10_01)
+
+			//yyy NN YYYYY XXXXX
+			state.SetVDirectly(tt.coarseY | tt.coarseX)
+
+			if state.GetPaletteIndexFromTileAttribute() != tt.expectedPalette {
+				t.Errorf("Expected palette to be %d; got %d", tt.expectedPalette, state.GetPaletteIndexFromTileAttribute())
+			}
+		})
+	}
+}
