@@ -90,6 +90,10 @@ func (p *PPU) GetV() uint16 {
 	return p.v
 }
 
+func (p *PPU) GetFineY() byte {
+	return byte(p.v >> 12)
+}
+
 func (p *PPU) GetNameTableAddress() uint16 {
 	const nametable_base_address = 0x2000
 	const nametable_v_register_mask = 0x0FFF

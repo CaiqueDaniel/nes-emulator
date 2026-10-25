@@ -288,3 +288,14 @@ func TestGetNameTableAddressWithCoarseXAndCoarseY(t *testing.T) {
 		})
 	}
 }
+
+func TestGetFineYFromV(t *testing.T) {
+	state := domain.NewPPU()
+
+	//yyy NN YYYYY XXXXX
+	state.SetVDirectly(0b111_00_00000_00000)
+
+	if state.GetFineY() != 0b111 {
+		t.Errorf("Expected fineY to be 0b111; got %d", state.GetFineY())
+	}
+}
