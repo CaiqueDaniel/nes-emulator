@@ -34,6 +34,11 @@ type PPU struct {
 	t                         uint16
 	currentBgTileIndex        byte
 	currentBgAttribute        byte
+	lowBgPatternLatch         byte
+	highBgPatternLatch        byte
+
+	lowBgPatternShiftRegister  uint16
+	highBgPatternShiftRegister uint16
 }
 
 type PPUFrameBuffer [MAX_VISIBLE_SCANLINES][MAX_VISIBLE_DOTS]uint32
@@ -114,6 +119,22 @@ func (p *PPU) SetCurrentBgAttribute(attribute byte) {
 
 func (p *PPU) GetCurrentBgAttribute() byte {
 	return p.currentBgAttribute
+}
+
+func (p *PPU) SetLowBgPatternLatch(latch byte) {
+	p.lowBgPatternLatch = latch
+}
+
+func (p *PPU) GetLowBgPatternLatch() byte {
+	return p.lowBgPatternLatch
+}
+
+func (p *PPU) SetHighBgPatternLatch(latch byte) {
+	p.highBgPatternLatch = latch
+}
+
+func (p *PPU) GetHighBgPatternLatch() byte {
+	return p.highBgPatternLatch
 }
 
 func (p *PPU) GetNameTableAddress() uint16 {
