@@ -32,13 +32,7 @@ type PPU struct {
 	frameBuffer               *PPUFrameBuffer
 	v                         uint16
 	t                         uint16
-	currentBgTileIndex        byte
-	currentBgAttribute        byte
-	lowBgPatternLatch         byte
-	highBgPatternLatch        byte
-
-	lowBgPatternShiftRegister  uint16
-	highBgPatternShiftRegister uint16
+	bgLayer                   *BGLayer
 }
 
 type PPUFrameBuffer [MAX_VISIBLE_SCANLINES][MAX_VISIBLE_DOTS]uint32
@@ -50,6 +44,7 @@ func NewPPU() *PPU {
 		enableBackgroundRendering: false,
 		enableSpriteRendering:     false,
 		frameBuffer:               &PPUFrameBuffer{},
+		bgLayer:                   NewBGLayer(),
 	}
 }
 
@@ -106,35 +101,35 @@ func (p *PPU) GetFineY() byte {
 }
 
 func (p *PPU) SetCurrentBgTileIndex(index byte) {
-	p.currentBgTileIndex = index
+	p.bgLayer.SetTileIndex(index)
 }
 
 func (p *PPU) GetCurrentBgTileIndex() byte {
-	return p.currentBgTileIndex
+	return p.bgLayer.GetTileIndex()
 }
 
 func (p *PPU) SetCurrentBgAttribute(attribute byte) {
-	p.currentBgAttribute = attribute
+	p.bgLayer.SetTileAttribute(attribute)
 }
 
 func (p *PPU) GetCurrentBgAttribute() byte {
-	return p.currentBgAttribute
+	return p.bgLayer.GetTileAttribute()
 }
 
 func (p *PPU) SetLowBgPatternLatch(latch byte) {
-	p.lowBgPatternLatch = latch
+	p.bgLayer.SetLowPatternLatch(latch)
 }
 
 func (p *PPU) GetLowBgPatternLatch() byte {
-	return p.lowBgPatternLatch
+	return p.bgLayer.GetLowPatternLatch()
 }
 
 func (p *PPU) SetHighBgPatternLatch(latch byte) {
-	p.highBgPatternLatch = latch
+	p.bgLayer.SetHighPatternLatch(latch)
 }
 
 func (p *PPU) GetHighBgPatternLatch() byte {
-	return p.highBgPatternLatch
+	return p.bgLayer.GetHighPatternLatch()
 }
 
 func (p *PPU) GetNameTableAddress() uint16 {
@@ -158,5 +153,5 @@ func (p *PPU) GetPaletteIndexFromTileAttribute() byte {
 	const coarse_y_mask = 0b00010_00000
 
 	attrPosition := byte((((p.v & coarse_x_mask) >> 1) | ((p.v & coarse_y_mask) >> 5)))
-	return p.currentBgAttribute >> (attrPosition * 2) & palette_mask
+	return p.bgLayer.GetTileAttribute() >> (attrPosition * 2) & palette_mask
 }
