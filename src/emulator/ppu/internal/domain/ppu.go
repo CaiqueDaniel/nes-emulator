@@ -32,6 +32,7 @@ type PPU struct {
 	frameBuffer               *PPUFrameBuffer
 	v                         uint16
 	t                         uint16
+	x                         byte
 	bgLayer                   *BGLayer
 }
 
@@ -100,6 +101,14 @@ func (p *PPU) GetV() uint16 {
 
 func (p *PPU) GetFineY() byte {
 	return byte(p.v >> 12)
+}
+
+func (p *PPU) SetFineX(value byte) {
+	p.x = value & 0b111
+}
+
+func (p *PPU) GetFineX() byte {
+	return p.x
 }
 
 func (p *PPU) SetCurrentBgTileIndex(index byte) {

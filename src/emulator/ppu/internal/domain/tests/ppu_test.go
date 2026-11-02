@@ -369,3 +369,19 @@ func TestGetPalatteIndexFromAttribute(t *testing.T) {
 		})
 	}
 }
+
+func TestSetFineX_ShouldOnlyConsiderTheLower3Bits(t *testing.T) {
+	ppu := domain.NewPPU()
+
+	ppu.SetFineX(0xFF)
+
+	if ppu.GetFineX() != 0b111 {
+		t.Errorf("Expected fineX to be 0x7F; got %X", ppu.GetFineX())
+	}
+
+	ppu.SetFineX(0b1111_1011)
+
+	if ppu.GetFineX() != 0b011 {
+		t.Errorf("Expected fineX to be 0x7F; got %X", ppu.GetFineX())
+	}
+}
