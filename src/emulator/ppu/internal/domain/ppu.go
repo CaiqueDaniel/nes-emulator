@@ -109,11 +109,11 @@ func (p *PPU) GetCurrentBgTileIndex() byte {
 }
 
 func (p *PPU) SetCurrentBgAttribute(attribute byte) {
-	p.bgLayer.SetTileAttribute(attribute)
+	p.bgLayer.SetTileAttributeIndex(p.calculateTileAttributeIndex(attribute))
 }
 
 func (p *PPU) GetCurrentBgAttribute() byte {
-	return p.bgLayer.GetTileAttribute()
+	return p.bgLayer.GetTileAttributeIndex()
 }
 
 func (p *PPU) SetLowBgPatternLatch(latch byte) {
@@ -148,10 +148,14 @@ func (p *PPU) GetAttributeTableAddress() uint16 {
 }
 
 func (p *PPU) GetPaletteIndexFromTileAttribute() byte {
+	return p.bgLayer.GetTileAttributeIndex()
+}
+
+func (p *PPU) calculateTileAttributeIndex(attibute byte) byte {
 	const palette_mask = 0b11
 	const coarse_x_mask = 0b10
 	const coarse_y_mask = 0b00010_00000
 
 	attrPosition := byte((((p.v & coarse_x_mask) >> 1) | ((p.v & coarse_y_mask) >> 5)))
-	return p.bgLayer.GetTileAttribute() >> (attrPosition * 2) & palette_mask
+	return attibute >> (attrPosition * 2) & palette_mask
 }

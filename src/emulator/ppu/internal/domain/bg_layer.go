@@ -1,8 +1,9 @@
 package domain
 
 type BGLayer struct {
-	tileIndex        byte
-	tileAttribute    byte
+	tileIndex          byte
+	tileAttributeIndex byte
+
 	lowPatternLatch  byte
 	highPatternLatch byte
 
@@ -32,8 +33,8 @@ func (b *BGLayer) GetTileIndex() byte {
 	return b.tileIndex
 }
 
-func (b *BGLayer) GetTileAttribute() byte {
-	return b.tileAttribute
+func (b *BGLayer) GetTileAttributeIndex() byte {
+	return b.tileAttributeIndex
 }
 
 func (b *BGLayer) GetLowPatternLatch() byte {
@@ -65,8 +66,8 @@ func (b *BGLayer) SetTileIndex(tileIndex byte) {
 	b.tileIndex = tileIndex
 }
 
-func (b *BGLayer) SetTileAttribute(tileAttribute byte) {
-	b.tileAttribute = tileAttribute
+func (b *BGLayer) SetTileAttributeIndex(tileAttributeIndex byte) {
+	b.tileAttributeIndex = tileAttributeIndex
 }
 
 func (b *BGLayer) SetLowPatternLatch(lowPatternLatch byte) {

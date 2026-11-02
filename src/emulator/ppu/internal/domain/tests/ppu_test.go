@@ -336,10 +336,10 @@ func TestGetPalatteIndexFromAttribute(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			state := domain.NewPPU()
-			state.SetCurrentBgAttribute(0b00_11_10_01)
 
 			//yyy NN YYYYY XXXXX
 			state.SetVDirectly(tt.coarseY | tt.coarseX)
+			state.SetCurrentBgAttribute(0b00_11_10_01)
 
 			if state.GetPaletteIndexFromTileAttribute() != tt.expectedPalette {
 				t.Errorf("Expected palette to be %d; got %d", tt.expectedPalette, state.GetPaletteIndexFromTileAttribute())
