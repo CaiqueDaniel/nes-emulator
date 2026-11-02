@@ -151,6 +151,18 @@ func (p *PPU) GetPaletteIndexFromTileAttribute() byte {
 	return p.bgLayer.GetTileAttributeIndex()
 }
 
+func (p *PPU) GetShiftRegisters() (uint16, uint16, uint16, uint16) {
+	return p.bgLayer.GetLowPatternShiftRegister(), p.bgLayer.GetHighPatternShiftRegister(), p.bgLayer.GetLowAttributeShiftRegister(), p.bgLayer.GetHighAttributeShiftRegister()
+}
+
+func (p *PPU) LoadBgShiftRegistersFromLatches() {
+	p.bgLayer.LoadShiftRegistersFromLatches()
+}
+
+func (p *PPU) ShiftBgRegisters() {
+	p.bgLayer.ShiftRegisters()
+}
+
 func (p *PPU) calculateTileAttributeIndex(attibute byte) byte {
 	const palette_mask = 0b11
 	const coarse_x_mask = 0b10

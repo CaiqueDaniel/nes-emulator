@@ -31,7 +31,10 @@ func (s *BGPixelPipelineStrategy) FetchPixel(ppu *domain.PPU) uint32 {
 	case ppu.GetDot()%TOTAL_PIPELINE_CYCLES == FETCH_ATTRIBUTE_CYCLE:
 		ppu.SetCurrentBgAttribute(s.GetAttribute(ppu))
 	case ppu.GetDot()%TOTAL_PIPELINE_CYCLES == FETCH_LOW_PATTERN_BYTE:
+		ppu.SetLowBgPatternLatch(s.GetLowPatternByte(ppu))
 	case ppu.GetDot()%TOTAL_PIPELINE_CYCLES == FETCH_HIGH_PATTERN_BYTE:
+		ppu.SetHighBgPatternLatch(s.GetHighPatternByte(ppu))
+		ppu.LoadBgShiftRegistersFromLatches()
 		return 0
 	}
 
@@ -56,4 +59,12 @@ func (s *BGPixelPipelineStrategy) GetLowPatternAddress(ppu *domain.PPU) uint16 {
 
 func (s *BGPixelPipelineStrategy) GetHighPatternAddress(ppu *domain.PPU) uint16 {
 	return s.GetLowPatternAddress(ppu) + 8
+}
+
+func (s *BGPixelPipelineStrategy) GetLowPatternByte(ppu *domain.PPU) byte {
+	return s.vram.Read(s.GetLowPatternAddress(ppu))
+}
+
+func (s *BGPixelPipelineStrategy) GetHighPatternByte(ppu *domain.PPU) byte {
+	return s.vram.Read(s.GetHighPatternAddress(ppu))
 }

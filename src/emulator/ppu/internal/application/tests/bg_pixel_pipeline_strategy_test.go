@@ -60,6 +60,67 @@ func TestGetLowAndHighPatternAddress(t *testing.T) {
 	}
 }
 
+const attribute_table_base_address = 0x23C0
+
+func TestShouldSetLowPatternLatch(t *testing.T) {
+	vram, ram, sut, state := createBGPixelPipelineStrategySut()
+
+	writeChar1ToPatternTable(vram)
+
+	vram.Write(vram_nametable_address, 0x0)
+	vram.Write(initial_palette_address, 0x01)
+	state.SetVDirectly(0)
+	ram.Write(0x2000, 0)
+
+	for range 6 {
+		sut.FetchPixel(state)
+		state.MoveToNextDot()
+	}
+
+	sut.FetchPixel(state)
+
+	if state.GetLowBgPatternLatch() != 0x10 {
+		t.Errorf("Expected low pattern latch to be 0x1, got %X", state.GetLowBgPatternLatch())
+	}
+}
+
+func TestShouldSetHighPatternLatchAndLoadBGLayerShiftRegisters(t *testing.T) {
+	vram, ram, sut, state := createBGPixelPipelineStrategySut()
+
+	writeChar1ToPatternTable(vram)
+
+	vram.Write(vram_nametable_address, 0x0)
+	vram.Write(initial_palette_address, 0x01)
+	state.SetVDirectly(0)
+	ram.Write(0x2000, 0)
+
+	for range 8 {
+		sut.FetchPixel(state)
+		state.MoveToNextDot()
+	}
+
+	sut.FetchPixel(state)
+
+	if state.GetLowBgPatternLatch() != 0x10 {
+		t.Errorf("Expected low pattern latch to be 0x1, got %X", state.GetLowBgPatternLatch())
+	}
+
+	//Gets high plane that also corresponds to byte 0x10
+	if state.GetHighBgPatternLatch() != 0x10 {
+		t.Errorf("Expected high pattern latch to be 0x1, got %X", state.GetHighBgPatternLatch())
+	}
+
+	lowPatternShiftRegister, highPatternShiftRegister, _, _ := state.GetShiftRegisters()
+
+	if lowPatternShiftRegister != 0x10 {
+		t.Errorf("Expected low pattern shift register to be 0x1, got %X", lowPatternShiftRegister)
+	}
+
+	if highPatternShiftRegister != 0x10 {
+		t.Errorf("Expected high pattern shift register to be 0x1, got %X", highPatternShiftRegister)
+	}
+}
+
 func createBGPixelPipelineStrategySut() (*memory.Memory, *memory.Memory, *application.BGPixelPipelineStrategy, *domain.PPU) {
 	vram := memory.NewMemory(0xFFFF)
 	ram := memory.NewMemory(0xFFFF)
