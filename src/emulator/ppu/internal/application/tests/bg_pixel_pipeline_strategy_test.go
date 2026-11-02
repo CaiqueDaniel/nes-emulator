@@ -95,8 +95,8 @@ func TestShouldSetHighPatternLatchAndLoadBGLayerShiftRegisters(t *testing.T) {
 	ram.Write(0x2000, 0)
 
 	for range 8 {
-		sut.FetchPixel(state)
 		state.MoveToNextDot()
+		sut.FetchPixel(state)
 	}
 
 	sut.FetchPixel(state)
@@ -113,11 +113,11 @@ func TestShouldSetHighPatternLatchAndLoadBGLayerShiftRegisters(t *testing.T) {
 	lowPatternShiftRegister, highPatternShiftRegister, _, _ := state.GetShiftRegisters()
 
 	if lowPatternShiftRegister != 0x10 {
-		t.Errorf("Expected low pattern shift register to be 0x1, got %X", lowPatternShiftRegister)
+		t.Errorf("Expected low pattern shift register to be 0x10, got %X", lowPatternShiftRegister)
 	}
 
 	if highPatternShiftRegister != 0x10 {
-		t.Errorf("Expected high pattern shift register to be 0x1, got %X", highPatternShiftRegister)
+		t.Errorf("Expected high pattern shift register to be 0x10, got %X", highPatternShiftRegister)
 	}
 }
 

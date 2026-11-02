@@ -95,6 +95,28 @@ func TestPPUShouldIdentifyVBlank(t *testing.T) {
 	}
 }
 
+func TestPPUShouldShiftBitsOnBgShiftRegisters(t *testing.T) {
+	ppu := domain.NewPPU()
+
+	ppu.SetCurrentBgTileIndex(0)
+	ppu.SetCurrentBgAttribute(0b01)
+	ppu.SetLowBgPatternLatch(0x10)
+	ppu.SetHighBgPatternLatch(0x11)
+	ppu.LoadBgShiftRegistersFromLatches()
+
+	lowPattern, highPattern, lowAttr, highAttr := ppu.GetShiftRegisters()
+	if lowPattern != 0x10 || highPattern != 0x11 || lowAttr != 255 || highAttr != 0 {
+		t.Errorf("Expected shift registers to be 0x10 and 0x11 and 0xFF and 0x0; got %X and %X and %X and %X", lowPattern, highPattern, lowAttr, highAttr)
+	}
+
+	ppu.MoveToNextDot()
+
+	lowPattern, highPattern, lowAttr, highAttr = ppu.GetShiftRegisters()
+	if lowPattern != (0x10<<1) || highPattern != (0x11<<1) || lowAttr != (255<<1) || highAttr != (0<<1) {
+		t.Errorf("Expected shift registers not to be 0x10 and 0x11 and 0xFF and 0x0; got %X and %X and %X and %X", lowPattern, highPattern, lowAttr, highAttr)
+	}
+}
+
 func TestGetNameTableAddressGivenVZero(t *testing.T) {
 	ppu := domain.NewPPU()
 

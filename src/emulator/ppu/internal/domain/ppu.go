@@ -54,6 +54,8 @@ func (p *PPU) MoveToNextDot() {
 	if p.dot == 0 {
 		p.scanline = (p.scanline + 1) % MAX_SCANLINES
 	}
+
+	p.bgLayer.ShiftRegisters()
 }
 
 func (p *PPU) GetScanline() uint16 {
@@ -157,10 +159,6 @@ func (p *PPU) GetShiftRegisters() (uint16, uint16, uint16, uint16) {
 
 func (p *PPU) LoadBgShiftRegistersFromLatches() {
 	p.bgLayer.LoadShiftRegistersFromLatches()
-}
-
-func (p *PPU) ShiftBgRegisters() {
-	p.bgLayer.ShiftRegisters()
 }
 
 func (p *PPU) calculateTileAttributeIndex(attibute byte) byte {
