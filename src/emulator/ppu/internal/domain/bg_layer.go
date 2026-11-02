@@ -18,7 +18,12 @@ func NewBGLayer() *BGLayer {
 }
 
 func (b *BGLayer) LoadShiftRegistersFromLatches() {
-	//TODO: implement
+	lowAttributeIndex, highAttributeIndex := b.getTransformedAttributeIndexBitToByte(b.tileAttributeIndex)
+
+	b.fillShiftRegister(b.lowPatternLatch, &b.lowPatternShiftRegister)
+	b.fillShiftRegister(b.highPatternLatch, &b.highPatternShiftRegister)
+	b.fillShiftRegister(lowAttributeIndex, &b.lowAttributeShiftRegister)
+	b.fillShiftRegister(highAttributeIndex, &b.highAttributeShiftRegister)
 }
 
 func (b *BGLayer) ShiftRegisters() {
@@ -26,6 +31,25 @@ func (b *BGLayer) ShiftRegisters() {
 	b.highPatternShiftRegister <<= 1
 	b.lowAttributeShiftRegister <<= 1
 	b.highAttributeShiftRegister <<= 1
+}
+
+func (b *BGLayer) getTransformedAttributeIndexBitToByte(value byte) (byte, byte) {
+	low := value & 0b1
+	high := (value & 0b10) >> 1
+
+	var convertedLow, convertedHigh byte
+	if low == 1 {
+		convertedLow = 0xFF
+	}
+	if high == 1 {
+		convertedHigh = 0xFF
+	}
+
+	return convertedLow, convertedHigh
+}
+
+func (b *BGLayer) fillShiftRegister(value byte, register *uint16) {
+	*register = *register | uint16(value)
 }
 
 // Getters
