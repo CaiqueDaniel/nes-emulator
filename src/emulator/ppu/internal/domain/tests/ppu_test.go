@@ -385,3 +385,24 @@ func TestSetFineX_ShouldOnlyConsiderTheLower3Bits(t *testing.T) {
 		t.Errorf("Expected fineX to be 0x7F; got %X", ppu.GetFineX())
 	}
 }
+
+func TestShouldGetPaletteIndex_GivenAttributeIsNotZero(t *testing.T) {
+	ppu := domain.NewPPU()
+
+	ppu.SetLowBgPatternLatch(0xFF)
+	ppu.SetHighBgPatternLatch(0xFF)
+	ppu.SetCurrentBgAttribute(0b00_11_10_10)
+	ppu.LoadBgShiftRegistersFromLatches()
+
+	for range 8 {
+		ppu.MoveToNextDot()
+	}
+
+	ppu.LoadBgShiftRegistersFromLatches()
+
+	paletteIndex := ppu.GetPaletteIndex()
+
+	if paletteIndex != 0b10_11 {
+		t.Errorf("Expected palette index to be 0b10_11, got %b", paletteIndex)
+	}
+}

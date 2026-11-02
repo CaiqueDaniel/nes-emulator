@@ -170,6 +170,17 @@ func (p *PPU) LoadBgShiftRegistersFromLatches() {
 	p.bgLayer.LoadShiftRegistersFromLatches()
 }
 
+func (p *PPU) GetPaletteIndex() byte {
+	const highest_bit_index = 15
+	bitPosition := highest_bit_index - p.GetFineX()
+	patternHighBit := getBitFromBitPositionOn2ByteRegister(p.bgLayer.GetHighPatternShiftRegister(), bitPosition)
+	patternLowBit := getBitFromBitPositionOn2ByteRegister(p.bgLayer.GetLowPatternShiftRegister(), bitPosition)
+	attributeHighBit := getBitFromBitPositionOnByteRegister(p.bgLayer.GetHighAttributeShiftRegister(), p.GetFineX())
+	attributeLowBit := getBitFromBitPositionOnByteRegister(p.bgLayer.GetLowAttributeShiftRegister(), p.GetFineX())
+
+	return (attributeHighBit << 3) | (attributeLowBit << 2) | (byte(patternHighBit) << 1) | byte(patternLowBit)
+}
+
 func (p *PPU) calculateTileAttributeIndex(attibute byte) byte {
 	const palette_mask = 0b11
 	const coarse_x_mask = 0b10
@@ -177,4 +188,14 @@ func (p *PPU) calculateTileAttributeIndex(attibute byte) byte {
 
 	attrPosition := byte((((p.v & coarse_x_mask) >> 1) | ((p.v & coarse_y_mask) >> 5)))
 	return attibute >> (attrPosition * 2) & palette_mask
+}
+
+func getBitFromBitPositionOn2ByteRegister(register uint16, bitPosition byte) uint16 {
+	value := register & (1 << bitPosition)
+	return value >> bitPosition
+}
+
+func getBitFromBitPositionOnByteRegister(register byte, bitPosition byte) byte {
+	value := register & (1 << bitPosition)
+	return value >> bitPosition
 }
