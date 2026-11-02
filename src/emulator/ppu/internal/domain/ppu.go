@@ -153,7 +153,7 @@ func (p *PPU) GetPaletteIndexFromTileAttribute() byte {
 	return p.bgLayer.GetTileAttributeIndex()
 }
 
-func (p *PPU) GetShiftRegisters() (uint16, uint16, uint16, uint16) {
+func (p *PPU) GetShiftRegisters() (uint16, uint16, byte, byte) {
 	return p.bgLayer.GetLowPatternShiftRegister(), p.bgLayer.GetHighPatternShiftRegister(), p.bgLayer.GetLowAttributeShiftRegister(), p.bgLayer.GetHighAttributeShiftRegister()
 }
 

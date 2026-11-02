@@ -47,11 +47,11 @@ func TestBGLayer_ShiftRegisters(t *testing.T) {
 		t.Errorf("Failed to load shift registers from latches")
 	}
 
-	if bglayer.GetLowAttributeShiftRegister() != (0xFF << 1) {
+	if bglayer.GetLowAttributeShiftRegister() != 254 {
 		t.Errorf("Failed to load shift registers from latches")
 	}
 
-	if bglayer.GetHighAttributeShiftRegister() != (0xFF << 1) {
+	if bglayer.GetHighAttributeShiftRegister() != 254 {
 		t.Errorf("Failed to load shift registers from latches")
 	}
 }
@@ -78,11 +78,11 @@ func TestBGLayer_LoadShiftRegistersFromLatches_ShouldUpdateFirst8BitsFromRegiste
 		t.Errorf("Failed to load shift registers from latches")
 	}
 
-	if bglayer.GetLowAttributeShiftRegister() != (0xFF<<8)|0xFF {
+	if bglayer.GetLowAttributeShiftRegister() != 0xFF {
 		t.Errorf("Failed to load shift registers from latches")
 	}
 
-	if bglayer.GetHighAttributeShiftRegister() != (0xFF<<8)|0xFF {
+	if bglayer.GetHighAttributeShiftRegister() != 0xFF {
 		t.Errorf("Failed to load shift registers from latches")
 	}
 }

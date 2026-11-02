@@ -9,8 +9,8 @@ type BGLayer struct {
 
 	lowPatternShiftRegister    uint16
 	highPatternShiftRegister   uint16
-	lowAttributeShiftRegister  uint16
-	highAttributeShiftRegister uint16
+	lowAttributeShiftRegister  byte
+	highAttributeShiftRegister byte
 }
 
 func NewBGLayer() *BGLayer {
@@ -19,11 +19,11 @@ func NewBGLayer() *BGLayer {
 
 func (b *BGLayer) LoadShiftRegistersFromLatches() {
 	lowAttributeIndex, highAttributeIndex := b.getTransformedAttributeIndexBitToByte(b.tileAttributeIndex)
+	b.lowAttributeShiftRegister = lowAttributeIndex
+	b.highAttributeShiftRegister = highAttributeIndex
 
 	b.fillShiftRegister(b.lowPatternLatch, &b.lowPatternShiftRegister)
 	b.fillShiftRegister(b.highPatternLatch, &b.highPatternShiftRegister)
-	b.fillShiftRegister(lowAttributeIndex, &b.lowAttributeShiftRegister)
-	b.fillShiftRegister(highAttributeIndex, &b.highAttributeShiftRegister)
 }
 
 func (b *BGLayer) ShiftRegisters() {
@@ -77,11 +77,11 @@ func (b *BGLayer) GetHighPatternShiftRegister() uint16 {
 	return b.highPatternShiftRegister
 }
 
-func (b *BGLayer) GetLowAttributeShiftRegister() uint16 {
+func (b *BGLayer) GetLowAttributeShiftRegister() byte {
 	return b.lowAttributeShiftRegister
 }
 
-func (b *BGLayer) GetHighAttributeShiftRegister() uint16 {
+func (b *BGLayer) GetHighAttributeShiftRegister() byte {
 	return b.highAttributeShiftRegister
 }
 

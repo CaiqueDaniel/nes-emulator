@@ -38,6 +38,8 @@ func (s *BGPixelPipelineStrategy) FetchPixel(ppu *domain.PPU) uint32 {
 		return 0
 	}
 
+	//TODO: implement pixel fetch
+
 	return 0x0
 }
 

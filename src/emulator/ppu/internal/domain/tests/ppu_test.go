@@ -112,7 +112,7 @@ func TestPPUShouldShiftBitsOnBgShiftRegisters(t *testing.T) {
 	ppu.MoveToNextDot()
 
 	lowPattern, highPattern, lowAttr, highAttr = ppu.GetShiftRegisters()
-	if lowPattern != (0x10<<1) || highPattern != (0x11<<1) || lowAttr != (255<<1) || highAttr != (0<<1) {
+	if lowPattern != (0x10<<1) || highPattern != (0x11<<1) || lowAttr != 254 || highAttr != (0<<1) {
 		t.Errorf("Expected shift registers not to be 0x10 and 0x11 and 0xFF and 0x0; got %X and %X and %X and %X", lowPattern, highPattern, lowAttr, highAttr)
 	}
 }
