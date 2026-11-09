@@ -8,6 +8,11 @@ import (
 
 func TestShouldPushBgPixelColor(t *testing.T) {
 	state := domain.NewPPU()
+
+	for range domain.MAX_DOTS_PER_SCANLINE {
+		state.MoveToNextDot()
+	}
+
 	sut := createDefaultPixelPipelineContext()
 	sut.FullfillFrameBuffer(state, application.BG_PIPELINE)
 

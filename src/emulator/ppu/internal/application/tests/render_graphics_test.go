@@ -37,7 +37,7 @@ func TestShouldRenderGraphics(t *testing.T) {
 	memory.Write(initial_palette_address+2, 0x09)
 	memory.Write(initial_palette_address+3, 0x1A)
 
-	for i := 0; i < domain.MAX_VISIBLE_SCANLINES; i++ {
+	for i := 0; i <= domain.MAX_VISIBLE_SCANLINES; i++ {
 		for y := 0; y < domain.MAX_DOTS_PER_SCANLINE; y++ {
 			sut.Execute()
 		}

@@ -40,7 +40,7 @@ type PPUFrameBuffer [MAX_VISIBLE_SCANLINES][MAX_VISIBLE_DOTS]uint32
 
 func NewPPU() *PPU {
 	return &PPU{
-		scanline:                  0,
+		scanline:                  MAX_SCANLINES - 1,
 		dot:                       0,
 		enableBackgroundRendering: false,
 		enableSpriteRendering:     false,

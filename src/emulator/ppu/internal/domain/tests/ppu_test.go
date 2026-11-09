@@ -13,8 +13,8 @@ func TestNewPPUInitialState(t *testing.T) {
 		t.Fatal("NewPPU() returned nil")
 	}
 
-	if got := ppu.GetScanline(); got != 0 {
-		t.Errorf("GetScanline() = %d, want 0", got)
+	if got := ppu.GetScanline(); got != 261 {
+		t.Errorf("GetScanline() = %d, want 261", got)
 	}
 
 	if got := ppu.GetDot(); got != 0 {
@@ -54,7 +54,8 @@ func TestPPUMoveToNextScanline(t *testing.T) {
 		t.Errorf("GetDot() after MoveToNextDot() = %d, want 0", got)
 	}
 
-	if got := ppu.GetScanline(); got != 1 {
+	//Scanline started at pre-render scanline (261 - 0 to 261 => 262 scanlines)
+	if got := ppu.GetScanline(); got != 0 {
 		t.Errorf("GetScanline() after MoveToNextDot() = %d, want 1", got)
 	}
 }
@@ -62,7 +63,7 @@ func TestPPUMoveToNextScanline(t *testing.T) {
 func TestPPUShouldWrapAroundScanlines(t *testing.T) {
 	ppu := domain.NewPPU()
 
-	for scanline := 0; scanline < domain.MAX_SCANLINES; scanline++ {
+	for scanline := 0; scanline <= domain.MAX_SCANLINES; scanline++ {
 		for i := 0; i < domain.MAX_DOTS_PER_SCANLINE; i++ {
 			ppu.MoveToNextDot()
 		}
@@ -80,7 +81,7 @@ func TestPPUShouldWrapAroundScanlines(t *testing.T) {
 func TestPPUShouldIdentifyVBlank(t *testing.T) {
 	ppu := domain.NewPPU()
 
-	for scanline := 0; scanline < domain.MAX_VISIBLE_SCANLINES; scanline++ {
+	for scanline := 0; scanline <= domain.MAX_VISIBLE_SCANLINES; scanline++ {
 		for i := 0; i < domain.MAX_DOTS_PER_SCANLINE; i++ {
 			ppu.MoveToNextDot()
 		}
@@ -409,6 +410,12 @@ func TestShouldGetPaletteIndex_GivenAttributeIsNotZero(t *testing.T) {
 
 func TestShouldPushPixelColorToFrameBuffer(t *testing.T) {
 	ppu := domain.NewPPU()
+
+	//Move from pre-render scanline to render scanline
+	for range domain.MAX_DOTS_PER_SCANLINE {
+		ppu.MoveToNextDot()
+	}
+
 	ppu.PushPixelColorToFrameBuffer(0xFC)
 
 	if ppu.GetFrameBuffer()[0][0] != 0xFC {
