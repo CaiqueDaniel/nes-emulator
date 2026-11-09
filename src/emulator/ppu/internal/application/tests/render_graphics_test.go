@@ -57,7 +57,7 @@ func TestShouldRenderGraphics(t *testing.T) {
 		t.Errorf("Expected image buffer to be rendered, but it was nil")
 	}
 
-	var chunks []uint32 = screen.GetImageBuffer()[0][0:4]
+	var chunks []uint32 = screen.GetImageBuffer()[0][8:12]
 
 	if slices.Compare(chunks, []uint32{0x0000FC, 0x0000FC, 0x0000FC, 0x007800}) != 4 {
 		t.Errorf("Pixels rendered different from expected; got %X, %X, %X, %X", chunks[0], chunks[1], chunks[2], chunks[3])
@@ -65,8 +65,11 @@ func TestShouldRenderGraphics(t *testing.T) {
 }
 
 func createSut() (*application.RenderGraphics, *persistence.PPUMemoryRepository, *memory.Memory, *services.MemoryScreen) {
+	ram := memory.NewMemory(0xFFFF)
 	vram := memory.NewMemory(0xFFFF)
 	repo := persistence.NewPPUMemoryRepository()
 	screen := services.NewMemoryScreen()
-	return application.NewRenderGraphics(repo, vram, screen), repo, vram, screen
+	bgPipeline := application.NewBGPixelPipelineStrategy(vram, ram)
+	pixelPipeline := application.NewDefaultPixelPipelineContext(bgPipeline)
+	return application.NewRenderGraphics(repo, vram, screen, pixelPipeline), repo, vram, screen
 }
