@@ -14,10 +14,10 @@ func NewDefaultPixelPipelineContext(bgPipeline PixelPipelineStrategy) *DefaultPi
 
 func (ctx *DefaultPixelPipelineContext) FullfillFrameBuffer(ppu *domain.PPU, pipeline uint) {
 	switch pipeline {
-	case BG:
+	case BG_PIPELINE:
 		ppu.PushPixelColorToFrameBuffer(ctx.bgPipeline.FetchPixel(ppu))
 		return
-	case OAM:
+	case OAM_PIPELINE:
 		break
 	}
 }

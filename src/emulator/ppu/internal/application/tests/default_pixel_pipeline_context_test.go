@@ -9,7 +9,7 @@ import (
 func TestShouldPushBgPixelColor(t *testing.T) {
 	state := domain.NewPPU()
 	sut := createDefaultPixelPipelineContext()
-	sut.FullfillFrameBuffer(state, application.BG)
+	sut.FullfillFrameBuffer(state, application.BG_PIPELINE)
 
 	if state.GetFrameBuffer()[0][0] != 0xFC {
 		t.Errorf("Expected background pixel color to be 0xFC, got %x", state.GetFrameBuffer()[0][0])
@@ -20,7 +20,7 @@ func TestShouldPushBgPixelColor(t *testing.T) {
 func TestShouldPushOamPixelColor(t *testing.T) {
 	state := domain.NewPPU()
 	sut := createDefaultPixelPipelineContext()
-	sut.FullfillFrameBuffer(state, application.OAM)
+	sut.FullfillFrameBuffer(state, application.OAM_PIPELINE)
 
 	if state.GetFrameBuffer()[0][0] != 0x0 {
 		t.Errorf("Expected object pixel color to be 0xFC, got %x", state.GetFrameBuffer()[0][0])

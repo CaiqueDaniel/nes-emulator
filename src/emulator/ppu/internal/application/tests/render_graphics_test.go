@@ -31,7 +31,7 @@ func TestShouldRenderGraphics(t *testing.T) {
 
 	writeChar1ToPatternTable(memory)
 
-	memory.Write(vram_nametable_address, 0x1)
+	memory.Write(vram_nametable_address, 0x0)
 	memory.Write(initial_palette_address, 0x01)
 	memory.Write(initial_palette_address+1, 0x01)
 	memory.Write(initial_palette_address+2, 0x09)

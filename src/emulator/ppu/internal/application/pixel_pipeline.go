@@ -3,8 +3,8 @@ package application
 import "nes-emu/src/emulator/ppu/internal/domain"
 
 const (
-	BG  = 0
-	OAM = 1
+	BG_PIPELINE  = 0
+	OAM_PIPELINE = 1
 )
 
 type PixelPipelineContext interface {
