@@ -60,8 +60,6 @@ func TestGetLowAndHighPatternAddress(t *testing.T) {
 	}
 }
 
-const attribute_table_base_address = 0x23C0
-
 func TestShouldSetLowPatternLatch(t *testing.T) {
 	vram, ram, sut, state := createBGPixelPipelineStrategySut()
 
@@ -84,7 +82,10 @@ func TestShouldSetLowPatternLatch(t *testing.T) {
 	}
 }
 
-func TestShouldSetHighPatternLatchAndLoadBGLayerShiftRegisters(t *testing.T) {
+func TestShouldSetHighPatternLatchAndLoadBGLayerShiftRegistersAndReturnPixelColor(t *testing.T) {
+	const expectedColorIndex = 0x1
+	expectedColor := domain.ColorPallet[expectedColorIndex]
+
 	vram, ram, sut, state := createBGPixelPipelineStrategySut()
 
 	writeChar1ToPatternTable(vram)
@@ -99,7 +100,7 @@ func TestShouldSetHighPatternLatchAndLoadBGLayerShiftRegisters(t *testing.T) {
 		sut.FetchPixel(state)
 	}
 
-	sut.FetchPixel(state)
+	output := sut.FetchPixel(state)
 
 	if state.GetLowBgPatternLatch() != 0x10 {
 		t.Errorf("Expected low pattern latch to be 0x1, got %X", state.GetLowBgPatternLatch())
@@ -118,6 +119,10 @@ func TestShouldSetHighPatternLatchAndLoadBGLayerShiftRegisters(t *testing.T) {
 
 	if highPatternShiftRegister != 0x10 {
 		t.Errorf("Expected high pattern shift register to be 0x10, got %X", highPatternShiftRegister)
+	}
+
+	if output != expectedColor {
+		t.Errorf("Expected output to be %X, got %X", expectedColor, output)
 	}
 }
 

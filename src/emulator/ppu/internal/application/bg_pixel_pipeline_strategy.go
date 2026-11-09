@@ -35,10 +35,8 @@ func (s *BGPixelPipelineStrategy) FetchPixel(ppu *domain.PPU) uint32 {
 	case ppu.GetDot()%TOTAL_PIPELINE_CYCLES == FETCH_HIGH_PATTERN_BYTE:
 		ppu.SetHighBgPatternLatch(s.GetHighPatternByte(ppu))
 		ppu.LoadBgShiftRegistersFromLatches()
-		return 0
+		return s.FetchColor(ppu)
 	}
-
-	//TODO: implement pixel fetch
 
 	return 0x0
 }
@@ -69,4 +67,17 @@ func (s *BGPixelPipelineStrategy) GetLowPatternByte(ppu *domain.PPU) byte {
 
 func (s *BGPixelPipelineStrategy) GetHighPatternByte(ppu *domain.PPU) byte {
 	return s.vram.Read(s.GetHighPatternAddress(ppu))
+}
+
+func (s *BGPixelPipelineStrategy) FetchColor(ppu *domain.PPU) uint32 {
+	const palette_offset uint16 = 0x3F00
+	var colorIndex byte = s.vram.Read(uint16(palette_offset))
+
+	index := ppu.GetPaletteIndex()
+
+	if index&0b11 != 0 {
+		colorIndex = s.vram.Read(palette_offset | uint16(colorIndex))
+	}
+
+	return domain.ColorPallet[colorIndex]
 }
