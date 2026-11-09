@@ -83,6 +83,10 @@ func (p *PPU) IsVBlankStarted() bool {
 	return p.scanline+1 == INITIAL_V_BLANK_SCANLINE && p.dot == 0
 }
 
+func (p *PPU) PushPixelColorToFrameBuffer(color uint32) {
+	p.frameBuffer[p.scanline][p.dot] = color
+}
+
 func (p *PPU) ClearFrameBuffer() {
 	*p.frameBuffer = PPUFrameBuffer{}
 }
