@@ -406,3 +406,48 @@ func TestShouldGetPaletteIndex_GivenAttributeIsNotZero(t *testing.T) {
 		t.Errorf("Expected palette index to be 0b10_11, got %b", paletteIndex)
 	}
 }
+
+func TestShouldPushPixelColorToFrameBuffer(t *testing.T) {
+	ppu := domain.NewPPU()
+	ppu.PushPixelColorToFrameBuffer(0xFC)
+
+	if ppu.GetFrameBuffer()[0][0] != 0xFC {
+		t.Errorf("Expected pixel color to be 0xFC, got %X", ppu.GetFrameBuffer()[0][0])
+	}
+}
+
+func TestShouldNotPushPixelColorForNonVisibleDots(t *testing.T) {
+	ppu := domain.NewPPU()
+
+	for range 257 {
+		ppu.MoveToNextDot()
+		ppu.PushPixelColorToFrameBuffer(0xFC)
+	}
+
+	if len(ppu.GetFrameBuffer()[0]) != 256 {
+		t.Errorf("Expected pixel color to be 0xFC, got %d", len(ppu.GetFrameBuffer()[0]))
+	}
+}
+
+func TestShouldNotPushPixelColorForNonVisibleLines(t *testing.T) {
+	ppu := domain.NewPPU()
+
+	for {
+		ppu.MoveToNextDot()
+		ppu.PushPixelColorToFrameBuffer(0xFC)
+
+		if ppu.IsVBlankStarted() {
+			break
+		}
+	}
+
+	ppu.PushPixelColorToFrameBuffer(0xFC)
+
+	if len(ppu.GetFrameBuffer()) != 240 {
+		t.Errorf("Expected pixel color to be 0xFC, got %d", len(ppu.GetFrameBuffer()))
+	}
+
+	if ppu.GetFrameBuffer()[239][255] != 0xFC {
+		t.Errorf("Expected pixel color to be 0xFC, got %X", ppu.GetFrameBuffer()[239][255])
+	}
+}

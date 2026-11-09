@@ -84,7 +84,17 @@ func (p *PPU) IsVBlankStarted() bool {
 }
 
 func (p *PPU) PushPixelColorToFrameBuffer(color uint32) {
-	p.frameBuffer[p.scanline][p.dot] = color
+	currentDot := max(int(p.dot)-1, 0)
+
+	if currentDot >= MAX_VISIBLE_DOTS {
+		return
+	}
+
+	if p.scanline >= MAX_VISIBLE_SCANLINES {
+		return
+	}
+
+	p.frameBuffer[p.scanline][currentDot] = color
 }
 
 func (p *PPU) ClearFrameBuffer() {
