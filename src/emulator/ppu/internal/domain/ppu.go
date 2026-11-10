@@ -56,6 +56,22 @@ func (p *PPU) MoveToNextDot() {
 		p.scanline = (p.scanline + 1) % MAX_SCANLINES
 	}
 
+	//TODO: reset v with t on dot 257
+	//TODO: handle specifics non-visible dots
+
+	if p.dot%8 == 0 {
+		if p.GetCoarseX() == 31 {
+			p.flipHNametable()
+			p.clearCoarseX()
+		} else {
+			p.v++
+		}
+	}
+
+	if p.dot%MAX_VISIBLE_DOTS == 0 {
+		p.v += 32
+	}
+
 	p.bgLayer.ShiftRegisters()
 }
 
@@ -123,6 +139,19 @@ func (p *PPU) SetFineX(value byte) {
 
 func (p *PPU) GetFineX() byte {
 	return p.x
+}
+
+func (p *PPU) GetCoarseX() byte {
+	return byte(p.v & 0b11111)
+}
+
+func (p *PPU) GetCoarseY() byte {
+	return byte((p.v >> 5) & 0b11111)
+}
+
+func (p *PPU) GetNametable() byte {
+	const mask = 0b11
+	return byte((p.v >> 10) & mask)
 }
 
 func (p *PPU) SetCurrentBgTileIndex(index byte) {
@@ -213,3 +242,15 @@ func getBitFromBitPositionOnByteRegister(register byte, bitPosition byte) byte {
 	value := register & (1 << bitPosition)
 	return value >> bitPosition
 }
+
+func (p *PPU) flipHNametable() {
+	const mask = 0b1_00000_00000
+	a := p.v ^ mask
+	p.v = a
+}
+
+func (p *PPU) clearCoarseX() {
+	p.v ^= (p.v & 0b11111)
+}
+
+//TODO: implement increment in x and y coarse

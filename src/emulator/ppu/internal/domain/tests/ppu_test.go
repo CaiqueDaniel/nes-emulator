@@ -458,3 +458,76 @@ func TestShouldNotPushPixelColorForNonVisibleLines(t *testing.T) {
 		t.Errorf("Expected pixel color to be 0xFC, got %X", ppu.GetFrameBuffer()[239][255])
 	}
 }
+
+func TestShouldCorrecltyGetCoarseX(t *testing.T) {
+	ppu := domain.NewPPU()
+	ppu.SetVDirectly(0b10101)
+
+	if ppu.GetCoarseX() != 0b10101 {
+		t.Errorf("Expected coarseX to be 0b10101, got %b", ppu.GetCoarseX())
+	}
+}
+
+func TestShouldCorrectlyGetCoarseY(t *testing.T) {
+	ppu := domain.NewPPU()
+	ppu.SetVDirectly(0b10101_00000)
+
+	if ppu.GetCoarseY() != 0b10101 {
+		t.Errorf("Expected coarseY to be 0b10101, got %b", ppu.GetCoarseY())
+	}
+}
+
+func TestShouldGetNametable(t *testing.T) {
+	ppu := domain.NewPPU()
+	ppu.SetVDirectly(0b100_0000_0000)
+
+	if ppu.GetNametable() != 1 {
+		t.Errorf("Expected nametable to be 0b100_0000_0000, got %b", ppu.GetNametable())
+	}
+}
+
+func TestShouldIncrementCoarseXAfter8Dots(t *testing.T) {
+	ppu := domain.NewPPU()
+
+	for range 8 {
+		ppu.MoveToNextDot()
+	}
+
+	if ppu.GetCoarseX() != 1 {
+		t.Errorf("Expected coarseX to be 1, got %d", ppu.GetCoarseX())
+	}
+}
+
+func TestShouldIncrementNametableBitAfter256Dots(t *testing.T) {
+	ppu := domain.NewPPU()
+
+	for range 255 {
+		ppu.MoveToNextDot()
+	}
+
+	ppu.MoveToNextDot()
+
+	if ppu.GetCoarseX() != 0 {
+		t.Errorf("Expected coarseX to be 1, got %d", ppu.GetCoarseX())
+	}
+
+	if ppu.GetNametable() != 1 {
+		t.Errorf("Expected nametable to be 1, got %d", ppu.GetNametable())
+	}
+}
+
+func TestShouldIncrementCoarseYAfter256Dots(t *testing.T) {
+	ppu := domain.NewPPU()
+
+	for range 256 {
+		ppu.MoveToNextDot()
+	}
+
+	if ppu.GetCoarseY() != 1 {
+		t.Errorf("Expected coarseY to be 1, got %d", ppu.GetCoarseY())
+	}
+
+	if ppu.GetCoarseX() != 0 {
+		t.Errorf("Expected coarseX to be 0, got %d", ppu.GetCoarseX())
+	}
+}
